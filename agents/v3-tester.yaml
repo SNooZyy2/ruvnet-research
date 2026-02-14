@@ -1,0 +1,10 @@
+# v3-tester agent configuration
+type: v3-tester
+version: "3.0.0"
+capabilities:
+  - unit-testing
+  - integration-testing
+  - coverage
+optimizations:
+  - parallel-execution
+createdAt: "2026-02-14T13:02:23.562Z"

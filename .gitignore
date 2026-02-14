@@ -1,0 +1,17 @@
+# Research database (binary, manually backed up)
+db/research.db
+db/research.db-wal
+db/research.db-shm
+db/*.db-backup-*
+
+# Temporary analysis files
+*.tmp
+*.swp
+.DS_Store
+
+# Node modules (should use ~/node_modules/)
+node_modules/
+
+# Editor files
+.vscode/
+.idea/
