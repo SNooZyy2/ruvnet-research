@@ -509,3 +509,206 @@ can match arbitrary number sequences. No NER or contextual analysis.
    are genuinely sophisticated but completely unused.
 4. **Real embeddings** -- Fix ONNX model download to replace hash-based fallback
    with actual semantic embeddings (MiniLM-L6-v2 384-dim).
+
+---
+
+## R22: TypeScript Source Deep-Read (Session 27 — agentic-flow-rust)
+
+> 54 files read, ~59K LOC, 150 findings across 5 agent clusters. Weighted average 83% real — highest quality batch analyzed.
+
+### Intelligence Layer Architecture (10 files, 12,100 LOC) — 82% REAL
+
+The agentic-flow intelligence subsystem has a well-layered architecture:
+
+```
+cli-proxy.ts (95%) ──> agent-booster-enhanced.ts (75%) ──> EmbeddingService.ts (80%) ──> EmbeddingCache.ts (90%)
+                                                                ^
+dispatch-service.ts (80%) ──> intelligence-bridge.ts (70%) ──> RuVectorIntelligence.ts (80%) ──> IntelligenceStore.ts (90%)
+```
+
+| File | LOC | Real % | Key Finding |
+|------|-----|--------|-------------|
+| **p2p-swarm-v2.ts** | 2,280 | 85% | Production Ed25519/X25519/AES-256-GCM crypto. Task execution STUB. Fake IPFS CIDs. |
+| **EmbeddingService.ts** | 1,810 | 80% | Real ONNX embedding, K-means clustering, pretrain system. Hash-based simpleEmbed fallback. |
+| **cli-proxy.ts** | 1,432 | 95% | Main CLI entry. Multi-provider proxy (OpenRouter, Gemini, ONNX, Requesty). QUIC transport. |
+| **agent-booster-enhanced.ts** | 1,428 | 75% | Pattern caching (exact+fuzzy), 5-tier compression, co-edit graph. External npx dep. |
+| **intelligence-bridge.ts** | 1,371 | 70% | Bridge to RuVectorIntelligence. 9 RL algorithms config-only. Math.random()*0.1 fabricated activations. |
+| **RuVectorIntelligence.ts** | 1,200 | 80% | Core: SONA Micro-LoRA, 6 attention types, HNSW retrieval, LRU eviction (10K trajectories). |
+| **dispatch-service.ts** | 1,212 | 80% | 12 worker types with real file analysis. Secret detection, dependency scanning. |
+| **edge-full.ts** | 943 | 75% | WASM integration for 6 ruvector sub-modules. JS fallback for 5/6. Cypher throws without WASM. |
+| **EmbeddingCache.ts** | 726 | 90% | 3-tier cache (native SQLite > WASM SQLite > Memory). SHA-256 keys, LRU eviction. |
+| **IntelligenceStore.ts** | 698 | 90% | SQLite dual backend (sql.js > better-sqlite3 > no-op). **SQL injection risk** in incrementStat. |
+
+### Proxy Layer (2 files, 1,655 LOC) — 91% REAL
+
+Both proxy files are genuine HTTP proxies with streaming:
+
+| File | LOC | Real % | Key Finding |
+|------|-----|--------|-------------|
+| **anthropic-to-requesty.ts** | 880 | 93% | Real Anthropic→OpenAI→Requesty proxy. API key prefix leaked in logs. |
+| **anthropic-to-openrouter.ts** | 775 | 90% | ~95% identical to Requesty. Missing sanitizeJsonSchema(). No request timeout. |
+
+### Agentic-Jujutsu Crate (10 files, ~11,300 LOC) — GENUINELY FUNCTIONAL
+
+The agentic-jujutsu Rust crate is one of the most genuine packages in the ecosystem:
+
+- **wrapper.rs** (1,300 LOC, 90%): `include_bytes!` embeds real jj binary at compile time. Build system downloads actual Jujutsu binary. All 15 JJ operations are real subprocess invocations.
+- **operations.rs** (1,449 LOC, 95%): 30 genuine JJ operation variants with 15 real unit tests.
+- **reasoning_bank.rs** (731 LOC, 85%): EMA-based pattern extraction, trajectory tracking with reward scoring. Same concept as claude-flow ReasoningBank, adapted for VCS operations.
+- **types.rs** (816 LOC, 98%): Clean type definitions with napi(object) and builder patterns.
+- **pkg/{web,node,bundler,deno}/*.js**: ALL wasm-bindgen auto-generated. Should never be manually edited.
+
+**Supply chain risk**: Build system downloads jj binary from internet at compile time.
+
+### CLI, Workers, MCP (12 files, ~10,500 LOC) — 88% REAL
+
+| File | LOC | Real % | Key Finding |
+|------|-----|--------|-------------|
+| **hooks.ts** | 1,149 | 100% | Pure CLI delegation layer. 10+ hook tools as Commander.js subcommands. |
+| **workers.ts** | 1,082 | 95% | 15+ subcommands. `dispatch-prompt` silently swallows ALL errors. |
+| **optimized-embedder.ts** | 917 | 90% | Real O(1) LRU + FNV-1a hash. `simpleTokenize` is hash-to-ID, not real wordpiece. |
+| **agentdb-cli.ts** | 862 | 95% | CONFIRMS R18: standalone CLI DOES initialize EmbeddingService with ONNX WASM. |
+| **standalone-stdio.ts** | 813 | 85% | Real FastMCP server, 15 tools. **SHELL INJECTION** via unsanitized execSync. |
+| **sona-tools.ts** | 676 | 90% | 15 tool definitions delegating to sonaService singletons. Real LoRA/trajectory handlers. |
+| **agentdb-wrapper-enhanced.ts** | 899 | 80% | Does NOT fix R18. AttentionService falls back to stub. `calculateRecall` returns wrong metric. |
+| **neural-substrate.ts** | 817 | 92% | REAL: SemanticDriftDetector, MemoryPhysics (hippocampal model), EmbeddingStateMachine. |
+| **ruvector-integration.ts** | 718 | 75% | 5-priority embedding fallback chain. `generateActivations` is hash-based placeholder. |
+
+### Systemic Pattern: Hash-Based Embedding Fallback
+
+4+ files silently degrade semantic search to character-frequency matching when ONNX unavailable:
+- `optimized-embedder.ts` — simpleTokenize uses hash-to-token-ID
+- `ruvector-integration.ts` — simpleEmbedding produces hash vectors as final fallback
+- `edge-full.ts` — simpleEmbed uses charCode mapping
+- `agentdb-wrapper-enhanced.ts` — inherits the problem through dependencies
+
+### Security Findings (R22)
+
+| Issue | File | Severity |
+|-------|------|----------|
+| Shell injection via unsanitized execSync | standalone-stdio.ts | CRITICAL |
+| SQL injection in incrementStat (string interpolation for column name) | IntelligenceStore.ts | HIGH |
+| API key prefix leaked in logs | anthropic-to-requesty.ts | HIGH |
+| Missing request timeout (can hang indefinitely) | anthropic-to-openrouter.ts | HIGH |
+
+### Updated Summary Statistics
+
+| Metric | Before R22 | After R22 |
+|--------|-----------|-----------|
+| DEEP files (agentic-flow-rust) | 4 | 57 |
+| NOT_TOUCHED (agentic-flow-rust) | 3,685 | 3,632 |
+
+## R40: Worker System & QUIC Transport Deep-Read (Session 40)
+
+### Overview
+
+3 files from agentic-flow's worker and transport layers. Key question: Are workers the real execution layer beneath the "demonstration framework" CLI (R31)? **Weighted average: 56% real.**
+
+### File Analysis
+
+| File | LOC | Real% | Verdict | Execution Model |
+|------|-----|-------|---------|-----------------|
+| **worker-registry.ts** (10941) | 662 | 80% | REAL persistence | In-memory objects + SQLite |
+| **worker-agent-integration.ts** (10939) | 613 | 68% | PARTIAL — advisory only | Configuration + selection |
+| **quic.ts** (10893) | 599 | 24% | COMPLETE FACADE | All stubs |
+
+### R31 Extension: "Functional Single-Node Task Runner"
+
+R31 characterized the CLI as a "demonstration framework." R40 refines this to a more nuanced picture:
+
+| Aspect | Assessment |
+|--------|------------|
+| Worker execution | **REAL** — dispatch-service performs genuine file I/O, pattern extraction, analysis |
+| Worker persistence | **REAL** — SQLite-backed with WAL mode, ULID IDs, 3-tier DB backend |
+| Agent selection | **REAL logic, advisory-only** — EMA performance tracking, multi-factor scoring, but no actual bridging |
+| Transport | **FACADE** — QUIC layer is pure scaffolding. Real QUIC exists only in Rust crate |
+
+**Corrected characterization**: agentic-flow is a **functional single-node task runner** with aspirational distributed transport. Workers execute real analysis in-process (same Node.js event loop). Distributed coordination is structurally defined but non-functional.
+
+### worker-registry.ts — Real SQLite Persistence (80%)
+
+Production-quality worker metadata store:
+- **Three-tier DB backend**: better-sqlite3 > sql.js > in-memory Map (cross-platform)
+- **WAL mode** + NORMAL synchronous (correct high-performance SQLite config)
+- **ULID-based** worker IDs (8-char truncated)
+- **Worker lifecycle**: create, updateStatus (with started_at/completed_at timestamps), cleanup
+- **json_insert()** for atomic result key appending
+
+**Issues**:
+- Race condition: sql.js async init in synchronous constructor — data loss window (lines 159-186)
+- Performance: sql.js wrapper calls writeFileSync on every mutation (lines 53-58)
+- Workers are database rows, NOT real processes or threads
+
+### worker-agent-integration.ts — Advisory Selection Only (68%)
+
+Provides recommendation logic for WHICH agent should handle a trigger, but does NOT actually bridge to agents:
+- 6 hardcoded agent types (researcher, coder, tester, security-analyst, performance-analyzer, documenter)
+- 12 trigger-to-agent mappings with fallback chains
+- EMA-based performance tracking (alpha=0.2) — good pattern
+- Multi-factor agent scoring: `quality * success_rate * (1/latency_factor)`
+
+**Issues**:
+- No process spawning, IPC, or agent lifecycle management — the "integration" is purely declarative
+- Performance data stored in-memory Maps — lost on restart
+- p95 latency is decaying high-water mark, not real percentile
+- `getWorkerRegistry` imported but never used
+
+### quic.ts — Complete Facade (24%)
+
+Zero QUIC protocol implementation:
+- `loadWasmModule()` returns `{}` (line 288)
+- `send()` writes nothing (lines 189-193)
+- `receive()` returns empty `Uint8Array` (lines 194-198)
+- `sendRequest()` returns hardcoded 200 with empty body (lines 315-319)
+- `getStats()` returns all zeros (lines 274-278)
+
+**Critical context**: Real QUIC exists in Rust crate `agentic-flow-quic` using **quinn 0.11** (production QUIC library) with **rustls 0.23** (real TLS 1.3). WASM bindings exist (`wasm.rs`) but are never connected to this TypeScript file. The TypeScript → WASM → Rust/quinn bridge was never completed.
+
+### Worker-Transport Architecture Gap
+
+```
+Transport Layer (QUIC) ────[FACADE]──── swarm/quic-coordinator.ts
+                                              │
+                                              ▼
+                                    SwarmAgent coordination
+                                    (depends on stub transport)
+                                              │
+                                              ▼
+Agent Integration ────[ADVISORY ONLY]─── dispatch-service.ts
+  (recommends agent)                    (executes in-process)
+        │                                      │
+        ▼                                      ▼
+  AgentCapabilities                    worker-registry.ts (SQLite)
+  (static config)                      (real persistence)
+```
+
+The critical gap is between the middle (agent selection) and top (transport) layers. Workers work locally, but distributed transport is absent.
+
+### Findings
+
+**CRITICAL** (2):
+- quic.ts has zero implementation — all stubs, `loadWasmModule()` returns `{}` (quic.ts:284-320)
+- `sendRequest()` returns hardcoded 200 with empty body regardless of input (quic.ts:213-235)
+
+**HIGH** (4):
+- Placeholder never connected to real quinn-based QUIC in Rust crate (quic.ts)
+- `getStats()` returns zeros with "From WASM" comments — misleading (quic.ts:274-278)
+- worker-agent-integration does NOT bridge agents to workers — advisory only, no IPC (worker-agent-integration.ts)
+- Performance profiles in-memory only — self-learning never persists (worker-agent-integration.ts:221-264)
+
+**MEDIUM** (6):
+- sql.js async init race condition in synchronous constructor (worker-registry.ts:159-186)
+- sql.js wrapper calls writeFileSync on every mutation (worker-registry.ts:53-58)
+- Workers are NOT real processes — database rows only (worker-registry.ts)
+- p95 latency is decaying high-water mark, not real percentile (worker-agent-integration.ts:239)
+- Incomplete benchmark compliance — only 3 of 6+ metrics checked (worker-agent-integration.ts:500-511)
+- All QUIC config options stored but never read (quic.ts:69-89)
+
+### Updated Summary
+
+| Metric | Before R40 | After R40 |
+|--------|-----------|-----------|
+| DEEP files (agentic-flow) | 57 | 60 |
+| Worker system verdict | Unknown | Functional single-node task runner |
+| QUIC transport verdict | Suspected stub (R22b) | Confirmed complete facade |
+| Real QUIC location | Unknown | Rust crate agentic-flow-quic (quinn 0.11) |

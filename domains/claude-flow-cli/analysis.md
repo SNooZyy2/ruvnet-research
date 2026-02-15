@@ -960,3 +960,86 @@ Four research files now cover the entire ruvnet stack:
 | `@ruvector/attention` | **MEDIUM** | Used by training service, broken for direct use |
 | `@ruvector/sona` | **MEDIUM** | Used by training service |
 | `@ruvector/gnn` | **LOW** | Broken API, JS wrapper fallback |
+
+---
+
+## 18. CLI Command Deep-Read (R17, 2026-02-14)
+
+**Session**: R17 | **Files**: 45 | **LOC**: 33,929 | **Findings**: 79 (10 CRITICAL, 17 HIGH, 37 MEDIUM, 15 INFO)
+
+Deep-read of ALL 37 unread CLI command files + 8 init system files. This covers every `dist/src/commands/*.js` file and the complete `dist/src/init/` system.
+
+### Command Implementation Quality Matrix
+
+| Command | LOC | Real % | Key Insight |
+|---------|-----|--------|-------------|
+| **analyze.js** | 1,823 | 70% | Real AST/graph analysis via ruvector. `code` and `deps` subcommands are stubs. |
+| **embeddings.js** | 1,576 | 95% | Most complete command. 14 subcommands, real HNSW via @ruvector/core, sql.js search. |
+| **neural.js** | 1,448 | 90% | Real WASM training, Ed25519 signing for exports, PII stripping. Best security. |
+| **memory.js** | 1,268 | 85% | Real sql.js with 9-table schema. cleanup/compress delegate to MCP. |
+| **init.js** | 964 | 85% | Wizard + upgrade + codex modes. Windows execSync bugs. |
+| **session.js** | 760 | 80% | Real save/restore/export. YAML import broken (uses JSON.parse). |
+| **mcp.js** | 700 | 50% | toggle non-functional, logs hardcoded, fallback tool list stale. |
+| **task.js** | 671 | 90% | Rich task model (10 types, 4 priorities, dependencies). |
+| **agentdb.js** | 625 | 90% | Real reflexion memory: episodes, skills, hybrid search. |
+| **workflow.js** | 617 | 60% | Template create never saves. Metadata hardcoded in CLI. |
+| **status.js** | 584 | 70% | Real MCP aggregation. Performance metrics are hardcoded marketing strings. |
+| **performance.js** | 579 | 75% | Real benchmarks with percentiles. optimize/bottleneck are stubs. |
+| **security.js** | 575 | 45% | Real npm audit + secret scan. CVE/STRIDE/audit are static examples. |
+| **doctor.js** | 571 | 95% | Excellent parallel health checks. npx cache detection. Auto-fix. |
+| **issues.js** | 567 | 95% | Real ADR-016 claim system with kanban board view. |
+| **completions.js** | 539 | 100% | Complete for 4 shells. Hardcoded command lists (maintenance burden). |
+| **benchmark.js** | 459 | 80% | Real neural/memory benchmarks with fallbacks. |
+| **start.js** | 418 | 85% | Full MCP integration, daemon mode, PID management. |
+| **config.js** | 406 | 10% | ENTIRELY STUB. init/get/set/export/import all fake persistence. |
+| **migrate.js** | 410 | 20% | V2→V3 migration steps are hardcoded stubs. Good breaking changes docs. |
+| **claims.js** | 373 | 40% | Real wildcard evaluation from config. grant/revoke don't persist. |
+| **index.js** | 366 | 100% | Lazy loading saves ~200ms startup. Clean architecture. |
+| **deployment.js** | 289 | 10% | All deployment steps simulated with setTimeout(). |
+| **update.js** | 276 | 95% | Real npm update checking with rate limiting. |
+| **progress.js** | 259 | 100% | Real MCP integration. |
+| **providers.js** | 232 | 30% | Hardcoded provider data, simulated config updates. |
+| **categories.js** | 178 | 100% | Clean DDD-aligned command taxonomy. |
+
+### RuVector PostgreSQL Bridge (9 files, 4,211 LOC)
+
+| Command | LOC | Quality |
+|---------|-----|---------|
+| setup.js | 765 | Real SQL generation but version/type mismatches |
+| backup.js | 746 | Real backup with SQL/JSON/CSV + compression |
+| optimize.js | 503 | Real pg health analysis + tuning recommendations |
+| migrate.js | 481 | 6 predefined migrations, checksum system |
+| benchmark.js | 480 | Real perf benchmarking with percentiles |
+| status.js | 456 | Real connection + schema health checks |
+| init.js | 431 | Real schema creation with interactive prompts |
+| import.js | 349 | Real sql.js→PostgreSQL import |
+| index.js | 129 | Clean command coordinator |
+
+### CRITICAL Cross-File Bug: RuVector Extension Confusion
+
+The ruvector PostgreSQL bridge has a **systemic inconsistency** across all 9 command files:
+
+- `setup.js` creates `ruvector(384)` types and `CREATE EXTENSION ruvector`
+- `init.js` creates `vector(${dimensions})` types and `CREATE EXTENSION vector`
+- `import.js` uses `ruvector(384)` hardcoded
+- `migrate.js` uses `vector(1536)` hardcoded
+- `benchmark.js` uses `vector(${dimensions})`
+
+**Impact**: Database initialization will fail or use the wrong extension. Dimension mismatches (384 vs 1536 vs configurable) will cause import/migration failures.
+
+### CRITICAL: config.js Has Zero Persistence
+
+The `config` command (`init`, `get`, `set`, `export`, `import`) is entirely a UI shell:
+- `init` creates a config object but never writes to disk
+- `get` returns hardcoded values, doesn't read any file
+- `set` prints success but doesn't persist
+- `export`/`import` don't read or write files
+
+### Key Architectural Observations
+
+1. **MCP-first architecture**: All core commands delegate to MCP tools via `callMCPTool()`. The CLI is a thin presentation layer.
+2. **Graceful degradation everywhere**: Dynamic imports with null fallback for ruvector, aidefence, codex.
+3. **Lazy loading optimization**: Command index uses on-demand loading, saving ~200ms startup time.
+4. **Real implementations exceed expectations**: embeddings (95%), neural (90%), agentdb (90%), doctor (95%) are genuinely functional.
+5. **Stub pattern**: Commands that manage external state (config, deployment, migration, providers) are mostly UI shells.
+6. **Security highlight**: neural.js export has production-grade Ed25519 signing with PII stripping and secret detection.

@@ -1,1377 +1,1089 @@
-# Claude-Flow Swarm Functionality: How It Actually Works
-
-**Analysis Date**: 2026-02-14
-**Scope**: Complete analysis of swarm coordination, queen coordinator, and agent-to-agent interaction in our local claude-flow implementation
-**Method**: 14-agent research swarm (5 initial + 4 gap-finding + 5 deep-dive) analyzing CLI commands, MCP tools, agent templates, claims/coordination, end-to-end flows, worker systems, learning pipeline, v3 source packages, real-world usage evidence, hooks internals, MCP runtime, headless/container execution, settings.json wiring, and plugin/guidance/skills/commands systems
-**Files Analyzed**: ~60 source files, ~8 agent templates, ~45 helper scripts, 33 skills, 90+ commands (~50,000+ lines)
-
----
-
-## Executive Summary
-
-Claude-flow's "swarm" system operates on **three distinct layers** that are commonly conflated:
-
-| Layer | What It Is | What It Does |
-|-------|-----------|--------------|
-| **Layer 1: Claude Code Task Tool** | Built-in Claude Code feature | Actually spawns parallel agent instances. **This IS the real swarm.** |
-| **Layer 2: claude-flow CLI/MCP** | JSON file state management | Writes metadata to `.swarm/` and `.claude-flow/`. No processes spawned. |
-| **Layer 3: Agent Templates** | Prompt engineering | `.claude/agents/*.md` files that define agent personas. Educational TypeScript examples, not executed. |
-
-**The critical insight**: The actual multi-agent parallelism comes entirely from Claude Code's native Task tool with `run_in_background: true`. Everything claude-flow adds on top is metadata, hooks, and prompt engineering — valuable for organization, but not for actual distributed coordination.
-
----
-
-## Table of Contents
-
-1. [The Two Agent Systems](#1-the-two-agent-systems)
-2. [What swarm init Actually Does](#2-what-swarm-init-actually-does)
-3. [The Queen Coordinator Myth](#3-the-queen-coordinator-myth)
-4. [Agent-to-Agent Communication](#4-agent-to-agent-communication)
-5. [The Claims System](#5-the-claims-system)
-6. [Consensus Mechanisms](#6-consensus-mechanisms)
-7. [End-to-End Flow Trace](#7-end-to-end-flow-trace)
-8. [What Actually Provides Value](#8-what-actually-provides-value)
-9. [Architecture Diagram](#9-architecture-diagram)
-10. [Gap Analysis](#10-gap-analysis)
-11. [Recommendations](#11-recommendations)
-
----
-
-## 1. The Two Agent Systems
-
-There are **two completely separate "agent" systems** that share no code and serve different purposes:
-
-### System A: Claude Code Task Tool (THE REAL SWARM)
-
-- Built into Claude Code (Opus 4.6)
-- Spawns isolated Claude instances as background agents
-- Parameters: `prompt`, `subagent_type` (matches `.claude/agents/*.md`), `model`, `run_in_background`
-- Each agent gets full tool access (Read, Write, Bash, Grep, etc.)
-- Agents execute truly in parallel when `run_in_background: true`
-- Results collected and returned to parent when all complete
-- **No connection to claude-flow CLI whatsoever**
-
-### System B: claude-flow MCP `agent_spawn` Tool (METADATA ONLY)
-
-- MCP tool in `agent-tools.js` (line 134)
-- Creates a JSON entry in `.claude-flow/agents/store.json`
-- **Does NOT spawn any process, thread, or Claude instance**
-- Agent record structure:
-  ```json
-  {
-    "agentId": "agent-1707900000-abc123",
-    "agentType": "coder",
-    "status": "idle",
-    "health": 1.0,
-    "taskCount": 0,
-    "config": {},
-    "createdAt": "2026-02-14T..."
-  }
-  ```
-- Terminating an agent just sets `status: 'terminated'` in JSON
-
-### The Confusion
-
-CLAUDE.md conflates these: "MUST spawn agents matching the suggested roles via Task tool" (System A) alongside "use `claude-flow agent spawn`" (System B). In practice, only System A does real work. System B is bookkeeping.
-
----
-
-## 2. What `swarm init` Actually Does
-
-### The Command
-
-```bash
-claude-flow swarm init --topology hierarchical --max-agents 15 --strategy specialized
-```
-
-### What It Claims
-- Initialize distributed swarm with topology selection
-- Set up communication protocols and consensus mechanisms
-- Deploy queen coordinator with worker agents
-
-### What Actually Happens
-
-**Step 1**: Calls MCP tool `swarm_init` (swarm-tools.js lines 19-37):
-```javascript
-handler: async (input) => {
-    return {
-        success: true,
-        swarmId: `swarm-${Date.now()}`,     // Timestamp-based ID
-        topology: input.topology || 'hierarchical-mesh',
-        config: {
-            currentAgents: 0,               // HARDCODED ZERO
-            communicationProtocol: 'message-bus',  // LABEL ONLY
-            consensusMechanism: 'majority',        // NOT IMPLEMENTED
-        }
-    };
-}
-```
-
-**Step 2**: Writes `.swarm/state.json`:
-```json
-{
-  "id": "swarm-1707900000",
-  "topology": "hierarchical",
-  "maxAgents": 15,
-  "strategy": "specialized",
-  "status": "ready"
-}
-```
-
-**Step 3**: Displays spinner animations and formatted output.
-
-**What is NOT done**:
-- No processes spawned
-- No network connections opened
-- No agent pool initialized
-- No communication channels created
-- No coordinator started
-
-### Topology Has Zero Behavioral Impact
-
-Available topologies: `hierarchical`, `mesh`, `ring`, `star`, `hybrid`, `hierarchical-mesh`
-
-All topologies are **string labels stored in JSON**. No code paths change based on topology selection. There is no routing, no graph structure, no communication pattern difference. From `coordination-tools.js` header:
-
-```javascript
-/**
- * ⚠️ IMPORTANT: These tools provide LOCAL STATE MANAGEMENT.
- * - Topology/consensus state is tracked locally
- * - No actual distributed coordination
- * - Useful for single-machine workflow orchestration
- */
-```
-
----
-
-## 3. The Queen Coordinator Myth
-
-### What the Architecture Claims
-
-```
-    👑 QUEEN (Strategic Command)
-        │
-   ┌────┼────┬────┐
-   │    │    │    │
-   🔬   💻   📊   🛡️
-  RSR  CODE  ANLY  SEC
-```
-
-### What Actually Exists
-
-The "queen" is an **agent template** at `.claude/agents/v3/v3-queen-coordinator.md` — a markdown file with instructions for an LLM. It has:
-
-- **Same tools as any other agent**: Read, Grep, Glob, Bash
-- **No special privileges**: Cannot spawn, terminate, or redirect other agents
-- **No supervisory capability**: Cannot monitor agent progress in real-time
-- **No enforcement mechanism**: Cannot prevent agents from ignoring its "commands"
-
-### How the "Hierarchy" Manifests
-
-1. The queen template prompt says: "You are the strategic coordinator. Delegate tasks to workers."
-2. Worker template prompts say: "You execute tasks from the coordinator."
-3. **Compliance is voluntary** — based entirely on prompt engineering
-4. If a worker agent ignores the queen's plan, nothing prevents it
-
-### The TypeScript Code in Templates
-
-Coordinator templates (hierarchical, mesh, adaptive, collective-intelligence) contain **300-800 lines of TypeScript code** showing:
-- `AttentionService` with Flash/Multi-Head/Hyperbolic attention
-- GraphRoPE position embeddings
-- Byzantine node detection algorithms
-- CRDT synchronization protocols
-
-**This code is NEVER EXECUTED.** Agents only have Bash tool access, not a TypeScript runtime. The code serves as:
-- Conceptual guidance for the LLM to understand coordination patterns
-- Prompt engineering to prime sophisticated reasoning
-- Implementation examples for what *could* be built
-
-### Coordinator Comparison
-
-| Coordinator | Template Size | TypeScript Example | Actual Capability |
-|-------------|--------------|-------------------|-------------------|
-| v3-queen-coordinator | 82 lines | None | Read/Grep/Glob/Bash |
-| hierarchical-coordinator | 717 lines | 457 lines | Read/Grep/Glob/Bash |
-| mesh-coordinator | 970 lines | 638 lines | Read/Grep/Glob/Bash |
-| adaptive-coordinator | 1133 lines | 669 lines | Read/Grep/Glob/Bash |
-| collective-intelligence | 1002 lines | 803 lines | Read/Grep/Glob/Bash |
-
-All coordinators have **identical actual capabilities**. The differences are only in their prompt instructions.
-
----
-
-## 4. Agent-to-Agent Communication
-
-### Available Communication Mechanisms
-
-#### Mechanism A: Shared Memory (SQLite) — WORKS
-```bash
-# Agent A stores finding
-claude-flow memory store --key "auth-pattern" --value "Use JWT with refresh" --namespace patterns
-
-# Agent B retrieves it
-claude-flow memory search --query "authentication" --namespace patterns
-```
-- Backed by SQLite at `~/.swarm/memory.db` and `~/.swarm/agentdb.db`
-- HNSW vector search for semantic retrieval (via @ruvector/core)
-- Persistent across sessions
-- **This is the REAL coordination mechanism**
-
-#### Mechanism B: File-Based Messages — EXISTS BUT PASSIVE
-```bash
-# Agent A sends message (via swarm-hooks.sh)
-.claude/helpers/swarm-hooks.sh send "agent_B" "Found schema conflict" "context" "high"
-# Creates: .claude-flow/swarm/messages/msg_*.json
-
-# Agent B must explicitly poll
-.claude/helpers/swarm-hooks.sh messages 10
-# Reads messages addressed to agent_B or broadcast ("*")
-```
-- **Polling-based only** — no push notifications
-- Agents must explicitly call the helper to check messages
-- No automatic polling mechanism
-- Task agents don't know other agents exist unless told in their prompt
-
-#### Mechanism C: Handoff Protocol — EXISTS BUT MANUAL
-```bash
-# Agent A initiates handoff
-.claude/helpers/swarm-hooks.sh handoff "agent_B" "Complete auth" '{"filesModified":["auth.ts"]}'
-# Creates: .claude-flow/swarm/handoffs/ho_*.json
-
-# Agent B accepts
-.claude/helpers/swarm-hooks.sh accept-handoff "ho_12345"
-# Outputs formatted context
-```
-- Requires explicit orchestration by agents
-- Not automatic — both sides must participate
-- Creates JSON files that the accepting agent reads
-
-#### Mechanism D: Pattern Broadcasting — EXISTS BUT OPT-IN
-```bash
-# Agent broadcasts pattern
-.claude/helpers/swarm-hooks.sh broadcast '{"strategy":"TDD","domain":"testing","quality":0.85}'
-# Creates: .claude-flow/swarm/patterns/bc_*.json
-
-# Other agents poll for broadcasts
-.claude/helpers/swarm-hooks.sh get-pattern-broadcasts
-```
-
-### The Communication Reality
-
-**Can agents communicate mid-task?** Technically yes, practically no.
-
-- Agents would need to explicitly call `swarm-hooks.sh` via Bash
-- No agent template instructs agents to poll for messages during execution
-- Task agents execute in isolation — they don't know about the messaging system unless their prompt tells them to use it
-- **The most reliable "communication" is through the filesystem**: one agent writes a file, another reads it
-
----
-
-## 5. The Claims System
-
-### Purpose
-Prevent duplicate work by tracking which agent "owns" which resource.
-
-### Storage
-`.claude-flow/claims/claims.json`:
-```json
-{
-  "claims": {
-    "issue-123": {
-      "issueId": "issue-123",
-      "claimant": {"type": "agent", "agentId": "coder-1", "agentType": "coder"},
-      "status": "active",
-      "progress": 45,
-      "context": "Working on authentication"
-    }
-  },
-  "stealable": {},
-  "contests": {}
-}
-```
-
-### Operations
-| Operation | What It Does |
-|-----------|-------------|
-| `claim` | Write claim record to JSON |
-| `release` | Delete claim from JSON |
-| `handoff` | Set `handoffTo` field, status to `handoff-pending` |
-| `steal` | Transfer ownership if marked `stealable` |
-| `rebalance` | Suggestion engine — doesn't auto-execute |
-
-### Limitations
-- **No atomic operations** — multiple agents writing simultaneously causes race conditions (last write wins)
-- **No integration with swarm system** — claims and swarm operate on different JSON files with no shared logic
-- **No locking** — no distributed locks or semaphores
-- **Separate from Task tool** — Claude Code Task agents don't automatically check claims
-
----
-
-## 6. Consensus Mechanisms
-
-### What's Claimed
-- Byzantine Fault Tolerant consensus with 2/3 majority
-- Raft leader election with log replication
-- Gossip-based distributed consensus
-
-### What's Implemented
-
-**hive-mind consensus** (hive-mind-tools.js lines 302-421):
-```javascript
-// "Consensus" = simple majority vote in JSON object
-if (action === 'vote') {
-    proposal.votes[voterId] = input.vote;  // Just sets key-value
-    const votesFor = Object.values(proposal.votes).filter(v => v).length;
-    const majority = Math.ceil(state.workers.length / 2) + 1;
-    if (votesFor >= majority) {
-        proposal.status = 'approved';
-    }
-}
-```
-
-**swarm-hooks.sh consensus** (lines 507-600):
-```bash
-initiate_consensus "Which framework?" "React,Vue,Svelte" 30000
-# Creates: .claude-flow/swarm/consensus/cons_*.json
-
-vote_consensus "cons_123" "React"
-# Adds vote to JSON: .votes["agent_A"] = "React"
-
-resolve_consensus "cons_123"
-# Counts votes, picks winner
-```
-
-### Reality
-- Simple majority counting in a local JSON file
-- No quorum enforcement, no timeout handling
-- No Byzantine detection, no leader election, no log replication
-- "Raft" and "Byzantine" are string labels, not implementations
-- Workers don't automatically participate — must be explicitly asked to vote
-
----
-
-## 7. End-to-End Flow Trace
-
-### What Actually Happens When You Say "spawn swarm"
-
-**Step 1: UserPromptSubmit Hook Fires**
-```bash
-claude-flow hooks swarm-gate --task "spawn swarm for API implementation"
-# Output: **[SWARM REQUIRED]** Complexity: 0.62
-# → This is informational context for Opus, NOT enforced
-```
-
-**Step 2: Opus Reads the Directive**
-The swarm-gate output appears in Claude Code's context:
-```
-**[SWARM REQUIRED]** Complexity: 0.62 (threshold: 0.50)
-  Action: You MUST initialize swarm before executing this task.
-  - Run: claude-flow swarm init --topology hierarchical --max-agents 8
-  - Spawn 3+ agents with roles: coder, tester, reviewer
-```
-
-**Step 3: Opus Decides What To Do**
-Usually one of two things:
-- **Option A** (common): Ignores directive, executes as solo agent
-- **Option B** (intended): Follows CLAUDE.md rules and initiates swarm
-
-**Step 4: If Swarm Is Initiated**
-```bash
-# Opus calls:
-claude-flow swarm init --topology hierarchical --max-agents 5 --strategy specialized
-# → Writes .swarm/state.json (metadata only)
-```
-
-**Step 5: Opus Spawns Task Agents**
-```
-Task(subagent_type="v3-coder", prompt="Implement auth", run_in_background=true)
-Task(subagent_type="v3-tester", prompt="Write tests", run_in_background=true)
-Task(subagent_type="v3-reviewer", prompt="Review code", run_in_background=true)
-```
-All three calls go in ONE message for parallel execution.
-
-**Step 6: Claude Code Manages the Agents**
-- Each Task spawns an isolated Claude instance
-- Agents execute in parallel with no awareness of each other
-- Each agent has full tool access (Read, Write, Bash, etc.)
-- **No claude-flow CLI involvement in execution**
-
-**Step 7: Agents Complete, Results Return**
-- Claude Code collects all background agent results
-- PostToolUse hooks fire for each completed agent:
-  ```bash
-  claude-flow hooks post-task --task-id "$AGENT_ID" --success true --train-patterns true
-  bash .claude/helpers/reflexion-post-task.sh   # Store episode
-  bash .claude/helpers/skill-extract.sh          # Extract skills
-  .claude/helpers/swarm-hooks.sh post-task "$PROMPT" true  # Broadcast completion
-  ```
-
-**Step 8: Opus Reviews All Results**
-- All agent outputs visible to parent Opus
-- Opus synthesizes, resolves conflicts, creates final output
-
-### The Key Realization
-
-**The "swarm" is just Claude Code's Task tool with `run_in_background: true`.**
-
-Everything else — swarm init, topology, queen coordinator, consensus — is organizational metadata and prompt engineering layered on top. It's valuable for structure but does not drive execution.
-
----
-
-## 8. What Actually Provides Value
-
-### Genuinely Useful Components
-
-| Component | Value | How It Works |
-|-----------|-------|-------------|
-| **Task tool parallelism** | HIGH | `run_in_background: true` enables real parallel execution |
-| **Agent templates** | HIGH | `.claude/agents/*.md` define specialized personas |
-| **Memory persistence** | HIGH | SQLite + HNSW for cross-agent data sharing |
-| **Model routing** | MEDIUM | Swarm-gate complexity scoring selects haiku/sonnet/opus |
-| **Pattern learning** | MEDIUM | PostToolUse hooks store successful patterns |
-| **Claims system** | LOW-MEDIUM | Work ownership tracking (no enforcement) |
-| **Swarm hooks** | LOW | Informational context for Opus (not enforced) |
-| **Swarm init** | LOW | Metadata ceremony (no functional impact) |
-| **Topology selection** | NONE | String label with zero behavioral difference |
-| **Consensus tools** | NONE | Simple vote counting, never used in practice |
-
-### The Real Coordination Pattern
-
-The most effective swarm pattern we've used (confirmed by ADR-020, ADR-028, ADR-037):
-
-1. **Decompose** task into non-overlapping subtasks
-2. **Spawn** parallel Task agents with detailed prompts including file ownership boundaries
-3. **Share data** via `claude-flow memory store/search` (instructed in agent prompts)
-4. **Collect** results when all agents complete
-5. **Synthesize** final output from all agent results
-
-This works because:
-- Non-overlapping file ownership prevents conflicts
-- Memory serves as shared context
-- Detailed prompts replace queen coordination
-- Claude Code handles lifecycle (no need for custom supervision)
-
----
-
-## 9. Architecture Diagram
-
-### What's Documented
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  👑 Queen Coordinator (Byzantine Consensus)              │
-│  ├── Flash Attention 2.49x-7.47x                        │
-│  ├── HNSW 150x-12,500x                                  │
-│  └── CRDT Synchronization                                │
-│       │                                                   │
-│  ┌────┼────┬────┬────┐                                   │
-│  │    │    │    │    │                                    │
-│  🔬   💻   📊   🛡️   🧪                                 │
-│  RSR  CODE ANLY  SEC  TST                                │
-│       │              │                                    │
-│  ┌────┴────────┐  ┌──┴──┐                                │
-│  Message Bus    │  Raft  │                                │
-│  (Byzantine)    │  Cons. │                                │
-└──────────────────────────────────────────────────────────┘
-```
+# Swarm Coordination Domain Analysis
+
+> **Priority**: HIGH | **Coverage**: 14.1% (196/1388 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-15 (Session R40 — neural model zoo JS deep-read)
+
+## Overview
+
+Multi-agent lifecycle, topology, consensus, health monitoring, inter-agent communication. 238 files / 67K LOC.
+
+## The Big Picture
+
+Swarm coordination has **four layers**, each with a different reality level:
+
+| Layer | Components | Status | Evidence |
+|-------|-----------|--------|----------|
+| **Agent Templates** | Coordinator/consensus .md files | **REAL** (accurate algorithms) | CRDT, BFT, threshold crypto all textbook-correct |
+| **P2P Crypto** | p2p-swarm-v2.js | **REAL** (Ed25519, AES-256-GCM) | Production-grade crypto, but task execution stubbed |
+| **Shell Coordination** | swarm-comms.sh, swarm-monitor.sh | **REAL** (file-based IPC) | Works but primitive; race conditions |
+| **Distributed Systems** | Federation, MultiDBCoordinator, SyncCoordinator | **FABRICATED** | All return empty arrays, hardcoded data, Math.random() |
+
+## How Swarms Actually Work
+
+"Swarm coordination" operates at two levels:
+1. **Template-guided** (REAL) — Agent prompts guide Claude Code's Task tool for parallel agent spawning
+2. **MCP-reported** (FABRICATED) — Tools claiming to report swarm state return hardcoded/random values
+
+Real coordination happens through Claude Code's Task tool parallelism + file-based message passing, not through distributed protocols.
+
+## R9 Deep-Read: P2P Swarm
+
+### p2p-swarm-v2.js (1,787 LOC) — REAL Crypto, STUB Execution
+
+**Production-grade cryptography:**
+- Ed25519 signing: `crypto.sign(null, ...)` (L100)
+- X25519 ECDH + HKDF key derivation (L129-181)
+- AES-256-GCM encryption with auth tags (L275-309)
+- Replay protection: per-sender nonce + counter + timestamp (L192-255)
+- Canonical JSON serialization for deterministic signatures (L27-51)
+
+**Stubbed/broken:**
+- Task executor returns hardcoded success (L1530-1584): "Stub execution - in production use Wasmtime"
+- IPFS CID generation is FAKE: `Qm${hash.slice(0,44)}` (L307), not real CIDs
+- WebRTC signaling handlers are no-ops (L869-884)
+- Gun relay uses deprecated Heroku URLs (L320-322)
+
+### p2p-swarm-wasm.js (315 LOC) — BROKEN
+
+Imports from `ruvector-edge.js` which doesn't exist. No try-catch, no fallback. All methods crash if WASM unavailable. HNSW index requires WASM that won't load.
+
+### MCP Tools & Hooks — REAL Wrappers
+
+12 MCP tools (p2p-swarm-tools.js) and 9 hooks (p2p-swarm-hooks.js) are correctly implemented wrappers with Zod validation and proper error handling.
+
+## R9 Deep-Read: Federation System
+
+### FederationHubServer.js (437 LOC) — REAL Networking, Dangerous Gaps
+
+WebSocket server is **functional** (L7, L94-110). SQLite metadata storage **works** (L39-85). BUT:
+- JWT auth **BYPASSED**: accepts ALL connections (L196-197: "TODO: Verify JWT")
+- AgentDB = null (L31) but storePattern() called (L269-284) → **crashes at runtime**
+- Vector clock exists but never resets, causing unbounded growth
+
+### FederationHub.js (284 LOC) — ENTIRELY SIMULATED
+
+- `sendSyncMessage()` returns `[]` (L141,143)
+- `getLocalChanges()` returns `[]` (L162)
+- `applyUpdate()` has empty switch cases (L239-247)
+- QUIC is placeholder: "actual implementation requires quiche or similar"
+
+### Federation CLI, Realtime, Debug
+
+- **federation-cli.js** references non-existent `run-hub.js` and `run-agent.js`
+- **realtime-federation.js**: Supabase listeners are correctly written but realtime must be manually enabled in Supabase dashboard (L331 comment)
+- **debug-stream.js** and **agent-debug-stream.js**: FULLY FUNCTIONAL observability tools
+
+### Federation Schema (SQL)
+
+Real Supabase schema with pgvector (1536-dim embeddings), RLS policies, HNSW index. Missing: programmatic realtime activation, client-side context for RLS.
+
+## R9 Deep-Read: Coordination Code
+
+### MultiDatabaseCoordinator.ts (1,108 LOC) — FABRICATED FACADE
+
+- Sync uses `await this.delay(10)` instead of network I/O (L425)
+- Conflicts simulated: `Math.random() < 0.01` (L444)
+- Health check: `Math.random() > 0.05` simulates 95% uptime (L778)
+- No vector clocks, CRDTs, or causal ordering — just LWW timestamps
+
+### SyncCoordinator.ts (717 LOC) — FABRICATED BACKEND
+
+QUICClient.sendRequest() returns hardcoded `{success: true, data: [], count: 0}` (L328-332). Five-phase sync protocol structure is sound but no actual data transfer occurs.
+
+### swarm-comms.sh (354 LOC) — REAL File-Based IPC
+
+Inter-agent communication via JSON files in `.claude-flow/swarm/queue/`, routed to mailbox directories. Priority-based (0-3), supports unicast and broadcast. **Critical**: race conditions in connection pool (jq on single file, non-atomic). Consensus voting creates files but has no actual quorum logic.
+
+### swarm-monitor.sh (218 LOC) — FABRICATED METRICS
+
+Agent count = `(process_count / 2)` heuristic (L59). Uses real `pgrep` but the interpretation is fabricated.
+
+## R9 Deep-Read: Simulations & Agent Templates
+
+### Simulation Scenarios (AgentDB)
+
+| File | LOC | Status | Notes |
+|------|-----|--------|-------|
+| voting-system-consensus.ts | 252 | **Real code, simplified** | Coalition counting bug (L202-216), limited RCV |
+| research-swarm.ts | 188 | **Real DB, fake research** | Hardcoded outcomes, arbitrary rewards |
+| lean-agentic-swarm.ts | 183 | **Real concurrency** | Promise.all works, coordinator is query-only |
+| multi-agent-swarm.ts | 147 | **Invalid test** | No real contention (unique keys), counts errors as "conflicts" |
+
+### Agent Templates (Consensus)
+
+| Template | LOC | Algorithm Quality | Implementation Gaps |
+|----------|-----|-------------------|-------------------|
+| **crdt-synchronizer.md** | 1,005 | **Textbook-correct** CRDTs | RGA merge oversimplified, delta computation undefined |
+| **quorum-manager.md** | 831 | **Sound** BFT math (ceil(2n/3)+1) | Network clustering undefined, hardcoded scoring weights |
+| **security-manager.md** | 625 | **Gold standard** crypto | ZKP library missing, threshold signature Lagrange coefficients undefined |
+| **adaptive-coordinator.md** | 1,133 | **Sophisticated** concepts | All 5 attention mechanisms delegate to undefined service |
+
+## CRITICAL Findings (8)
+
+1. **Fabricated swarm metrics** — status returns zeros, health always "ok", coordination uses Math.random().
+2. **QUIC is empty** — WASM returns `{}`, Federation returns empty arrays, SyncCoordinator backend returns hardcoded empty data.
+3. **Circular dependency** — agentic-flow shells out to `npx claude-flow@alpha`, creating circular import.
+4. **P2P task executor is stub** — Returns hardcoded success, never invokes Wasmtime.
+5. **WASM module broken** — p2p-swarm-wasm.js imports non-existent ruvector-edge.js, no fallback.
+6. **Federation JWT bypassed** — Accepts ALL connections without authentication.
+7. **FederationHub entirely simulated** — All sync methods return empty arrays.
+8. **Agent count fabricated** — Estimated as (process_count / 2) heuristic in swarm-monitor.sh.
+
+## HIGH Findings (7)
+
+1. **P2P crypto is production-grade** — Ed25519, X25519, AES-256-GCM, replay protection all real.
+2. **IPFS CID is fake** — Generates invalid "Qm" prefix, won't interoperate with real IPFS.
+3. **WebRTC signaling not implemented** — Handlers are no-ops.
+4. **FederationHubServer AgentDB null crash** — storePattern() called on null.
+5. **MultiDatabaseCoordinator is fabricated facade** — delay(10) instead of sync, random conflicts.
+6. **File-based IPC has race conditions** — swarm-comms.sh jq operations not atomic.
+7. **Agent templates algorithmically accurate** — CRDT, BFT, threshold crypto are textbook-correct but lack actual implementations.
+
+## Positive
+
+- **P2P crypto layer** is genuinely production-grade (Ed25519, AES-256-GCM)
+- **Debug streams** (agent-debug-stream.js, debug-stream.js) are fully functional
+- **Agent templates** document sophisticated algorithms accurately (CRDT, BFT, ZKP)
+- **12 MCP tools + 9 hooks** correctly implemented as wrappers
+- **Supabase schema** is well-designed with pgvector and RLS
+- **File-based IPC** (swarm-comms.sh) actually works for single-machine coordination
+
+## R10 Broad Coverage: Templates, Commands, Implementations
+
+Session R10 covered 55 additional files across 6 categories. Key discoveries below.
+
+### Coordinator Templates (8 files)
+
+| Template | LOC | Quality | Notes |
+|----------|-----|---------|-------|
+| **mesh-coordinator.md** | 971 | **Excellent** | Real gossip, work-stealing, auction, GraphRoPE, BFS, Byzantine detection |
+| **hierarchical-coordinator.md** | 718 | **Excellent** | Hyperbolic attention, depth/sibling encoding, weighted consensus |
+| **performance-benchmarker.md** | 859 | **Excellent** | Throughput ramp, percentiles (p50-p99.99), CPU/memory profiling, adaptive optimizer |
+| **topology-optimizer.md** | 816 | **Good** | GA (pop=100, 500 gen), simulated annealing, METIS-like partitioning |
+| **consensus-coordinator.md** | 346 | **Good** | PageRank voting, matrix consensus. Depends on non-existent MCP tool |
+| **byzantine-coordinator.md** | 71 | **Stub** | Mentions PBFT only. No implementation |
+| **gossip-coordinator.md** | 71 | **Stub** | Lists push/pull gossip, zero algorithmic detail |
+| **raft-manager.md** | 71 | **Stub** | Leader election mentioned, no pseudocode or timing |
+
+**Pattern**: The 3 "deep" templates (mesh, hierarchical, performance-benchmarker) contain real, implementable algorithms. The 3 "stub" templates (byzantine, gossip, raft) are 71-LOC placeholders.
+
+### GitHub Swarm Templates (5 files)
+
+| Template | LOC | Quality | Production Ready |
+|----------|-----|---------|-----------------|
+| **swarm-issue.md** | 559 | Very Good | 85% (1 portability bug: GNU date) |
+| **swarm-pr.md** | 412 | Very Good | 80% |
+| **code-review-swarm.md** | 323 | Excellent | 90% (reasoning blueprint, not shell guide) |
+| **release-swarm.md** | 573 | Good | 60% (3 CLI issues) |
+| **multi-repo-swarm.md** | 537 | Medium | 50% (fragile cross-platform) |
+
+### SKILL.md Files (5 files)
+
+| Skill | LOC | Quality | Notes |
+|-------|-----|---------|-------|
+| **v3-swarm-coordination** | 340 | **Best** | Concrete 15-agent blueprint tied to actual v3 ADRs |
+| **hive-mind-advanced** | 713 | Good | Real CLI tools documented, 3 consensus algorithms |
+| **swarm-advanced** | 974 | Aspirational | ~30% references non-existent MCP functions |
+| **flow-nexus-swarm** | 611 | Over-promises | Requires external flow-nexus MCP server |
+| **swarm-orchestration** | 180 | Skeleton | Needs 3-4x expansion |
+
+### dist/ Implementation Files (5 files)
+
+| File | LOC | Real% | Notes |
+|------|-----|-------|-------|
+| **supabase-adapter-debug.js** | 401 | 95% | Production-grade Supabase integration |
+| **e2b-swarm.js** | 366 | 90% | Real E2B sandbox orchestration (requires API key) |
+| **transport-router.js** | 375 | 60% | HTTP/2 real, QUIC layer fabricated |
+| **swarm-learning-optimizer.js** | 351 | 20% | Reward calculations invented, speedup predictions ungrounded |
+| **swarm.js (CLI)** | 325 | 30% | P2P backend missing, CLI will crash |
+
+### Command Files (15 files, ~2K LOC)
+
+7 strategy stubs (analysis, development, maintenance, optimization, testing, research, examples) define swarm patterns with agent roles. 8 substantive GitHub command files provide real gh CLI workflows. Core `swarm.md` mandates background execution pattern.
+
+### Hive-Mind Files (11 + misc, ~1K LOC)
+
+8 of 11 hive-mind subcommands are 9-LOC placeholders. Coordination docs clarify tools create patterns for Claude Code to follow, not write code directly.
+
+## CRITICAL Findings (10, +2 from R10)
+
+1. **Fabricated swarm metrics** — status returns zeros, health always "ok", coordination uses Math.random().
+2. **QUIC is empty** — WASM returns `{}`, Federation returns empty arrays, SyncCoordinator backend returns hardcoded empty data.
+3. **Circular dependency** — agentic-flow shells out to `npx claude-flow@alpha`, creating circular import.
+4. **P2P task executor is stub** — Returns hardcoded success, never invokes Wasmtime.
+5. **WASM module broken** — p2p-swarm-wasm.js imports non-existent ruvector-edge.js, no fallback.
+6. **Federation JWT bypassed** — Accepts ALL connections without authentication.
+7. **FederationHub entirely simulated** — All sync methods return empty arrays.
+8. **Agent count fabricated** — Estimated as (process_count / 2) heuristic in swarm-monitor.sh.
+9. **transport-router QUIC fabricated** — sendViaQuic() sends nothing; HTTP/2 fallback is real (R10).
+10. **swarm-learning-optimizer rewards invented** — Base reward 0.5, speedup predictions (2.5x-4.0x) have no empirical basis (R10).
+
+## HIGH Findings (9, +2 from R10)
+
+1. **P2P crypto is production-grade** — Ed25519, X25519, AES-256-GCM, replay protection all real.
+2. **IPFS CID is fake** — Generates invalid "Qm" prefix, won't interoperate with real IPFS.
+3. **WebRTC signaling not implemented** — Handlers are no-ops.
+4. **FederationHubServer AgentDB null crash** — storePattern() called on null.
+5. **MultiDatabaseCoordinator is fabricated facade** — delay(10) instead of sync, random conflicts.
+6. **File-based IPC has race conditions** — swarm-comms.sh jq operations not atomic.
+7. **Agent templates algorithmically accurate** — CRDT, BFT, threshold crypto are textbook-correct but lack actual implementations.
+8. **swarm.js CLI backend missing** — Imports p2p-swarm-v2.js which may not exist at expected path. All 11 commands will crash (R10).
+9. **~30% of SKILL.md MCP function references don't exist** — Aspirational APIs in swarm-advanced skill (R10).
+
+## Positive
+
+- **P2P crypto layer** is genuinely production-grade (Ed25519, AES-256-GCM)
+- **Debug streams** (agent-debug-stream.js, debug-stream.js) are fully functional
+- **Agent templates** document sophisticated algorithms accurately (CRDT, BFT, ZKP)
+- **12 MCP tools + 9 hooks** correctly implemented as wrappers
+- **Supabase schema** is well-designed with pgvector and RLS
+- **File-based IPC** (swarm-comms.sh) actually works for single-machine coordination
+- **supabase-adapter-debug.js** is 95% real production-grade code (R10)
+- **e2b-swarm.js** provides real E2B sandbox orchestration (R10)
+- **mesh-coordinator** and **performance-benchmarker** templates have real implementable algorithms (R10)
+- **v3-swarm-coordination SKILL** is the most concrete, actionable blueprint (R10)
+
+## Knowledge Gaps (Closed in R9-R10)
+
+- ~~p2p-swarm-v2.js~~ — DEEP, real crypto but stubbed execution
+- ~~Consensus protocols~~ — DEEP via agent templates (CRDT, BFT, quorum)
+- ~~Federation system~~ — DEEP, mostly simulated except debug streams
+- ~~MultiDatabaseCoordinator, SyncCoordinator~~ — DEEP, fabricated facades
+- ~~swarm-comms.sh, swarm-monitor.sh~~ — DEEP, file-based IPC with race conditions
+- ~~Coordinator templates (8)~~ — DEEP, 3 excellent + 2 good + 3 stubs (R10)
+- ~~GitHub swarm templates (5)~~ — DEEP, mostly production-ready (R10)
+- ~~SKILL.md files (5)~~ — DEEP, v3-swarm-coordination best (R10)
+- ~~dist/ implementations (5)~~ — DEEP, supabase/e2b real, QUIC/learning fabricated (R10)
+- ~~Command files (15)~~ — DEEP, mostly stubs defining patterns (R10)
+- ~~Hive-mind commands (11)~~ — DEEP, 8 of 11 are 9-LOC placeholders (R10)
+
+## Phase C: ruv-swarm-core Rust Deep-Read (2026-02-14, Session 13)
+
+### ruv-swarm-core (20 files, ~2,331 LOC source + ~3,093 LOC tests)
+
+A Rust crate in the ruv-FANN repo (`ruv-swarm/crates/ruv-swarm-core/`) that ports
+the claude-flow JS swarm architecture to Rust:
+
+**What works:**
+- **6 topology types**: Star, Ring, Mesh, Hierarchical, Custom, FullyConnected
+- **5 distribution strategies**: RoundRobin, Random, Star (broadcast), LoadBased, Custom
+- **Agent lifecycle**: Create → Configure → Start → Process → Stop state machine
+- **Async swarm**: tokio-based async variant with spawn_blocking
+- **Zero unsafe code**, 80%+ test coverage
+
+**What's broken:**
+- **Priority queue NOT implemented**: Task struct has priority field but scheduling
+  uses Vec/FIFO. Tasks always dequeued in insertion order.
+- **RoundRobin broken**: Always picks the first available agent. The round-robin
+  counter is never incremented. Only Star (broadcast) and Random work correctly.
+- **Message passing is placeholder**: `send_message()` stores in local buffer but
+  messages are never delivered to target agents. No actual inter-agent communication.
+- **Health monitoring print-only**: Prints agent status to stdout but no restart,
+  failover, or alerting.
+
+**Architecture note**: This is a faithful Rust port of the JS claude-flow swarm
+architecture (matching topology types and distribution strategies). It demonstrates
+the same pattern seen across the project: correct architecture with incomplete
+critical-path implementation.
+
+### Impact on Swarm Domain Assessment
+
+This confirms the swarm-coordination domain pattern across languages:
+- **Templates and architecture**: Consistently excellent (Rust and JS)
+- **Core execution**: Consistently incomplete (message passing, task scheduling)
+- **Crypto/Security**: Production-grade where implemented (P2P crypto in JS)
+- **Metrics/Monitoring**: Fabricated or print-only (both JS and Rust)
+
+## R16: ruv-swarm mcp-tools-enhanced.js Deep-Read (2,863 LOC)
+
+### Overview
+
+The primary MCP tool surface for the ruv-swarm npm package. `EnhancedMCPTools` class
+registers **25 tools** (18 core + 7+ DAA delegated to `DAA_MCPTools`).
 
 ### What's Real
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     Claude Code (Opus 4.6)              │
-│  [The ONLY entity that spawns and manages agents]       │
-│                                                          │
-│  Hooks fire → informational context → Opus decides      │
-└──────────────────┬──────────────────────────────────────┘
-                   │ Task tool (run_in_background: true)
-       ┌───────────┼───────────┐
-       │           │           │
-  ┌────▼────┐ ┌───▼────┐ ┌───▼────┐
-  │ Agent A │ │Agent B │ │Agent C │
-  │ (v3-    │ │(v3-    │ │(v3-    │
-  │  coder) │ │ tester)│ │ rev.)  │
-  └────┬────┘ └───┬────┘ └───┬────┘
-       │          │           │
-       │    No direct comms   │
-       │          │           │
-       └──────────┼───────────┘
-                  │
-         ┌────────▼────────┐
-         │  Shared State   │
-         │                 │
-         │ memory.db (SQL) │  ← claude-flow memory store/search
-         │ agentdb.db      │  ← episodes, skills, reflexion
-         │ .claude-flow/   │  ← claims, messages (JSON)
-         │ .swarm/         │  ← state.json (metadata)
-         └─────────────────┘
-```
-
----
-
-## 10. Gap Analysis
-
-### Claims vs Reality
-
-| Feature | Documented | Implemented | Gap |
-|---------|-----------|-------------|-----|
-| Agent spawning | "Spawn specialized workers" | JSON record in file | **CRITICAL** — no processes created |
-| Queen coordination | "Strategic command & control" | Same tools as any agent | **HIGH** — no special privileges |
-| Topology routing | "Hierarchical/mesh/ring patterns" | String label, zero behavioral change | **HIGH** — cosmetic only |
-| Consensus | "Byzantine fault-tolerant" | Majority vote in JSON | **HIGH** — no BFT implementation |
-| Message bus | "Distributed message passing" | JSON files with manual polling | **MEDIUM** — exists but passive |
-| Load balancing | "Adaptive work distribution" | Picks agent with lowest counter | **MEDIUM** — basic heuristic |
-| Health monitoring | "Real-time health checks" | Always returns "healthy" | **HIGH** — hardcoded response |
-| CRDT sync | "Conflict-free replication" | Last-write-wins SQLite | **HIGH** — not implemented |
-| Agent communication | "Peer-to-peer messaging" | Shared filesystem + polling | **MEDIUM** — works but clunky |
-| Swarm metrics | "Real-time performance data" | `Math.random()` values | **CRITICAL** — fabricated |
-
-### Honest Assessment of swarm-tools.js
-
-```javascript
-// swarm_status handler — ALWAYS returns zeros
-handler: async (input) => {
-    return {
-        swarmId: input.swarmId,
-        status: 'running',    // HARDCODED
-        agentCount: 0,        // HARDCODED
-        taskCount: 0,         // HARDCODED
-    };
-}
-
-// swarm_health handler — ALWAYS returns healthy
-handler: async (input) => {
-    return {
-        status: 'healthy',    // HARDCODED
-        checks: [
-            { name: 'coordinator', status: 'ok' },  // HARDCODED
-            { name: 'agents', status: 'ok' },        // HARDCODED
-            { name: 'memory', status: 'ok' },        // HARDCODED
-            { name: 'messaging', status: 'ok' },     // HARDCODED
-        ]
-    };
-}
-```
-
-### coordination-tools.js Metrics — Fabricated
-
-```javascript
-// Returns RANDOM NUMBERS as "metrics"
-metrics: {
-    latency: { avg: 25 + Math.random() * 20 },
-    throughput: { current: Math.floor(Math.random() * 1000) + 500 },
-    availability: { uptime: 99.9 + Math.random() * 0.09 },
-}
-```
-
----
-
-## 11. Recommendations
-
-### For Our Implementation
-
-1. **Stop calling `swarm init`** unless you want the metadata for organizational clarity. It has zero functional impact.
-
-2. **Focus on Task tool parallelism** — this is the real swarm:
-   ```
-   Task(subagent=coder, prompt=..., background=true)
-   Task(subagent=tester, prompt=..., background=true)
-   ```
-
-3. **Use memory for inter-agent data sharing** — instruct agents in their prompts to store/retrieve via `claude-flow memory`.
-
-4. **Design prompts for non-overlapping file ownership** — this prevents merge conflicts better than any coordination protocol.
-
-5. **Trust the pattern learning** — PostToolUse hooks store successful patterns in AgentDB/ReasoningBank, which informs future routing.
-
-### For Improving Swarm Coordination
-
-If we wanted to build real coordination on top of what exists:
-
-| Priority | Improvement | Effort |
-|----------|------------|--------|
-| P0 | Fix `swarm_status` to read actual `.claude-flow/agents/store.json` | Low |
-| P0 | Fix `swarm_health` to check real SQLite connections | Low |
-| P1 | Add active message polling to agent templates | Medium |
-| P1 | Wire claims system to Task tool agent prompts | Medium |
-| P2 | Implement real topology-based message routing | High |
-| P3 | Build actual queen coordinator as persistent process | Very High |
-| P3 | Implement Raft/BFT consensus | Very High |
-
-### What We Should NOT Do
-
-- Don't build a distributed consensus system — it's unnecessary for our use case
-- Don't try to make agents into persistent processes — Claude Code manages lifecycle better
-- Don't implement real message buses — shared memory (SQLite) is sufficient
-- Don't add CRDT/vector clocks — last-write-wins is fine for non-overlapping file ownership
-
----
-
-## Appendix A: File Inventory
-
-### CLI Commands
-- `dist/src/commands/swarm.js` (748 lines) — CLI facade, JSON file management
-- `dist/src/commands/agent.js` (819 lines) — Agent CRUD on JSON
-- `dist/src/commands/hive-mind.js` (~300 lines) — Hive-mind CLI, `--claude` flag
-
-### MCP Tools
-- `dist/src/mcp-tools/swarm-tools.js` (101 lines) — Stub handlers returning hardcoded values
-- `dist/src/mcp-tools/hive-mind-tools.js` (~500 lines) — JSON file state management
-- `dist/src/mcp-tools/agent-tools.js` (549 lines) — Agent JSON CRUD
-- `dist/src/mcp-tools/coordination-tools.js` (486 lines) — "LOCAL STATE MANAGEMENT" (per header)
-- `dist/src/mcp-tools/claims-tools.js` (731 lines) — Issue claims system
-- `dist/src/mcp-tools/task-tools.js` — Task JSON CRUD
-
-### Agent Templates
-- `.claude/agents/v3/v3-queen-coordinator.md` (82 lines)
-- `.claude/agents/swarm/hierarchical-coordinator.md` (717 lines, 457 TS example)
-- `.claude/agents/swarm/mesh-coordinator.md` (970 lines, 638 TS example)
-- `.claude/agents/swarm/adaptive-coordinator.md` (1133 lines, 669 TS example)
-- `.claude/agents/v3/collective-intelligence-coordinator.md` (1002 lines, 803 TS example)
-- `.claude/agents/v3/swarm-memory-manager.md` (165 lines)
-- `.claude/agents/templates/coordinator-swarm-init.md` (98 lines)
-- `.claude/agents/templates/memory-coordinator.md` (195 lines)
+- **Persistence layer**: `SwarmPersistencePooled` with configurable pool sizes (readers, workers, mmap, cache). Real async initialization with timeout.
+- **Error handling**: 7 typed error classes (Validation, Swarm, Agent, Task, Neural, WASM, Persistence, Resource). Severity classification, recoverability assessment, structured logging, rolling error log (max 1000).
+- **Swarm lifecycle**: `swarm_init` creates real swarms via `RuvSwarm.createSwarm()`, persists to SQLite. `loadExistingSwarms()` reconstructs in-memory state from DB on startup. `agent_spawn` persists agents with UNIQUE constraint handling.
+- **Task orchestration**: `task_orchestrate` delegates to `swarm.orchestrate()` with capability matching, persists task to DB.
+- **WASM benchmarks** (L1847-1938): Actually calls real WASM functions — `create_neural_network` with Uint32Array layers, `randomize_weights`, `run` with Float64Array, `create_forecasting_model`, `create_swarm_orchestrator`. Falls back gracefully via `isPlaceholder` check.
+- **Connection pool tools**: `pool_health`, `pool_stats`, `persistence_stats` report real pool state.
 
-### Helper Scripts
-- `.claude/helpers/swarm-hooks.sh` — File-based message passing, handoffs, consensus
-- `.claude/helpers/format-routing-directive.sh` — Formats swarm-gate output
-- `.claude/helpers/reflexion-pre-task.sh` — AgentDB episode retrieval
-- `.claude/helpers/reflexion-post-task.sh` — AgentDB episode storage
-- `.claude/helpers/skill-suggest.sh` — AgentDB skill suggestions
-- `.claude/helpers/skill-extract.sh` — AgentDB skill extraction
-
-### State Files
-```
-.claude-flow/
-├── agents/store.json          # Agent registry (System B)
-├── tasks/store.json           # Task queue
-├── claims/claims.json         # Work claims
-├── coordination/store.json    # Topology metadata
-├── hive-mind/state.json       # Hive-mind workers, consensus, memory
-└── swarm/
-    ├── messages/msg_*.json    # Agent messages
-    ├── patterns/bc_*.json     # Broadcast patterns
-    ├── consensus/cons_*.json  # Consensus votes
-    └── handoffs/ho_*.json     # Task handoffs
-
-.swarm/
-├── state.json                 # Swarm metadata (from CLI init)
-├── memory.db                  # Shared SQLite memory
-└── agentdb.db                 # AgentDB episodes/skills
-```
-
----
+### What's Fabricated
 
-## Appendix B: The One Real Feature in Hive-Mind
-
-The `hive-mind spawn --claude` flag (hive-mind.js lines 149-305) is the **only thing that creates an actual process**:
-
-```javascript
-async function spawnClaudeCodeInstance(swarmId, swarmName, objective, workers, flags) {
-    const hiveMindPrompt = generateHiveMindPrompt(swarmId, swarmName, objective, workers);
-    await writeFile(promptFile, hiveMindPrompt, 'utf8');
-
-    // Spawns actual Claude Code CLI process
-    const claudeProcess = childSpawn('claude', claudeArgs, {
-        stdio: 'inherit',
-        shell: false,
-    });
-}
-```
-
-This literally:
-1. Generates a text prompt telling the LLM to "act as a queen coordinator"
-2. Spawns the `claude` CLI process with that prompt as input
-3. All "coordination" happens in the LLM's context window
-
-It's essentially the same as manually opening Claude Code and pasting a "you are a queen coordinator" prompt — but automated.
-
----
-
-## Appendix C: What Our Successful Swarms Actually Used
-
-Based on ADR-020 (8-agent swarm), ADR-028 (5-agent swarm), and ADR-037 (5-agent swarm):
-
-### Pattern That Works
-1. **Decomposition**: Split work by file ownership boundaries
-2. **Parallel Task spawn**: All agents in ONE message with `run_in_background: true`
-3. **Detailed prompts**: Each agent gets exact files to create/modify
-4. **Non-overlapping ownership**: No two agents touch the same file
-5. **Memory sharing**: Agents store/retrieve shared context via `claude-flow memory`
-6. **Collect and review**: Parent reviews all results before proceeding
-
-### Pattern That Does NOT Work
-1. Expecting agents to communicate mid-task
-2. Relying on queen coordinator to supervise workers
-3. Using consensus for decision-making
-4. Expecting topology to affect routing
-5. Depending on claims system for conflict prevention
-
-### Conclusion
-
-**The swarm is the Task tool. Everything else is decoration.**
-
-The decoration is useful — agent templates define specialized roles, hooks store learning patterns, memory enables data sharing — but the actual multi-agent execution is 100% Claude Code's native Task tool. Understanding this distinction is critical for using the system effectively.
-
----
----
-
-# ADDENDUM: Gap-Finding Analysis (Round 2)
-
-**Method**: 4 additional research agents investigating gaps in the initial analysis
-**Focus Areas**: Worker systems, v3 source packages, learning pipeline, real-world swarm usage evidence
-
----
-
-## Addendum 1: Worker Systems — Genuinely Functional (MISSED)
-
-The initial analysis completely overlooked three **real, functional subsystems**:
-
-### WorkerQueue (511 lines) — REAL
-
-**Location**: `dist/src/services/worker-queue.js`
-
-A **full-featured Redis-compatible task queue** with:
-- Priority-based scheduling (critical/high/normal/low)
-- Automatic retry with exponential backoff (`Math.min(30000, 1000 * 2^retryCount)`)
-- Dead letter queue for permanent failures
-- Worker heartbeat monitoring
-- Concurrent task processing with configurable limits
-- Result caching with TTL
-- EventEmitter-based events (`enqueued`, `completed`, `failed`, `retrying`)
-
-```javascript
-class WorkerQueue extends EventEmitter {
-    async enqueue(workerType, payload, options)   // Add to queue
-    async dequeue(workerTypes)                     // Pull from queue
-    async complete(taskId, result)                 // Mark done
-    async fail(taskId, error, retryable = true)    // Mark failed + retry
-    async registerWorker(workerTypes, options)      // Register consumer
-    async start(workerTypes, handler, options)      // Processing loop
-    async shutdown()                                // Graceful shutdown (30s timeout)
-}
-```
-
-**Verdict**: Production-ready job queue. Currently uses in-memory store (fallback when Redis unavailable), but architecturally ready for distributed execution.
+| Function | Lines | Issue |
+|----------|-------|-------|
+| **neural_train()** | 1672-1686 | Loss/accuracy SIMULATED: `loss *= (0.95 + Math.random()*0.1)`, `accuracy += Math.random()*0.05`. WASM call at L1689 silently fails. |
+| **agent_metrics()** | 2451-2458 | ALL values Math.random(): completion rate, response time, accuracy, cognitive load, memory, active time |
+| **swarm_monitor()** | 2551-2614 | ALL metrics Math.random(): health score, CPU, memory, network, message throughput, consensus time, coordination efficiency, performance trends |
+| **task_results()** | 1022-1037 | Falls back to mock data (status=completed, success=true) when DB lookup fails |
+| **runNeuralBenchmarks()** | 1941-1983 | Entirely setTimeout() sleep timers: 5ms, 2ms, 10ms. Measures timer precision not neural performance |
+| **features_detect()** | 1413-1425 | Hardcoded counts: 18 activation functions, 5 training algorithms, 27 models, 5 patterns |
+| **neural_patterns()** | 1805-1831 | Static descriptions of 5 cognitive patterns. No dynamic data |
+
+### Architecture Assessment
+
+The file follows the same "split personality" pattern seen across claude-flow: **infrastructure is real** (persistence, error handling, WASM loading, pool management) while **observable metrics are fabricated** (training results, performance scores, health metrics). A user calling `neural_train` receives convincing epoch-by-epoch loss/accuracy curves that are pure random noise.
+
+### Dependency Graph
+
+- Imports from: `index-enhanced.js`, `persistence-pooled.js`, `errors.js`, `schemas.js`, `mcp-daa-tools.js`, `logger.js`
+- The `RuvSwarm` class (from index-enhanced.js) wraps WASM loading and swarm creation
+- `DAA_MCPTools` adds 7+ Dynamic Agent Architecture tools (delegated, not yet read)
+
+## R19: ruv-swarm Neural/Coordination Deep-Reads (Session 21)
+
+### neural-coordination-protocol.js (1,363 LOC) — 10-15% REAL
+
+8 coordination strategies + 4 consensus protocols as config objects.
+
+**Real parts:**
+- Graph topology construction (star/mesh/ring/neighborhood)
+- Strategy selection with weighted scoring
+- Config-driven coordination pattern definitions
+
+**Fabricated:**
+- ALL 8 coordination strategy executions return `{ success: true }` stubs
+- ALL 4 consensus protocols return hardcoded `"consensus_reached"`
+- Market auction bids are `Math.random() * 100`
+
+### neural-network-manager.js (1,938 LOC) — 15-20% REAL
+
+**CRITICAL**: WASM fallback creates `SimulatedNeuralNetwork` (lines 1726-1807).
+If wasmLoader fails (which it usually does), the entire network uses:
+- `accuracy = 0.5 + Math.random() * 0.3`
+- `loss = max(0.01, loss * (0.9 + Math.random() * 0.1))`
+- `output[i] = Math.random()`
 
-### WorkerDaemon (756 lines) — REAL BACKGROUND PROCESS
+Real parts: WASM loading attempt, error handling structure, class hierarchy.
 
-**Location**: `dist/src/services/worker-daemon.js`
+### hooks/index.js (1,900 LOC) — 25-30% REAL
 
-A **genuine Node.js daemon** with 12 scheduled workers:
+**Real:**
+- Git commit with heredoc/execSync
+- Command safety validation with regex patterns
+- Task complexity analysis with keyword scoring
+
+**Fabricated:**
+- `trainPatternsFromEdit` uses `Math.random() * 0.05` for improvement
+- Confidence scores are `0.85 + Math.random() * 0.1`
+
+### gpu_learning_engine.rs (1,628 LOC) — 5-10% REAL
+
+**CRITICAL**: ZERO GPU/CUDA operations despite filename. No wgpu usage. 27+ models
+promised, 0 implemented. 280+ lines of `#[derive(Default)]` struct shells.
+Real parts: UUID generation, `Arc<RwLock<>>` async patterns.
 
-| Worker | Interval | Priority | Purpose |
-|--------|----------|----------|---------|
-| `map` | 15 min | normal | Codebase mapping |
-| `audit` | 10 min | critical | Security analysis |
-| `optimize` | 15 min | high | Performance optimization |
-| `consolidate` | 30 min | low | Memory consolidation |
-| `testgaps` | 20 min | normal | Test coverage analysis |
-| `predict` | manual | high | Pattern prediction |
-| `document` | manual | normal | Documentation generation |
-| `ultralearn` | manual | critical | Deep learning analysis |
-| `refactor` | manual | normal | Code refactoring |
-| `deepdive` | manual | high | Deep code analysis |
-| `benchmark` | manual | normal | Performance benchmarking |
-| `preload` | manual | low | Predictive preloading |
+### swarm_coordinator_training.rs (1,838 LOC) — 25-35% REAL
 
-Real features:
-- **Resource gating**: Checks CPU load and free memory before executing workers
-- **Concurrency limits**: Default 2 concurrent workers, queues excess
-- **Staggered scheduling**: Prevents I/O spikes
-- **Persistent state**: Saves to `.claude-flow/daemon-state.json`, restores on restart
-- **Headless execution**: Integrates with Claude Code CLI for AI-powered workers
-- **Metrics output**: Writes real JSON to `.claude-flow/metrics/` (codebase-map, security-audit, performance, consolidation)
-
-### Daemon CLI (593 lines) — PRODUCTION-READY
-
-```bash
-claude-flow daemon start              # Detached background (PID file, log file)
-claude-flow daemon start --foreground  # Blocks terminal
-claude-flow daemon status              # PID, uptime, worker stats, success rates
-claude-flow daemon stop                # SIGTERM → wait 1s → SIGKILL
-claude-flow daemon trigger -w audit    # Manual worker execution
-claude-flow daemon enable -w predict   # Enable disabled worker
-```
-
-Security hardened:
-- Path validation (prevents null bytes, shell metacharacters)
-- No shell string interpolation (uses spawn argument array)
-- PID file management with stale detection
-
-### Worker Dispatch Intelligence
-
-**Location**: `hooks-tools.js` lines 2441-2636
-
-12 worker types with **pattern-based auto-detection** from user prompts:
-- Scans for keywords: "optimize", "test", "security", "document", etc.
-- Returns confidence scores per detected worker
-- Can auto-dispatch via `--auto-dispatch` flag
-- Integrates with swarm-gate: complexity >0.3 triggers worker dispatch recommendations
-
-### Workflow Engine (Framework)
-
-**Location**: `dist/src/mcp-tools/workflow-tools.js`
-
-Step types: `task`, `condition`, `parallel`, `loop`, `wait`
-State machine: `ready → running → completed/failed`
-Features: pause/resume, template system, variable injection
+**Real algorithms:**
+- GNN `encode_task_graph` with L2 normalization
+- Self-attention (query·key/√d_model with softmax)
+- Q-learning (epsilon-greedy + Q-value update)
+- VAE (reparameterization trick z=μ+exp(lv/2)*ε, KL divergence)
+- MAML-style adaptation (5 inner steps with gradient normalization)
 
-**Current status**: Framework real, but step execution is placeholder — designed for extension.
+**CRITICAL**: ALL 5 training metrics hardcoded (GNN=0.95, Transformer=0.91, RL=0.88,
+VAE=0.93, Meta=0.87). Fake `rand` module uses `SystemTime::now().subsec_nanos() % 1000`.
 
-### Other Tools: State Tracking Only
+### Cross-Crate Fake RNG Pattern
+
+Both `ml-training/lib.rs` and `swarm_coordinator_training.rs` mock the `rand` crate
+using `SystemTime::now().subsec_nanos()`, making "random" values deterministic within
+the same second. This is a systematic antipattern across Rust crates.
+
+## CRITICAL Findings (12, +2 from R19)
+
+1. **Fabricated swarm metrics** — status returns zeros, health always "ok", coordination uses Math.random().
+2. **QUIC is empty** — WASM returns `{}`, Federation returns empty arrays, SyncCoordinator backend returns hardcoded empty data.
+3. **Circular dependency** — agentic-flow shells out to `npx claude-flow@alpha`, creating circular import.
+4. **P2P task executor is stub** — Returns hardcoded success, never invokes Wasmtime.
+5. **WASM module broken** — p2p-swarm-wasm.js imports non-existent ruvector-edge.js, no fallback.
+6. **Federation JWT bypassed** — Accepts ALL connections without authentication.
+7. **FederationHub entirely simulated** — All sync methods return empty arrays.
+8. **Agent count fabricated** — Estimated as (process_count / 2) heuristic in swarm-monitor.sh.
+9. **transport-router QUIC fabricated** — sendViaQuic() sends nothing; HTTP/2 fallback is real (R10).
+10. **swarm-learning-optimizer rewards invented** — Base reward 0.5, speedup predictions (2.5x-4.0x) have no empirical basis (R10).
+11. **GPU learning engine is empty shell** — gpu_learning_engine.rs has ZERO GPU ops, 280+ struct defaults (R19).
+12. **Rust training metrics all hardcoded** — 5 training functions in swarm_coordinator_training.rs report fixed values regardless of input (R19).
+
+## HIGH Findings (11, +2 from R19)
+
+1. **P2P crypto is production-grade** — Ed25519, X25519, AES-256-GCM, replay protection all real.
+2. **IPFS CID is fake** — Generates invalid "Qm" prefix, won't interoperate with real IPFS.
+3. **WebRTC signaling not implemented** — Handlers are no-ops.
+4. **FederationHubServer AgentDB null crash** — storePattern() called on null.
+5. **MultiDatabaseCoordinator is fabricated facade** — delay(10) instead of sync, random conflicts.
+6. **File-based IPC has race conditions** — swarm-comms.sh jq operations not atomic.
+7. **Agent templates algorithmically accurate** — CRDT, BFT, threshold crypto are textbook-correct but lack actual implementations.
+8. **swarm.js CLI backend missing** — Imports p2p-swarm-v2.js which may not exist at expected path. All 11 commands will crash (R10).
+9. **~30% of SKILL.md MCP function references don't exist** — Aspirational APIs in swarm-advanced skill (R10).
+10. **All 8 coordination strategies are stubs** — neural-coordination-protocol.js returns `success: true` for all executions (R19).
+11. **SimulatedNeuralNetwork fallback** — neural-network-manager.js uses Math.random() for all neural ops when WASM unavailable (R19).
+
+## R21: ruv-swarm-ml + Persistence Crate Reads (Session 23)
+
+### sqlite.rs (1,016 LOC) — 92% REAL
+Production-quality persistence: r2d2 connection pooling (4× CPU count), exponential
+backoff with 50% jitter, WAL mode, PRAGMA mmap_size=256MB, ACID deferred transactions
+with RAII rollback-on-drop. **MOCK**: `get_current_timestamp()` returns `PI * 1000.0`.
+
+### ensemble/mod.rs (1,006 LOC) — 78% REAL
+- Real: SimpleAverage, Median, TrimmedMean, WeightedAverage, diversity metrics
+- FAKE: BayesianModelAveraging = inverse-MSE (not true BMA)
+- BROKEN: Stacking — meta-learner never trained, Ridge/Lasso/ElasticNet have no regularization
+
+### agent_forecasting/mod.rs (813 LOC) — 65% REAL
+- Real: EMA (alpha=0.1), memory constraints, model switching (requires 5+ measurements)
+- Hardcoded: researcher→NHITS, coder→LSTM etc. Same PI*1000 mock timestamp. 8 tests.
+
+### swe_bench_evaluator.rs (991 LOC) — 35-40% REAL (FACADE)
+ALL metrics hardcoded: token_efficiency=0.15, success_rate=0.25, p_value=0.05,
+baseline 45% vs ML 78%. Real orchestration, zero actual evaluation.
+
+### comprehensive_validation_report.rs (1,198 LOC) — 45% REAL
+SELF-REFERENTIAL mock: sets simulation_ratio=0.60, creates CRITICAL flag (>0.5),
+returns CriticalFlaws verdict about itself.
+
+### unit_tests.rs (1,078 LOC) — 90-95% REAL
+48+ genuine tests across GOAP planning, A* search, rule engine. Tests real algorithms.
+
+## R22: p2p-swarm-v2.ts Deep-Read (agentic-flow TypeScript source, Session 26)
+
+### p2p-swarm-v2.ts (2,280 LOC) — 75-80% REAL
+
+This is the **TypeScript source** of the P2P swarm coordination system (previously only the compiled JS was analyzed in R9). The TS source confirms and extends the R9 findings.
+
+**Production-grade (REAL):**
+- Ed25519 signing, X25519 ECDH + HKDF session key derivation, AES-256-GCM encryption (lines 74-367)
+- Per-sender nonce tracking with cleanup, monotonic counter validation
+- Canonical JSON serialization (`stableStringify`) for deterministic signatures preventing malleability attacks (lines 22-59)
+- Complete TaskReceipt signature verification against registry-bound executor keys (lines 1721-1785)
+- Heartbeat/membership system: 20s heartbeat interval, 60s timeout, negative caching (lines 1574-1707)
+- Task claim conflict resolution: signed claims with 45s TTL, stale claim overwrite (lines 1874-1958)
+- Two-layer encryption: swarm envelope key (broadcast) + per-peer session keys (direct channels)
+
+**Stubbed/broken (confirms R9):**
+- WebRTC: `handleOffer`/`handleAnswer`/`handleICE` only log messages (lines 1159-1176) — zero P2P direct channels
+- IPFS CIDs: `generateCID` creates fake `Qm${hash.slice(0,44)}` — NOT real IPFS (lines 363-366)
+- Task execution: No Wasmtime integration, hardcoded `{status: 'success', fuelUsed: 1000}` (lines 1972-2026)
+- Gun relay health: passive failure tracking only, no proactive ping/pong (lines 486-605)
+
+**Architecture insight**: Registry-based identity model (NEVER trust keys from envelopes, always resolve from verified member registry) is a sound security design.
+
+## R22: ruv-swarm-wasm-unified Crate Deep-Read (13 Rust files, 1,435 LOC, Session 26)
+
+### Overview
+
+Unified WASM entry point wrapping all ruv-FANN ecosystem capabilities (core, ml, wasm, persistence) behind wasm-bindgen interfaces. **Overall 45% real** — bridge/utility code genuine, advertised capabilities mostly stubs.
+
+### Module Breakdown
+
+| Module | LOC | Reality % | Verdict |
+|--------|-----|-----------|---------|
+| `utils/simd.rs` | 369 | **75%** | **REAL WASM SIMD128** for vector add/mul/dot/relu (v128_load, f32x4_add). Sigmoid and matmul NOT SIMD despite names. |
+| `utils/bridge.rs` | 224 | **80%** | Genuine JS↔Rust type conversion, SharedArrayBuffer, BatchProcessor |
+| `utils/memory.rs` | 183 | **35%** | Pool creation real (Vec::with_capacity) but allocate/deallocate/compact all no-ops |
+| `core/agent.rs` | 147 | **55%** | Wraps DynamicAgent but cognitive patterns FAKE (set is no-op, get returns "convergent") |
+| `utils/mod.rs` | 121 | **75%** | Genuine SIMD/Worker detection, real memory usage query |
+| `lib.rs` | 85 | **70%** | Standard WASM config |
+| `core/mod.rs` | 56 | 60% | SwarmPerformance metrics |
+| `core/swarm.rs` | 55 | **20%** | set_topology no-op, get_agent_count hardcoded to 0 |
+| `core/task.rs` | 55 | 70% | set_priority works, description hardcoded |
+| `core/topology.rs` | 54 | 30% | Static metadata only |
+| `persistence/mod.rs` | 34 | 40% | In-memory HashMap, no actual persistence |
+| `neural/mod.rs` | 27 | **5%** | EMPTY STUB — JS glue advertises 18 FANN activations but struct is empty |
+| `forecasting/mod.rs` | 25 | **5%** | EMPTY STUB — lists 10 model names, implements zero |
+
+### Key Findings
+
+1. **Neural module is a facade** — JS glue shows `WasmNeuralNetwork` with 18 activation functions, Rust source is empty struct returning static JSON
+2. **Forecasting module is a facade** — lists "arima, prophet, lstm, transformer" with zero implementation
+3. **First confirmed real WASM SIMD128** in ruv-swarm ecosystem — `v128_load`, `f32x4_add`, `f32x4_mul`, `f32x4_max` intrinsics
+4. **rayon declared but useless** in wasm32-unknown-unknown (no threads support)
+5. **Cognitive patterns are lies** — `set_cognitive_pattern()` discards input, `get_cognitive_pattern()` always returns "convergent"
+6. **Memory allocator is cosmetic** — creates 25MB of pools but `allocate_from_pool()` always returns offset 0
+
+## R22: attention-fallbacks.ts Deep-Read (agentic-flow, 1,953 LOC, Session 26)
+
+### Summary — 85-90% REAL
+
+High-quality JavaScript fallback implementation of attention mechanisms with extensive optimizations.
+
+**REAL (high quality):**
+- Flash Attention with correct online softmax (Tri Dao algorithm) — O(1) memory overhead (lines 1208-1283)
+- Complete backward pass for training: dQ, dK, dV gradients (lines 1332-1544)
+- Numerically stable softmax with max-subtract-exp, -Infinity fallback (lines 240-323)
+- Causal masking support (lines 1099-1109)
+- Input validation: MAX_HIDDEN_DIM=16384, MAX_SEQ_LENGTH=32768, 64MB memory cap (lines 42-64)
+- BufferPool for GC pressure reduction with Float32Array reuse (lines 80-123)
+
+**Misleading/wrong:**
+- "SIMD" is 8x loop unrolling, NOT real SIMD intrinsics (lines 136-202) — confirms R17 JS "SIMD" finding
+- Hyperbolic distance uses Euclidean approximation, NOT real Poincaré ball (lines 1664-1691) — confirms Phase D finding
+- MoE gating is simple linear + softmax, no learned routing/load balancing (lines 1724-1731)
+
+**Cross-ecosystem insight**: The JS "SIMD" (loop unrolling, 2-8x speedup) vs Rust SIMD (AVX-512/AVX2/NEON intrinsics, 10-20x speedup) gap is confirmed from both sides now.
+
+## CRITICAL Findings (14, +2 from R22)
+
+1. **Fabricated swarm metrics** — status returns zeros, health always "ok", coordination uses Math.random().
+2. **QUIC is empty** — WASM returns `{}`, Federation returns empty arrays, SyncCoordinator backend returns hardcoded empty data.
+3. **Circular dependency** — agentic-flow shells out to `npx claude-flow@alpha`, creating circular import.
+4. **P2P task executor is stub** — Returns hardcoded success, never invokes Wasmtime.
+5. **WASM module broken** — p2p-swarm-wasm.js imports non-existent ruvector-edge.js, no fallback.
+6. **Federation JWT bypassed** — Accepts ALL connections without authentication.
+7. **FederationHub entirely simulated** — All sync methods return empty arrays.
+8. **Agent count fabricated** — Estimated as (process_count / 2) heuristic in swarm-monitor.sh.
+9. **transport-router QUIC fabricated** — sendViaQuic() sends nothing; HTTP/2 fallback is real (R10).
+10. **swarm-learning-optimizer rewards invented** — Base reward 0.5, speedup predictions (2.5x-4.0x) have no empirical basis (R10).
+11. **GPU learning engine is empty shell** — gpu_learning_engine.rs has ZERO GPU ops, 280+ struct defaults (R19).
+12. **Rust training metrics all hardcoded** — 5 training functions in swarm_coordinator_training.rs report fixed values regardless of input (R19).
+13. **WASM-unified neural/forecasting modules are facades** — JS glue advertises 18 FANN activations and 10 forecasting models, Rust source is empty structs (R22).
+14. **WASM-unified cognitive patterns are lies** — set discards, get always returns "convergent" (R22).
+
+## HIGH Findings (13, +2 from R22)
+
+1. **P2P crypto is production-grade** — Ed25519, X25519, AES-256-GCM, replay protection all real.
+2. **IPFS CID is fake** — Generates invalid "Qm" prefix, won't interoperate with real IPFS.
+3. **WebRTC signaling not implemented** — Handlers are no-ops.
+4. **FederationHubServer AgentDB null crash** — storePattern() called on null.
+5. **MultiDatabaseCoordinator is fabricated facade** — delay(10) instead of sync, random conflicts.
+6. **File-based IPC has race conditions** — swarm-comms.sh jq operations not atomic.
+7. **Agent templates algorithmically accurate** — CRDT, BFT, threshold crypto are textbook-correct but lack actual implementations.
+8. **swarm.js CLI backend missing** — Imports p2p-swarm-v2.js which may not exist at expected path. All 11 commands will crash (R10).
+9. **~30% of SKILL.md MCP function references don't exist** — Aspirational APIs in swarm-advanced skill (R10).
+10. **All 8 coordination strategies are stubs** — neural-coordination-protocol.js returns `success: true` for all executions (R19).
+11. **SimulatedNeuralNetwork fallback** — neural-network-manager.js uses Math.random() for all neural ops when WASM unavailable (R19).
+12. **Hyperbolic attention JS is geometrically wrong** — Euclidean approximation, not real Poincaré ball distance (R22, confirms Phase D).
+13. **WASM-unified memory allocator is cosmetic** — Creates 25MB pools but never tracks allocations, always returns offset 0 (R22).
+
+## Positive (updated R22)
+
+- **P2P crypto layer** is genuinely production-grade (Ed25519, AES-256-GCM)
+- **P2P receipt verification** is complete with registry-bound executor keys (R22)
+- **P2P canonical serialization** prevents signature malleability (R22)
+- **WASM SIMD128 is real** for vector ops in wasm-unified (first confirmed in ruv-swarm) (R22)
+- **attention-fallbacks.ts** has real Flash Attention with backward pass (training-ready) (R22)
+- **Debug streams** (agent-debug-stream.js, debug-stream.js) are fully functional
+- **Agent templates** document sophisticated algorithms accurately (CRDT, BFT, ZKP)
+- **12 MCP tools + 9 hooks** correctly implemented as wrappers
+- **Supabase schema** is well-designed with pgvector and RLS
+- **File-based IPC** (swarm-comms.sh) actually works for single-machine coordination
+- **supabase-adapter-debug.js** is 95% real production-grade code (R10)
+- **e2b-swarm.js** provides real E2B sandbox orchestration (R10)
+- **mesh-coordinator** and **performance-benchmarker** templates have real implementable algorithms (R10)
+- **v3-swarm-coordination SKILL** is the most concrete, actionable blueprint (R10)
+
+## R22b: TypeScript Source Confirmation (Session 27)
+
+### QUICClient.ts (668 LOC) — 25% REAL (CONFIRMED STUB)
+
+The TypeScript source confirms the compiled JS finding: QUICClient is entirely stub.
+- `sendRequest()` at line 317-333 returns hardcoded `{success: true, data: [], count: 0}` after 100ms setTimeout
+- Comments explicitly say "reference implementation"
+- Connection pool is a plain Map of objects with no QUIC protocol
+- The ONLY real distributed-systems code is in **quic.ts types** (773 LOC, 95% real) with textbook CRDTs
+
+### SyncCoordinator.ts (717 LOC) — 55% REAL (PARTIALLY REAL)
+
+The TS source reveals the SyncCoordinator has more genuine logic than the compiled JS suggested:
+- **REAL**: Change detection via timestamp queries, sync state persistence (SQL upsert), bidirectional sync flow, auto-sync timer
+- **STUB**: All operations route through QUICClient which returns empty data
+- **NET**: Infrastructure is designed but non-functional due to QUICClient dependency
+
+### dispatch-service.ts (1,212 LOC) — 80% REAL
+
+12 worker types with real file analysis:
+- Glob-based file discovery, readFile content analysis, regex extraction
+- Secret detection, dependency scanning, complexity analysis
+- AbortController-based cancellation
+- Vectorization phase is minimal stub
+
+### Intelligence Bridge Findings
+
+intelligence-bridge.ts (1,371 LOC, 70% real) confirms that the "9 RL algorithms" referenced in hook outputs are CONFIG-ONLY — all computation delegates to ruvector. Math.random()*0.1 fabricated activations pollute trajectory data fed into the learning system.
+
+### Updated CRITICAL Count: 16 (+2 from R22b)
+
+15. **QUICClient TypeScript source is stub** — Not just compiled JS; the source code has hardcoded responses (R22b).
+16. **Intelligence bridge fabricates activations** — Math.random()*0.1 contaminates trajectory data (R22b).
+
+### Updated HIGH Count: 15 (+2 from R22b)
+
+14. **SyncCoordinator has real but unused orchestration** — Change detection, sync state persistence routes through dead QUICClient (R22b).
+15. **dispatch-service vectorization stub** — 12 real worker types but vectorization phase is placeholder (R22b).
+
+### Updated Positive (+2 from R22b)
+
+- **quic.ts types** contain textbook-correct CRDTs (GCounter, LWWRegister, ORSet) — the only genuine distributed systems code in the QUIC surface
+- **dispatch-service** has real file analysis, secret detection, and dependency scanning
+
+## R28: ruv-swarm Crate Deep-Reads (Session 28)
+
+### handlers.rs (ruv-swarm-mcp, 951 LOC) — 65% Design, 0% Compilable
+
+Well-architected MCP handler layer with **classic interface drift** — handlers and orchestrator were written independently:
+
+| Handler | Status | Issue |
+|---------|--------|-------|
+| `handle_initialize` | Works | Returns server info |
+| `handle_tools_list` | Works | Delegates to ToolRegistry |
+| `handle_tool_call` | Works | Router with error categorization |
+| `handle_spawn` | Partial | Wrong argument types to orchestrator |
+| `handle_memory_store/get` | Works | But uses in-memory DashMap, not persistent SQLite |
+| `handle_orchestrate` | Dead code | Calls non-existent `orchestrate_task()` |
+| `handle_monitor` | Dead code | `subscribe_events()` doesn't exist |
+| `handle_optimize` | Dead code | `analyze_performance()` doesn't exist |
+| `handle_task_create` | Won't compile | 4 wrong args to `create_task()` |
+| `handle_subscribe/unsubscribe` | Stub | Returns canned `{subscribed: true}` |
+| `handle_swarm_status/metrics` | Dead code | `get_status()`, `get_metrics()` don't exist |
+
+**~12 orchestrator method calls have wrong names or signatures.** Good design patterns (input validation, error categorization, resource limiting, async) but built against an API that doesn't match the actual orchestrator. Confirms the ruv-swarm-core "written separately, never integrated" pattern from R13.
+
+### gpu.rs (ruv-swarm-daa, 901 LOC) — 15% REAL (DEAD CODE)
 
-- **DAA Tools** (`daa-tools.js`): Header says "LOCAL STATE MANAGEMENT". Tracks agent coordination metadata in `.claude-flow/daa/store.json`
-- **Terminal Tools** (`terminal-tools.js`): Header says "does NOT actually execute commands". Records command history for coordination tracking.
+**Entirely dead code** — not declared as a module in `lib.rs` (no `pub mod gpu;`):
 
----
+- Syntax error on line 588: `GPUOperationType::Gradient Computation` (space in enum variant) — **proves code was never compiled**
+- References `wgpu` via `#[cfg(feature = "webgpu")]` 12 times, but `webgpu` feature doesn't exist in Cargo.toml and `wgpu` is not a dependency
+- All "GPU compute" methods return hardcoded values: `success_rate=0.95`, `learning_efficiency=0.85`, `coordination_score=0.9`
+- Well-designed struct hierarchy (18 structs, 4 enums, Arc/RwLock concurrency) shows architectural intent but zero actual computation
+- Cross-file: imports from `gpu_learning_engine.rs` which has same dead code pattern (R22-a: "ZERO GPU ops, 280+ struct defaults")
 
-## Addendum 2: V3 Source Packages — Infrastructure Shipped But Unwired
+### Updated CRITICAL Count: 18 (+2 from R28)
+
+17. **gpu.rs is dead code** — Not in module tree, syntax error proves never compiled, phantom webgpu feature (R28).
+18. **MCP handlers won't compile** — ~12 API mismatches between handlers.rs and orchestrator.rs (R28).
 
-### Event Sourcing: EXISTS BUT UNUSED
+### Updated HIGH Count: 17 (+2 from R28)
 
-`@claude-flow/shared` ships a **full EventStore implementation** (415 lines):
-- Append-only event log with SQLite (sql.js)
-- Event versioning per aggregate
-- Snapshot support
-- Event replay for projections
-- Causation/correlation IDs
+16. **handlers.rs event/optimization/status methods are dead code** — Call non-existent orchestrator methods (R28).
+17. **handlers.rs memory uses DashMap not SQLite** — In-memory only, data lost on restart (R28).
 
-**But the CLI claims system uses simple JSON** (`readFileSync`/`writeFileSync` to `claims.json`). The event sourcing infrastructure exists in the shared package but is never imported by the CLI.
+## R29: ruv-swarm-daa Core + WASM + npm JS Deep-Reads (Session 29)
 
-### swarm-comms.sh: More Sophisticated Than Initially Found
+15 files read, 12,590 LOC, 42 findings (9 CRITICAL, 11 HIGH, 15 MEDIUM, 7 INFO), 14 dependencies.
 
-**Location**: `/home/snoozyy/.claude/helpers/swarm-comms.sh` (354 lines)
+### ruv-swarm-daa Rust Crate (5 files, 3,917 LOC) — 25-35% REAL
 
-Beyond the basic `swarm-hooks.sh` messaging, this implements:
+The DAA (Dynamically Adaptive Agent) crate has excellent architecture but almost no real computation:
 
-1. **Priority-based message queue** (4 levels: 0=critical → 3=low)
-2. **Message batching** with configurable batch size (default 10, auto-flush)
-3. **Connection pooling** with acquire/release/cleanup lifecycle
-4. **Async pattern broadcasting** (fire-and-forget via background `&`)
-5. **Async consensus** with configurable timeout and background auto-resolve
-6. **Mailbox-based routing** (per-agent directories under `.claude-flow/swarm/mailbox/`)
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `daa_gpu_agent_framework.rs` | 856 | **5-8%** | ZERO GPU ops. All 11 imported types from ruv_fann::webgpu don't exist. Performance predictions hardcoded. |
+| `learning.rs` | 806 | **60-70%** | Best file in crate. Proficiency EMA formula real. BUT: all 5 adaptation strategies return hardcoded improvements (0.1-0.2). Memory leak in GlobalKnowledgeBase (unbounded Vec). |
+| `coordination_protocols.rs` | 762 | **30%** | seek_consensus() sets consensus_reached=true unconditionally ("Simplified for demo"). resolve_conflicts() returns empty Vec. negotiate_with_peers() returns hardcoded resources=512. |
+| `agent.rs` | 758 | **50-60%** | Agent lifecycle and builder pattern real. BUT: all 6 cognitive pattern process_* methods return Ok(true) immediately. 4-tier memory system has no eviction. |
+| `adaptation.rs` | 735 | **20-30%** | Traits only, zero implementations. NaN bug: ActionProbabilities::normalize() divides by potentially-zero total_mass. Async/sync cfg collision. |
 
-**Key difference from swarm-hooks.sh**: swarm-comms.sh is designed for **non-blocking async operations** where every operation returns immediately and processing happens in background subshells.
+**Key insight**: Same "Ferrari body, no engine" pattern as gpu.rs (R28) and gpu_learning_engine.rs (R19). Architecture is sophisticated (async traits, Arc/RwLock concurrency, builder patterns) but execution layer is entirely stubbed.
 
-### Hive-Mind `--claude` Flag: Rich Queen Prompt
-
-The `hive-mind spawn --claude` command generates a **143-line queen coordination prompt** that:
-- Lists ALL available MCP tools organized by category (5 sections)
-- Provides a 4-phase execution protocol (Init → Execute → Monitor → Complete)
-- Includes coordination tips for broadcast, consensus, and memory sharing
-- Spawns actual `claude` CLI process with the prompt
-- Handles SIGINT for session pause/resume with saved prompts
-- Supports `--non-interactive` mode with JSON streaming
-
-This is the **most functionally complete coordination feature** — it's the only thing that creates a real process and gives it a comprehensive coordination blueprint.
-
----
-
-## Addendum 3: Learning Pipeline — Genuinely Feeds Back (With Limitations)
+### ruv-swarm WASM Crate + DAA WASM Bindings (5 files, 3,742 LOC) — 30% REAL
 
-### The 4-Layer Learning Loop
-
-```
-TASK EXECUTION
-    │
-    ▼
-POST-TASK HOOKS (fire after each Task agent completes)
-    ├── reflexion-post-task.sh → Store episode (task, output, reward) to agentdb.db
-    ├── skill-extract.sh → Auto-consolidate similar episodes into skills
-    └── hooks post-task --train-patterns → Display-only (NOT real training)
-    │
-    ▼
-STORAGE
-    ├── agentdb.db: episodes table, skills table (DDD services)
-    ├── model-router-state.json: routing history (last 100 outcomes)
-    └── memory.db: sessions table, routing context
-    │
-    ▼
-NEXT SESSION / NEXT TASK
-    │
-    ▼
-PRE-TASK HOOKS (fire before each new Task agent)
-    ├── session-routing-context.js → Load past 3 sessions' complexity, detect escalation (+0.1 boost)
-    ├── reflexion-pre-task.sh → Retrieve k=5 similar episodes via HNSW → inject into agent prompt
-    └── skill-suggest.sh → Retrieve k=3 skills via composite scoring → inject as suggestions
-    │
-    ▼
-AGENT RECEIVES AUGMENTED PROMPT (original + past episodes + suggested skills)
-```
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `neural_swarm_coordinator.rs` | 791 | **15-20%** | All 4 training modes return hardcoded loss curves [0.5,0.3,0.2,0.15,0.1]. Zero neural computation. |
+| `swarm_orchestration_wasm.rs` | 757 | **20-25%** | execute_distributed_task() has unused params, always returns {status:"initiated"}. Comment: "In a real implementation". |
+| `lib.rs` (WASM) | 722 | **40-50%** | WasmNeuralNetwork forward pass is REAL (17 activations, layer-by-layer matmul). WasmForecastingModel is naive heuristic. |
+| `learning_integration.rs` | 736 | **30-40%** | "GPU" methods (adapt_pattern_gpu etc.) have ZERO GPU operations. All 4 optimization algorithms .optimize() returns pattern.clone(). |
+| `wasm.rs` (DAA) | 736 | **45-55%** | Agent management genuine (getters/setters, capabilities). Resource optimize() is cosmetic (returns string, no state change). |
 
-### What's Genuinely Valuable
+**Key insight**: Infrastructure ≠ Execution. WASM bindings compile correctly, state management works, but learning/training/orchestration all return stubs. The ONLY real computation is WasmNeuralNetwork forward pass in lib.rs.
 
-1. **Episodic memory injection** (`reflexion-pre-task.sh`): Retrieves 5 most similar past episodes via HNSW vector search (384-dim MiniLM-L6-v2 embeddings) and injects them as `additionalContext` in the agent prompt. Agents receive concrete past outcomes including successes, failures, and critiques. **This is the strongest learning feedback.**
+### ruv-swarm npm JS Source (5 files, 4,931 LOC) — 88% REAL
 
-2. **Composite skill scoring**: `0.4*similarity + 0.3*successRate + 0.1*(usage/1000) + 0.2*avgReward` — well-designed formula that balances relevance, proven success, usage frequency, and reward.
+**Dramatically better quality than the Rust crate code:**
 
-3. **Circuit breaker**: After 5 consecutive failures on a model, it gets penalized in routing. Prevents stuck loops.
-
-4. **Cross-session escalation**: Tracks whether task complexity is increasing across sessions and boosts routing thresholds accordingly.
-
-### What's Weak or Broken
-
-1. **Binary reward scoring**: Fixed 0.8 (success) or 0.2 (failure). Cannot distinguish mediocre from exceptional.
-
-2. **`--train-patterns` is display-only**: Returns fabricated values (`patternsUpdated: 2`, `newPatterns: 1`) with no backend storage. This flag does nothing.
-
-3. **Skill extraction uses prefix matching**: Groups tasks by `substr(task, 1, 50)` — cannot recognize semantically similar tasks with different wording. Vector search exists for retrieval but not consolidation.
-
-4. **Static routing thresholds**: Model routing thresholds (0.3 haiku, 0.6 sonnet) are never adjusted by outcome feedback. No gradient descent, no Bayesian updates.
-
-5. **Learning history capped at 100 entries**: Older patterns are forgotten entirely (no EWC++ consolidation despite it being advertised).
-
----
-
-## Addendum 4: Real-World Swarm Usage — The Evidence Gap
-
-### What ADRs Claim
-
-| ADR | Claim | Agents |
-|-----|-------|--------|
-| ADR-020 | "8-agent swarm, hierarchical" | coordinator + 2 architects + 2 coders + 2 reviewers + tester |
-| ADR-028 | "5-agent swarm, hierarchical, opus" | schema + skill-library + reflexion + bootstrap + tester |
-| ADR-037 | "5-agent swarm, hierarchical, opus" | Fixes A-D agents + Fix E bridge agent |
-
-### What Evidence Exists
-
-**Swarm state file** (`~/.swarm/state.json`):
-```json
-{
-  "id": "swarm-1770735408334",
-  "topology": "hierarchical",
-  "maxAgents": 15,
-  "strategy": "specialized",
-  "initializedAt": "2026-02-10T14:56:48.334Z",
-  "status": "ready"
-}
-```
-Swarm was initialized once (Feb 10). Status is "ready" — never moved to "running" or "completed".
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `ruv-swarm-secure-heartbeat.js` | 1,549 | **92%** | Production-grade MCP stdio server. JSON-RPC 2.0, restart circuit breaker, regex input sanitization, CommandSanitizer. |
+| `daa-cognition.js` | 977 | **88%** | REAL consensus protocol with Byzantine-tolerant weighted voting. Real distributed learning with pattern extraction + peer aggregation. Emergent pattern detection (occurrence>0.7, diversity>0.5). |
+| `claude-flow-enhanced.js` | 840 | **85%** | Real dependency graph analysis with topological sort and circular dependency detection. Batching violation enforcement. SIMD speedup values hardcoded (3.2, 4.1). |
+| `neural-agent.js` | 830 | **84%** | REAL neural network: Xavier/Glorot init, forward/backward with momentum, 4 activations. Real feature engineering (12+ input dims). Cognitive pattern modifiers affect analysis. |
+| `mcp-daa-tools.js` | 735 | **90%** | 10 MCP tools wrapping real daaService. Proper error handling, metrics, snake_case/camelCase normalization. |
 
-**Message files** (`~/.claude-flow/swarm/messages/`): 100+ JSON files, but ALL are **completion notifications**:
-```json
-{
-  "from": "agent_1770407152_befa27e5",
-  "to": "*",
-  "type": "result",
-  "content": "Completed: \n",
-  "priority": "low"
-}
-```
-No inter-agent coordination messages. No queries, handoffs, or conflict resolution.
-
-**Handoff files** (`~/.claude-flow/swarm/handoffs/`): **ZERO files**. The handoff mechanism was never used.
-
-**Git history**: Individual commits per ADR, not the chaotic multi-agent pattern expected from true parallel execution. Single commits suggest either:
-- Agents coordinated before committing (single final commit)
-- Work was done sequentially and attributed to "N-agent swarm" as a decomposition strategy
-
-### What Actually Happened
-
-Based on ADR-028 Agent 5 completion report (the most detailed evidence):
-> "60s agent wait allowed other agents to complete"
-
-This reveals **sequential execution with waits**, not true parallel coordination. The pattern was likely:
-1. Decompose work into logical phases (Agent 1-N roles)
-2. Execute via Claude Code Task tool (possibly `run_in_background: true` for some)
-3. Agent 5 waited for prior agents to finish
-4. Results aggregated and documented as "N-agent swarm"
-
-### The Pattern That Actually Works
-
-Based on real-world evidence, successful multi-agent work in this project used:
-
-1. **Task decomposition by file ownership** — non-overlapping boundaries
-2. **Parallel Task tool calls** — `run_in_background: true` for real parallelism
-3. **Detailed prompts replacing coordination** — each agent told exactly what to do
-4. **Memory as shared context** — `claude-flow memory store/search` for data sharing
-5. **Parent agent as integrator** — reviews all results, resolves conflicts
-
-What was NOT used:
-- `swarm init` (state file exists but was ceremonial)
-- Inter-agent messages (only completion notifications)
-- Handoffs (zero files)
-- Consensus (no voting evidence)
-- Queen coordinator (no supervisor process)
-
----
-
-## Revised Summary Table
-
-After both analysis rounds, here's the complete picture:
-
-| Component | First Analysis | Gap-Finding Revision | Actual Status |
-|-----------|---------------|---------------------|---------------|
-| **Task tool parallelism** | THE real swarm | Confirmed | **WORKS — primary execution engine** |
-| **Agent templates** | Prompt engineering | Confirmed | **WORKS — defines agent personas** |
-| **Memory persistence** | SQLite + HNSW | Confirmed | **WORKS — real coordination mechanism** |
-| **WorkerQueue** | MISSED | 511 lines, production-ready | **WORKS — real job queue** |
-| **WorkerDaemon** | MISSED | 756 lines, real background process | **WORKS — genuine daemon with resource gating** |
-| **Worker Dispatch** | MISSED | Pattern detection + auto-dispatch | **WORKS — integrates with swarm-gate** |
-| **Learning pipeline** | Mentioned briefly | Full 4-layer loop traced | **PARTIALLY WORKS — episodic retrieval real, pattern training fake** |
-| **swarm-comms.sh** | MISSED | 354 lines async messaging | **EXISTS — priority queues, batching, connection pooling** |
-| **hive-mind --claude** | Mentioned | 143-line queen prompt + process spawn | **WORKS — the most complete coordination feature** |
-| **Event sourcing** | Not analyzed | Shipped in @claude-flow/shared | **EXISTS BUT UNUSED — claims still use JSON** |
-| **Workflow engine** | MISSED | Real framework, placeholder execution | **PARTIAL — structure exists, steps not implemented** |
-| **Model routing** | Mentioned | Learning loop traced | **WORKS — static thresholds, no adaptation** |
-| **Swarm init** | Metadata only | Confirmed by real usage evidence | **CEREMONIAL — no functional impact** |
-| **Topology** | Cosmetic label | Confirmed | **COSMETIC — zero behavioral difference** |
-| **Consensus** | Simple voting | Confirmed by absence of evidence | **UNUSED IN PRACTICE** |
-| **Inter-agent messaging** | File-based polling | 100+ messages are completion notifications only | **EXISTS BUT UNUSED FOR COORDINATION** |
-| **Handoffs** | Manual protocol | Zero files found | **UNUSED** |
-| **Queen coordinator** | No special powers | No supervisor process evidence | **PROMPT ENGINEERING ONLY** |
-| **Swarm metrics** | `Math.random()` | Confirmed | **FABRICATED** |
-
----
-
-## Final Revised Conclusion
-
-**The initial conclusion stands but needs refinement:**
-
-> "The swarm is the Task tool. Everything else is decoration."
-
-**Revised**: "The swarm is the Task tool. The decoration is more substantial than initially found — the WorkerQueue, WorkerDaemon, learning pipeline, and swarm-comms.sh provide real infrastructure. But the decoration has never been fully exercised in practice. What actually coordinates our multi-agent work is: (1) Task tool parallelism, (2) detailed prompts with file ownership boundaries, (3) memory-based data sharing, and (4) episodic retrieval from past sessions."
-
-The biggest gap is not missing features — it's the **gap between what's built and what's used**. The infrastructure for sophisticated swarm coordination exists (worker queues, async messaging, event sourcing, consensus voting). It's just not wired into the actual execution path that Claude Code follows when spawning Task agents.
-
----
----
-
-# ADDENDUM 2: Deep Dive Analysis (Round 3)
-
-**Method**: 5-agent deep-dive swarm focusing on implementation internals with exact code references
-**Agents**: hooks-tools.js internals, MCP runtime path, headless/container execution, settings.json hook wiring, plugin/guidance/skills/commands systems
-
-## CRITICAL CORRECTION: Real Process Execution Exists
-
-**Previous conclusion was PARTIALLY WRONG.** Rounds 1-2 stated "no real processes" — this is incorrect. Claude-flow has **THREE real process execution modes** that were completely missed because earlier analysis focused on `agent-tools.js` (MCP metadata) and never examined the `services/` directory.
-
-### Three Real Execution Modes
-
-#### 1. Headless Worker Executor (`headless-worker-executor.js:810`)
-```javascript
-const child = spawn('claude', ['--print', prompt], {
-    cwd: this.projectRoot,
-    env: { ...process.env, CLAUDE_CODE_HEADLESS: 'true', ANTHROPIC_MODEL: MODEL_IDS[options.model] },
-    stdio: ['pipe', 'pipe', 'pipe']
-});
-```
-- Spawns REAL `claude` CLI processes in headless mode
-- 8 AI worker types: `audit`, `optimize`, `testgaps`, `document`, `ultralearn`, `refactor`, `deepdive`, `predict`
-- Process pool with max 2 concurrent, timeout protection (5-15 min)
-- **Requires**: `@anthropic-ai/claude-code` CLI installed
-
-#### 2. Container Worker Pool (`container-worker-pool.js:407`)
-```javascript
-const child = spawn('docker', args, { stdio: ['pipe', 'pipe', 'pipe'] });
-```
-- Manages pool of Docker containers (1-3 default, max 15)
-- Image: `ghcr.io/ruvnet/claude-flow-headless:latest`
-- Resource limits: 2 CPUs, 4GB memory per container
-- Health checking, auto-recovery, idle termination
-- **Requires**: Docker daemon running
-
-#### 3. Hive-Mind Claude Code Launcher (`hive-mind.js:218`)
-```javascript
-const claudeProcess = childSpawn('claude', claudeArgs, { stdio: 'inherit', shell: false });
-```
-- Spawns `claude` CLI with full TTY (interactive, not headless)
-- Generates coordination prompt with Byzantine consensus instructions
-- `--dangerously-skip-permissions` for seamless execution
-- **This is the ONLY mode that delegates to Claude Code's Task tool for sub-agent spawning**
+**Key insight**: The JS orchestration layer is **legitimate production code** — this is the best quality swarm code in the entire ruv-swarm ecosystem. Real consensus, real neural networks, real MCP compliance. The ~12-16% facade is appropriate for an orchestration layer that coordinates rather than executes.
 
-#### 4. Worker Daemon Local Fallback (what previous analysis found)
-- JSON file generators with no AI — the only mode previous research examined
-- Falls back to this when Claude CLI and Docker are unavailable
+### R29 Cross-Language Quality Comparison
 
-### Execution Architecture Comparison
+| Aspect | Rust DAA | Rust WASM | JS npm |
+|--------|----------|-----------|--------|
+| Average real % | **25-35%** | **30%** | **88%** |
+| Architecture quality | Excellent | Good | Excellent |
+| Actual computation | Near-zero | 1 forward pass | Full NN + consensus |
+| GPU/WASM integration | Fake | Stub bindings | Delegates to real WASM |
+| Production readiness | 0% | 5% | 85%+ |
 
-| Feature | Headless Executor | Container Pool | Hive-Mind | Daemon Local |
-|---------|------------------|----------------|-----------|--------------|
-| Process Type | Claude CLI | Docker | Claude CLI (TTY) | In-process Node.js |
-| Isolation | Process | Container (Docker) | Process | None |
-| Concurrency | 2 (default) | 1-3 (scalable) | 1 (interactive) | 2 (queued) |
-| AI Execution | **REAL** (Claude API) | **REAL** (via container) | **REAL** (Task tool) | **FAKE** (JSON) |
-
-### Critical Code Paths
-
-```
-Path 1: daemon.js:184 → worker-daemon.js:78 → headless-worker-executor.js:810 → REAL CLAUDE PROCESS
-Path 2: container-worker-pool.js:299 → line 407 (docker exec) → REAL DOCKER CONTAINER
-Path 3: hive-mind.js:218 → CLAUDE CODE INTERACTIVE → Claude Task tool sub-agents
-Path 4: worker-daemon.js fallback → JSON generators (NO AI)
-```
-
----
-
-## Exact Complexity Scoring Algorithm (hooks-tools.js)
-
-### Base Complexity (Lines 2747-2758)
-
-```
-complexity = min(1, max(0, 0.3 + (highCount * 0.2) - (lowCount * 0.15) + (length/200 * 0.2)))
-```
-
-- **High indicators** (+0.2 each): `architect`, `design`, `refactor`, `security`, `audit`, `complex`, `analyze`
-- **Low indicators** (-0.15 each): `simple`, `typo`, `format`, `rename`, `comment`
-- **Length factor**: task.length / 200, capped at 0.2
-
-### Contextual Boosts (Lines 2810-2820)
-
-| Boost | Condition | Amount |
-|-------|-----------|--------|
-| File count | `parseInt(fileCount) > 3` | +0.10 |
-| Multi-step | `multiStep === 'true'` | +0.05 |
-| Swarm intent | `/swarm\|coordinate\|orchestrat\|parallel/i` | +0.15 |
-| Security intent | `/secur\|audit\|vuln\|cve/i` | +0.10 |
-| Architecture intent | `/architect\|design\|refactor\|migrat/i` | +0.05 |
-
-### Swarm Gate Thresholds (Lines 2821-2825)
-
-| Score | Enforcement | Action |
-|-------|------------|--------|
-| < 0.30 | `optional` | Single agent OK |
-| 0.30-0.49 | `recommended` | Swarm preferred |
-| >= 0.50 | `required` | Swarm mandatory |
-
-### Agent Role Detection (Lines 2827-2836)
-
-Regex-based detection assigns suggested roles:
-- `secur|audit|vuln|cve` → `security-architect`, `security-auditor`
-- `test|validat|verif` → `v3-tester`
-- `code|implement|build|fix|patch` → `v3-coder`
-- `review|analyz` → `v3-reviewer`
-- `architect|design|refactor|migrat` → `architecture`
-- `plan|decompos|break down` → `v3-planner`
-- `research|investigat|explor` → `v3-researcher`
-- Default fallback: `v3-coder`
-
----
-
-## Model Routing Scoring Curves (model-router.js, ADR-021)
-
-### Base Complexity Features (Lines 198-227)
-
-```
-score = min(1, max(0, lexicalComplexity * 0.2 + semanticDepth * 0.35 + taskScope * 0.25 + uncertaintyLevel * 0.2))
-```
+This reveals an **inverted quality gradient**: the JS code is the most production-ready, while the Rust code (which should be the performance layer) is almost entirely facades. The JS layer correctly delegates to WASM/native backends via MCP tools — the problem is that those backends don't actually compute.
 
-### ADR-021 Adjusted Model Curves (Lines 292-304)
+### Updated CRITICAL Count: 23 (+5 from R29)
 
-```javascript
-haiku:  score < 0.25 ? 1 - score * 1.5 : 1 - score * 2.5   // Drops to 0 at ~0.4
-sonnet: 1 - Math.abs(score - 0.45) * 2.2                     // Peaks at 0.45
-opus:   Math.min(1, score * 2.0)                              // Reaches 100% at 0.5
-```
+19. **DAA GPU framework has zero GPU operations** — All 11 types imported from ruv_fann::webgpu don't exist. No wgpu, no compute shaders. (R29)
+20. **DAA consensus always succeeds** — seek_consensus() sets consensus_reached=true unconditionally. No voting, no message passing. (R29)
+21. **DAA conflict resolution is empty** — resolve_coordination_conflicts() returns empty Vec. active_conflicts HashMap never populated. (R29)
+22. **Neural swarm training returns hardcoded loss curves** — All 4 modes (DataParallel, ModelParallel, Federated, SwarmOptimization) return identical [0.5,0.3,0.2,0.15,0.1]. (R29)
+23. **Learning integration "GPU" has zero GPU ops** — 4 optimization algorithms (GradientDescent, GeneticAlgorithm, SimulatedAnnealing, BayesianOptimization) all return pattern.clone(). (R29)
 
-**Key insight**: Opus reaches max score at just 0.5 complexity, meaning moderate-complexity tasks get routed to Opus. Haiku is only viable below 0.25.
-
-### Learning & Circuit Breaker
+### Updated HIGH Count: 22 (+5 from R29)
 
-- History bounded to last 100 outcomes, persisted to `.swarm/model-router-state.json`
-- Circuit breaker: 5 consecutive failures trips protection for that model
-- Escalation ladder: haiku → sonnet → opus (when uncertainty > threshold)
+18. **DAA adaptation improvements hardcoded** — 5 apply_*_adaptation functions return fixed values (0.1, 0.15, 0.2, 0.12, 0.18). No computation. (R29)
+19. **DAA all 6 cognitive process methods identical** — convergent/divergent/lateral/systems/critical/adaptive all return Ok(true). No cognitive differences. (R29)
+20. **WASM task orchestration never executes** — execute_distributed_task() has unused params, always returns success. (R29)
+21. **WASM cognitive patterns static and never learn** — select_cognitive_pattern() is hardcoded mapping. Shannon diversity calculated but unused. (R29)
+22. **SIMD speedup values fabricated in JS orchestrator** — claude-flow-enhanced.js hardcodes simdSpeedup=3.2 and 4.1, not measured. (R29)
 
----
+### Updated Positive (+4 from R29)
 
-## MCP Runtime: 175 Tools Across 24 Modules
+- **daa-cognition.js** has real Byzantine-tolerant consensus with weighted voting and quorum logic (R29)
+- **neural-agent.js** has genuine neural network with Xavier/Glorot init and backpropagation with momentum (R29)
+- **ruv-swarm-secure-heartbeat.js** is production-grade MCP server with comprehensive input validation (R29)
+- **WasmNeuralNetwork** (lib.rs) has genuine forward pass with 17 activation functions (R29)
 
-### Startup Sequence
+## R31: ruv-swarm MCP, Transport, WASM, Benchmarking, ML, CLI, SWE-bench (Session 31)
 
-1. `bin/mcp-server.js` — Pure JSON-RPC 2.0 stdio transport (5 methods: initialize, tools/list, tools/call, ping, notifications/initialized)
-2. `dist/src/mcp-client.js` — Imports 24 tool modules, builds global `TOOL_REGISTRY` Map synchronously
-3. `callMCPTool(name, input, context)` — Direct Map lookup → `tool.handler(input, context)`. No middleware, no retry, no auth.
+25 files read, 14,761 LOC, 95 findings (9 CRIT, 18 HIGH, 28 MED, 40 INFO). 5-agent swarm.
 
-### Tool Count by Category
+### Cluster 1: MCP Orchestrator (4 files, 2,049 LOC) — ~77% REAL
 
-| Category | Count | Category | Count |
-|----------|-------|----------|-------|
-| hooks | 37 | browser | 23 |
-| claims | 12 | transfer | 12 |
-| hive-mind | 9 | workflow | 9 |
-| daa | 8 | performance | 8 |
-| agent | 7 | memory | 7 |
-| embeddings | 7 | coordination | 7 |
-| config | 6 | security | 6 |
-| task | 6 | analyze | 6 |
-| neural | 6 | agentdb | 6 |
-| system | 5 | terminal | 5 |
-| session | 5 | github | 5 |
-| swarm | 4 | progress | 4 |
-| **TOTAL** | **175** | | |
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `orchestrator.rs` | 594 | **90-92%** | Real SQLite persistence via sqlx. Agent/task/workflow lifecycle, hybrid metrics (runtime + DB aggregated). Agent ID mismatch across layers. |
+| `lib.rs` | 494 | **30-35%** | **85% COMMENTED OUT**. Entire McpServer disabled for "simple service test". WebSocket JSON-RPC handler, session management, CORS all disabled. Only health endpoint active. |
+| `tools.rs` | 482 | **95-98%** | 11 tool schemas with typed parameters and validation rules. Production-ready tool registry. All handlers None (disconnected from disabled handlers module). |
+| `validation.rs` | 479 | **92-95%** | Production-grade: path traversal protection (URL-encoded attack detection), null byte injection prevention, memory TTL bounds. 8 comprehensive tests. Schema mismatch: 4 strategies vs tools.rs's 6. |
 
-### Memory Backend (memory-initializer.js, 1,929 lines)
+**Key insight**: The MCP crate is **well-architected but non-functional** — lib.rs disabled the server, tools have no handlers, and handlers.rs (R28) has API mismatches with orchestrator.rs. Three layers (tools → handlers → orchestrator) were developed independently.
 
-- **9-table SQLite schema**: memory_entries, patterns, pattern_history, trajectories, trajectory_steps, migration_state, sessions, vector_indexes, metadata
-- **Embeddings**: MiniLM-L6-v2 (384-dim ONNX) → agentic-flow fallback (768-dim) → hash fallback (128-dim)
-- **HNSW**: @ruvector/core Rust NAPI, lazy-initialized, 150x-12,500x faster search
-- **Flash Attention ops**: batchCosineSim (~50us/1000 vectors), softmaxAttention, topKIndices
-- **Int8 quantization**: 4x memory reduction, `scale = max(|min|, |max|) / 127`
+### Cluster 2: WASM Cognitive/Neural (4 files, 2,268 LOC) — ~75% REAL
 
----
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `simd_optimizer.rs` | 595 | **85-90%** | **BEST SIMD in ruv-swarm-wasm**. Real f32x4 WASM SIMD128 intrinsics for dot product, add, scale, ReLU. 5-point unsafe safety docs. BUT: tanh_simd() and gelu_simd() are SCALAR fallbacks (no SIMD despite names). Sigmoid uses fast approximation x/(1+\|x\|). |
+| `cognitive_diversity_wasm.rs` | 639 | **75-80%** | Real Shannon diversity index, 5 cognitive patterns with neural configs, multi-factor pattern recommendation scoring. Optimization plan functions are facades (hardcoded +0.3/+0.2/+0.15 improvements). |
+| `agent_neural.rs` | 552 | **80-85%** | **Genuine ruv_fann bridge**: builds customized Networks via NetworkBuilder, trains with IncrementalBackprop, 6 cognitive templates with realistic architectures. measure_performance() has 4/5 metrics as placeholders (0.0). |
+| `cognitive_neural_architectures.rs` | 482 | **60-65%** | Detailed encoder/processor/decoder specs for convergent/divergent patterns. BUT: IntegrationStrategy enum (4 variants) NEVER USED. Systems/critical/lateral are plain JSON templates. Only convergent template fully initialized. |
 
-## Complete Hook Pipeline Per Task Tool Call
+**Key insight**: The WASM cognitive crate has a **real execution layer** (agent_neural.rs genuinely trains ruv_fann networks) and **real SIMD** (simd_optimizer.rs), unlike the wasm-unified crate (45% overall, R22-a). The gap is in the cognitive architecture templates (detailed specs, unused implementations).
 
-### Phase 1: Pre-Task Hooks (6 hooks, 22s max timeout)
+**Cross-file dependency chain**: cognitive_diversity_wasm.rs (pattern specs) → agent_neural.rs (network creation/training) → ruv_fann (execution). simd_optimizer.rs is standalone.
 
-| Order | Script | Timeout | Purpose |
-|-------|--------|---------|---------|
-| 1 | `swarm-gate \| format-routing-directive.sh` | 5s | **Swarm enforcement directive** |
-| 2 | `guidance-hooks.sh route` | 3s | Agent role hints via keyword matching |
-| 3 | `swarm-hooks.sh pre-task` | 3s | Agent registration + stale reaping |
-| 4 | `claude-flow hooks pre-task` | 5s | Intelligence + coordination state |
-| 5 | `reflexion-pre-task.sh` | 3s | **Episodic memory retrieval (ADR-020)** |
-| 6 | `skill-suggest.sh` | 3s | **Skill library retrieval (ADR-020)** |
+### Cluster 3: Transport Layer (2 files, 1,160 LOC) — ~87% REAL
 
-Hooks 5-6 inject `hookSpecificOutput.additionalContext` into the Task prompt (past episodes + proven skills).
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `websocket.rs` | 678 | **88-92%** | Production-grade: client/server modes, exponential backoff auto-reconnect, gzip compression, real-time stats. tokio::select! message loop. 137-line code duplication between handle_connection and handle_raw_connection (separate TcpStream vs MaybeTlsStream types). |
+| `shared_memory.rs` | 482 | **85-88%** | Ring buffer with atomic head/tail and length-prefix protocol. WASM support via SharedArrayBuffer. unsafe impl Send/Sync with 180-line safety justification. **ISSUES**: misleadingly named "lock-free" (uses Mutex), 1ms polling interval (CPU-hungry), race condition between size checks. ZeroCopyMessage wrapper is well-designed. |
 
-### Phase 2: Task Execution
+**Key insight**: Transport layer is the **highest-quality infrastructure** in the ruv-swarm Rust codebase. WebSocket is production-ready, shared memory is functional with performance concerns.
 
-Task prompt now enriched with: swarm directive, 5 similar past episodes, 3 proven skills, routing hints.
+### Cluster 4: Benchmarking Suite (5 files, 3,054 LOC) — ~87% REAL
 
-### Phase 3: Post-Task Hooks (8 hooks, 22s max timeout)
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `storage.rs` | 795 | **95-98%** | **BEST SQL in batch**. 10 normalized tables with CHECK constraints, foreign keys, 9 performance indexes. Full async CRUD via sqlx. Real environment capture (Rust version, OS, arch). consensus_rounds always 0. |
+| `comparator.rs` | 584 | **88-92%** | Real Welch's t-test (Welch-Satterthwaite DOF), Cohen's d effect size, confidence intervals via statrs library. **CRITICAL**: n=1 comparisons have hardcoded p_value=0.01, CI=(0.1,0.3), effect_size=0.5 — fake statistics for single-run benchmarks. |
+| `stream_parser.rs` | 602 | **85-90%** | Parses Claude Code stream-json output (8 event types). Extensible EventProcessor trait with 3 plugin processors. **STUB**: thinking duration estimated at 50ms/token (hardcoded constant, not measured). Clock skew risk from Utc::now() arithmetic. |
+| `realtime.rs` | 521 | **85-90%** | Production Axum WebSocket monitoring server. DashMap-based concurrent run tracking, broadcast channel, bounded event buffers (max 1000, FIFO). **ISSUES**: include_str for missing static/monitor.html (compile failure), MetricsAggregator creates all-zero snapshots. |
+| `lib.rs` | 552 | **75-80%** | Benchmark orchestrator: baseline vs ML-optimized runs for each SWE-bench scenario. Real async process spawning with timeout. **CRITICAL**: build_command() generates ENGLISH PROMPTS ("solve SWE-bench instance X using ML-optimized swarm coordination") instead of CLI flags. Benchmark cannot execute. |
 
-| Order | Script | Timeout | Purpose |
-|-------|--------|---------|---------|
-| 1 | `claude-flow hooks post-task` | 5s | Pattern training + metrics |
-| 2 | `reflexion-post-task.sh` | 3s | **Episode storage (BACKGROUND, non-blocking)** |
-| 3 | `skill-extract.sh` | 3s | **Skill extraction (BACKGROUND, non-blocking)** |
-| 4 | `swarm-hooks.sh post-task` | 3s | Pattern broadcast |
-| 5 | `claude-flow hooks metrics` | 3s | Update metrics JSON |
-| 6 | `swarm-monitor.sh check` | 3s | Health check |
-| 7 | `checkpoint-manager.sh summary` | 3s | Checkpoint |
-| 8 | `pattern-consolidator.sh check` | 5s | Pattern consolidation |
+**Key insight**: Benchmarking is an **80% complete prototype**. Hard parts done well (SQL schema, statistics, WebSocket server), easy parts never finished (CLI command construction, HTML file, metrics aggregation). Same pattern as ruv-swarm-core (R13).
 
-Hooks 2-3 use `{ command } & disown` pattern — fire-and-forget, non-blocking (ADR-016).
+### Cluster 5: ML Models + Claude Parser (3 files, 2,042 LOC) — ~82% REAL
 
-### Session Lifecycle Hooks
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `time_series/mod.rs` | 612 | **90-92%** | **High quality**. 7 genuine transformations (normalize, standardize, log, difference, moving average, exponential smoothing, Box-Cox) with correct formulas and edge cases. Real autocorrelation, trend strength via R² regression. Seasonality strength hardcoded to 0.5. |
+| `claude-parser/lib.rs` | 788 | **85-88%** | Claude Code stream-json parser with 10 event types, async streaming support, training data export. Metric estimates hardcoded (100ms/tool invocation, 50ms/token thinking, 80% error recovery). 8 comprehensive tests. |
+| `models/mod.rs` | 642 | **70-75%** | Model factory cataloging 27 SOTA time series models (NBEATS, TFT, Informer, AutoFormer, TimesNet, etc.) with rich metadata. create_model() delegates to neural_models module (unknown implementation). Only 4/27 have specific requirements; rest use generic defaults. |
 
-- **SessionStart** (7 hooks): agent registration, V3 context injection, learning init, session restore, agent config build, **verify-patches.sh** (ADR-037)
-- **SessionEnd** (5 hooks): learning consolidation, session cleanup, memory export, metrics, checkpoint
-- **UserPromptSubmit** (3 hooks): swarm-gate, worker status, guidance prompt analysis
+**Key insight**: Time series preprocessing is genuine; model factory is well-structured metadata but actual implementations are behind an opaque delegation to neural_models (needs verification in future session).
 
----
+### Cluster 6: CLI Commands + SWE-bench Adapter (7 files, 4,188 LOC) — ~71% REAL
 
-## Agent Booster: External NPX Package, NOT WASM
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `prompts.rs` | 534 | **98%** | **BEST quality file in batch**. 4 difficulty-based Claude Code prompt templates (Simple/Standard/Detailed/Expert). Token estimation, section-aware truncation. Zero stubs. |
+| `wasm.rs` (persistence) | 694 | **95%** | Production IndexedDB via rexie crate. Full CRUD for agents, tasks, events, messages, metrics. Secondary indexes, auto-commit transactions. Only stub: get_storage_size() returns 0. |
+| `loader.rs` | 493 | **75%** | Difficulty scoring is REAL (weighted formula: files 25%, lines 25%, tests 20%, complexity 15%). Instance caching, filtering, patch analysis genuine. download_instance() returns MOCK data (repo: "mock/repo"). |
+| `lib.rs` (adapter) | 580 | **70%** | Framework architecture complete: loader→prompt→evaluate→benchmark. Parallel agent pooling. **CRITICAL**: evaluate_instance() returns hardcoded mock: output="Mock execution output", patch="diff fix". Results persistence not implemented. |
+| `init.rs` | 538 | **65%** | Interactive config generation (dialoguer, topology, persistence) is real. configure_mcp_servers() generates valid .mcp.json (90% real). **CRITICAL**: actual spawning is simulated: sleep(200-500ms) + console output. run_onboarding_flow() prints "full implementation pending". |
+| `status.rs` | 687 | **60%** | Display logic, formatting, health scoring, alerts all production-ready. **CRITICAL**: all data loaded from static JSON files (agents-{swarm_id}.json), NOT live swarm state. Status viewer, not live monitor. |
+| `orchestrate.rs` | 662 | **45%** | 4 orchestration strategies (Parallel, Sequential, Adaptive, Consensus) architecturally correct. **CRITICAL**: execute_subtask() sleeps 1-2s then returns success:true with "Simulated result". build_consensus() returns hardcoded agreement_level: 0.85. |
 
-**CLAUDE.md claims**: "Agent Booster (WASM)" with <1ms latency
+**Key insight**: CLI commands are a **demonstration framework** — config generation and display output are real, but all execution is sleep-based simulation. SWE-bench adapter has a complete integration architecture but evaluate_instance() short-circuits with mock patches. This matches the R19 finding that the JS CLI is "MCP-first thin layer."
 
-**Actual implementation** (enhanced-model-router.js:415-461):
-```javascript
-const cmd = `npx --yes agent-booster@0.2.2 apply --language ${language}`;
-const result = execSync(cmd, { input: JSON.stringify({ code, edit: instruction }), timeout: 5000 });
-```
+**Systemic finding**: The CLI layer follows an inversion pattern: prompt generation (98%) > persistence (95%) > data loading (75%) > framework integration (70%) > config generation (65%) > status display (60%) > orchestration execution (45%). The further from actual task execution, the more real the code becomes.
 
-- Calls **external npm package** `agent-booster@0.2.2` as subprocess
-- NOT WASM, NOT AST-based — it's a child process with 5s timeout
-- 6 supported intents: `var-to-const`, `remove-console`, `async-await`, `add-logging`, `add-types`, `add-error-handling`
-- Confidence threshold: 0.7 (below = falls through to LLM)
+### R31 Updated CRITICAL Count: 27 (+4 from R31)
 
----
+24. **MCP server entirely disabled** — lib.rs has 85% commented out, WebSocket handler disabled, all 11 tool handlers None. MCP crate non-functional. (R31)
+25. **CLI orchestration is simulation** — execute_subtask() sleeps 1-2s and returns success:true. build_consensus() hardcodes 0.85. No actual agent execution. (R31)
+26. **SWE-bench evaluate_instance returns mock** — Hardcoded "Mock execution output" and fake diff. Framework complete but never calls agent. (R31)
+27. **Benchmarking build_command generates English prompts** — "solve SWE-bench instance X using ML-optimized swarm" instead of CLI flags. Cannot execute real benchmarks. (R31)
 
-## Worker Dispatch: Simulated Execution
+### R31 Updated HIGH Count: 27 (+5 from R31)
 
-The 12-worker system (ultralearn, optimize, consolidate, predict, audit, map, preload, deepdive, document, refactor, benchmark, testgaps) has **real trigger detection** but **simulated execution**:
+23. **n=1 benchmark statistics are fake** — comparator.rs hardcodes p_value=0.01, effect_size=0.5 for single-run comparisons. (R31)
+24. **WASM simd tanh/gelu are scalar despite names** — tanh_simd() calls .tanh() in loop, gelu_simd() computes scalar formula. No SIMD intrinsics. (R31)
+25. **WASM cognitive IntegrationStrategy never used** — 4-variant enum defined but no implementation differentiates strategies. (R31)
+26. **CLI status reads stale files** — Agents could be dead for hours but status shows last saved JSON snapshot. (R31)
+27. **Shared memory 1ms polling** — Aggressive CPU consumption on idle systems. Should use blocking or event-driven approach. (R31)
 
-```javascript
-// Lines 2605-2628: Worker "execution" is just setTimeout
-setTimeout(() => {
-    const w = activeWorkers.get(workerId);
-    if (w) { w.progress = 100; w.phase = 'completed'; w.status = 'completed'; }
-}, 1500);
-```
+### R31 Updated Positive (+6)
 
-Workers are created in an in-memory Map, progress is updated via setTimeout, no actual analysis runs. The trigger detection (regex patterns) is sophisticated, but dispatch is a no-op.
+- **simd_optimizer.rs** has genuine WASM SIMD128 with f32x4 intrinsics and exemplary unsafe documentation (R31)
+- **agent_neural.rs** genuinely trains ruv_fann networks with IncrementalBackprop (R31)
+- **storage.rs (benchmarking)** is exceptional SQL: 10 normalized tables, CHECK constraints, 9 indexes (R31)
+- **comparator.rs** has real Welch's t-test and Cohen's d via statrs (for n>1) (R31)
+- **prompts.rs** is 98% real with zero stubs — best quality file in batch (R31)
+- **wasm.rs (persistence)** is production IndexedDB via rexie — 95% real (R31)
 
----
+## R34: ruv-swarm DAA Crate Core + MCP Limits + Transport (Session 34)
 
-## Overlooked Subsystems (~40-50% of Architecture)
+5 files read, ~2,200 LOC, 5 agents. Covers the DAA crate's core runtime (coordinator binary, lib entry point, trait definitions) plus MCP resource limits and in-process transport.
 
-### 1. Guidance Framework (Constitutional AI)
+### DAA Runtime (3 files, 1,327 LOC) — 67% weighted real
 
-- **WASM Kernel**: `guidance_kernel_bg.wasm` (94.3KB Rust binary)
-  - `batch_process()`, `content_hash()`, `detect_destructive()`, `hmac_sha256()`, `scan_secrets()`
-- **CLI**: `claude-flow guidance` with 6 subcommands (compile, retrieve, gates, status, optimize, ab-test)
-- **GuidanceProvider** (350 lines): Pre-edit gates (blocks .env/.pem/.key), post-edit quality checks, pre-command risk assessment, routing recommendations
-- **Current status**: Hooks use `guidance-hooks.sh` (bash keyword matching), NOT the full WASM semantic retrieval engine. WASM exists but is unwired.
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `traits.rs` | 402 | **80%** | 5 sophisticated trait interfaces (DistributedAutonomousAgent, SelfHealingAgent, ResourceOptimizer, EmergentBehavior, CognitiveArchitecture) — well-designed but ZERO implementations in crate. Aspirational API surface. |
+| `bin/daa-coordinator.rs` | 465 | **65%** | Daemon skeleton with CLI arg parsing, tokio runtime, graceful shutdown. `select_optimal_agent()` returns `agents.keys().next()` (first HashMap key, NOT optimal). Duplicate DAACoordinator struct vs lib.rs version. CLI args parsed but not all consumed. |
+| `lib.rs` (DAA) | 460 | **55%** | **FACADE**: `orchestrate_task()` hardcodes success:true, execution_time_ms:100, coordination_efficiency:0.95. `get_agent()` always returns Error (HashMap::get catch-all). 8 config fields unused. |
 
-### 2. Plugin System (IPFS Marketplace)
+**Key insight**: The DAA crate runtime (R34) confirms and extends the R29 findings about the broader DAA ecosystem. R29 found the learning/coordination/GPU modules were facades; R34 shows the core runtime entry point (lib.rs) is ALSO a facade. The trait definitions are well-designed but the implementation gap is total — 5 traits, 0 implementations.
 
-- **Architecture**: IPFS-based decentralized registry with Ed25519 signature verification
-- **21 plugins**: 9 official (Anthropic) + 12 external (Asana, GitHub, Slack, Stripe, Firebase, etc.)
-- **Plugin types**: agent, hook, command, provider, integration, theme, core, hybrid
-- **10 permission types**: network, filesystem, execute, memory, agents, credentials, config, hooks, privileged
-- **CLI**: `claude-flow plugins` with 9 subcommands (list, search, install, uninstall, upgrade, toggle, info, create, rate)
-- **Trust levels**: unverified → community → verified → official
+### MCP Limits + Transport (2 files, 873 LOC) — 91% weighted real
 
-### 3. RuVector Intelligence Layer (14 modules, ~3,500 lines)
+| File | LOC | Real % | Verdict |
+|------|-----|--------|---------|
+| `limits.rs` | 449 | **90%** | Production-grade enforcement: LimitCategory enum, resource tracking with Arc<RwLock<>>, threshold checking with severity levels. **ABSURD defaults**: max_agents=10,000,000, max_memory_bytes=1TB, max_session_duration=30 days. Defaults would never trigger in practice. |
+| `in_process.rs` | 424 | **92%** | **BEST transport in ruv-swarm-transport**. DashMap-based agent registry with mpsc + broadcast channels. Agent auto-unregistration on disconnect. Bincode size validation (10MB cap). create_pair() factory for testing. Clean Transport trait implementation. |
 
-- **Flash Attention** (`flash-attention.js`, 367 lines): 2-7x speedup via block-wise tiling, 32-element blocks, top-K sparse attention
-- **LoRA Adapter** (`lora-adapter.js`, 400+ lines): Rank 8, 384-dim, 24x parameter reduction, online gradient descent, persists to `.swarm/lora-weights.json`
-- **MoE Router** (`moe-router.js`, 500+ lines): 8 experts, 2-layer MLP gating, top-2 selection, load balancing, persists to `.swarm/moe-weights.json`
-- **Additional**: semantic-router, q-learning-router, coverage-router, diff-classifier, ast-analyzer, graph-analyzer, vector-db
+**Cross-file insight**: The quality inversion continues — infrastructure code (limits, transport) is production-ready while the components it serves (DAA runtime, orchestration) are facades. in_process.rs at 92% is the highest-quality transport implementation in the ruv-swarm ecosystem, confirming the R31 finding that transport was the strongest layer.
 
-### 4. Skills System (33 Auto-Invoked Skills)
+### R34 Updated CRITICAL Count: 29 (+2 from R34)
 
-Skills activate automatically when Claude's task matches their `description` frontmatter trigger:
-- **AgentDB** (5): advanced, learning, optimization, memory-patterns, vector-search
-- **GitHub** (5): code-review, project-management, release-management, multi-repo, workflow-automation
-- **V3 Implementation** (9): core, DDD, CLI, integration, performance, MCP, security, memory, swarm
-- **Swarm** (2): advanced, orchestration
-- **ReasoningBank** (2): agentdb, intelligence
-- **Other** (10): browser, hooks-automation, pair-programming, skill-builder, sparc, stream-chain, verification-quality, etc.
+28. **DAA orchestrate_task is FACADE** — lib.rs hardcodes success:true, execution_time_ms:100, coordination_efficiency:0.95. Core runtime function never actually orchestrates. (R34)
+29. **DAA get_agent always errors** — lib.rs get_agent() catches all HashMap misses with generic Error, making agent retrieval non-functional. (R34)
 
-### 5. Commands System (90+ Slash Commands)
+### R34 Updated HIGH Count: 31 (+4 from R34)
 
-User-invoked via `/command-name`:
-- **GitHub** (20): code-review, pr-manager, release-manager, issue-tracker, multi-repo-swarm, etc.
-- **SPARC** (30+): architect, coder, tester, debugger, reviewer, sparc-modes, etc.
-- **Analysis** (6): bottleneck-detect, performance-report, token-efficiency, etc.
-- **Automation** (7): auto-agent, smart-agents, self-healing, session-memory, etc.
-- **Monitoring** (6): agents, swarm-monitor, real-time-view, status, etc.
-- **Optimization** (5): auto-topology, cache-manage, parallel-execute, etc.
+28. **DAA traits define 5 sophisticated interfaces with zero implementations** — DistributedAutonomousAgent, SelfHealingAgent, ResourceOptimizer, EmergentBehavior, CognitiveArchitecture all unimplemented. (R34)
+29. **limits.rs absurd defaults** — 10M agents, 1TB memory, 30-day sessions would never trigger enforcement. (R34)
+30. **DAA select_optimal_agent is trivial** — Returns first HashMap key (non-deterministic), not actual optimization. (R34)
+31. **DAA duplicate DAACoordinator struct** — bin/daa-coordinator.rs defines its own vs lib.rs version, potential field drift. (R34)
 
-### 6. Helpers Runtime Library (45 Scripts)
+### R34 Updated Positive (+2)
 
-Categories: hook helpers (11), service helpers (5), management helpers (9), safety helpers (4), status helpers (5), setup helpers (5), tool helpers (6), git hooks (2).
+- **in_process.rs** is BEST transport in ruv-swarm-transport — DashMap registry, mpsc+broadcast, bincode validation. 92% real (R34)
+- **limits.rs** has production-grade enforcement logic (threshold checking, severity levels) despite absurd defaults (R34)
 
----
+## R33: Python ML Training + Swarm JS Infrastructure (Session 33)
 
-## Trajectory & Intelligence Tracking
+> 10 files deep-read (5 Python, 5 JS). 8,199 LOC. 17 findings.
 
-### What's Real
+### First-Ever Python Deep-Reads (5 files, 4,319 LOC)
 
-- **Trajectory recording**: In-memory Map, stores steps with action/result/quality timestamps
-- **Pattern storage**: Real HNSW indexing via `memory-initializer.js storeEntry()` — generates embeddings, writes to SQLite
-- **SONA learning**: Real modules called on trajectory completion (processes outcome, returns pattern key + confidence)
-- **Model routing history**: Last 100 outcomes persisted, circuit breaker, learning from escalations
+**Key discovery: 72% REAL PyTorch infrastructure, but ALL training data is synthetic/fabricated.**
 
-### What's Synthetic
+| File | LOC | Real % | Framework | Key Finding |
+|------|-----|--------|-----------|-------------|
+| **train_ensemble_improved.py** | 969 | 85% | PyTorch+torch_geometric | BEST Python file. GATConv, NoisyLinear, Beta-VAE with curriculum learning. Real gradient descent. |
+| **hyperparameter_optimizer.py** | 858 | 68% | scikit-optimize | Real Bayesian GP minimization. But ALL 5 model evaluators are SIMULATED — not actual training. |
+| **train_lstm_coding_optimizer.py** | 853 | 78% | PyTorch | Real seq2seq with Luong attention + copy mechanism. But data = HARDCODED coding templates (lines 84-134). |
+| **enhanced_strategies.py** | 820 | 62% | PyTorch (mock) | 4 real decomposition strategies (waterfall/agile/feature/component). MockModel returns random predictions. |
+| **train_ensemble.py** | 819 | 71% | PyTorch+torch_geometric | Base version of improved. Real ensemble training. RL uses np.random.normal(0.5, 0.2) for rewards. |
 
-- **EWC++ gradients**: `sin(i * 0.01) * (steps.length / 10)` — NOT real neural network gradients
-- **Pretrain pipeline**: Returns multiplier-based fabricated numbers, not real training
-- **Worker execution**: setTimeout progress updates only
+**Cross-file pattern**: Real PyTorch infrastructure (loss.backward(), optimizer.step(), gradient clipping, LR scheduling) wrapping synthetic/unknown training data. Accuracy claims (95%, 85%, 88%) are aspirational, unvalidated on real data.
 
----
+**Improved vs Base ensemble**: Improved adds data augmentation (5x), GATConv (vs SAGEConv), NoisyLinear, Beta-VAE with KL annealing, explicit curriculum scheduler, 3-tier validation tolerance.
 
-## Revised Architecture: FOUR Layers, Not Three
+### Swarm JS Infrastructure (5 files, 3,880 LOC)
 
-| Layer | What | Execution | Status |
-|-------|------|-----------|--------|
-| **Layer 1: Claude Code Task Tool** | Built-in parallel agent spawning | **REAL** — this IS the swarm | Active, primary execution |
-| **Layer 2: claude-flow Services** | Headless executor, container pool, worker daemon | **REAL** — spawns claude/docker processes | Available but requires CLI/Docker |
-| **Layer 3: claude-flow CLI/MCP** | 175 MCP tools, hooks, memory, routing | **METADATA** — JSON state + complexity scoring | Active, enriches Layer 1 |
-| **Layer 4: Agent Templates + Skills** | 95 agents, 33 skills, 90+ commands | **PROMPT ENGINEERING** — behavioral guidance | Active, shapes agent behavior |
+| File | LOC | Real % | Key Finding |
+|------|-----|--------|-------------|
+| **schemas.js** | 864 | 95% | Production-grade recursive validator with 25+ MCP tool schemas. UUID validation, input sanitization. |
+| **MultiDatabaseCoordinator.js** | 803 | 42% | Sync is SIMULATED — no actual network I/O (line 235). 1% hardcoded conflict rate. Health = random bool. |
+| **wasm-memory-optimizer.js** | 784 | 78% | Real buddy allocator with block merging + compaction. But SIMD functions are NON-FUNCTIONAL placeholders (lines 508-511). |
+| **index-enhanced.js** | 734 | 65% | Orchestrator with WASM fallback. Agent.execute() is STUB (line 604: "Task execution placeholder"). |
+| **persistence-pooled.js** | 695 | 92% | 8-table schema, exponential backoff retry, TTL cleanup, SQLite VACUUM. Production-grade. |
 
-**Key revision**: Layer 2 (services) was completely missed in Rounds 1-2. The headless-worker-executor and container-worker-pool are production-grade with process pooling, timeout protection, resource limits, and error recovery.
+**Cross-file dependencies**: index-enhanced.js imports wasm-memory-optimizer (loader) + persistence-pooled (storage). schemas.js validates all MCP tool parameters.
 
----
+### R33 Quality Spectrum: Language Comparison
 
-## Final Revised Conclusion (Updated)
+| Language | Files | Avg Real % | Pattern |
+|----------|-------|------------|---------|
+| **Python** (PyTorch) | 5 | 72% | Real ML infrastructure, fake/synthetic data |
+| **JavaScript** (npm) | 5 | 74% | Real persistence/validation, fake network sync |
+| **Rust** (prior sessions) | ~50 | 35% | Infrastructure real, execution simulated |
 
-> "The swarm is the Task tool. Everything else is decoration."
+### R33 Findings Added
 
-**Updated**: "The swarm PRIMARILY runs via the Task tool. But claude-flow has a SECOND real execution layer (headless executor + container pool + hive-mind launcher) that spawns actual Claude/Docker processes. This layer is production-grade but currently unused in our typical workflow because we use Claude Code's native Task tool instead. The third layer (175 MCP tools, hooks, complexity scoring, model routing) enriches the Task tool with episodic memory, skill suggestions, and swarm enforcement directives. The fourth layer (agents, skills, commands) shapes behavior through prompt engineering. Additionally, ~40-50% of the architecture was overlooked: a guidance framework (constitutional AI via WASM), a plugin marketplace (21 IPFS-based plugins), an ML intelligence layer (Flash Attention, LoRA, MoE), 33 auto-invoked skills, and 90+ slash commands."
+**CRITICAL** (2):
+- All Python training data is synthetic/unknown — accuracy claims unvalidated
+- RL component uses random rewards, no real task feedback (train_ensemble.py:585)
 
-The system is significantly more sophisticated than initially assessed. The gap is not between what's built and what exists — it's between what's built and what's **wired together and actively used**.
+**HIGH** (3):
+- MultiDatabaseCoordinator sync entirely simulated (line 235)
+- Health checks return random bool (line 559)
+- SIMD functions in wasm-memory-optimizer are placeholders (lines 508-511)
+
+**MEDIUM** (4):
+- Agent.execute() returns hardcoded placeholder (index-enhanced.js:604)
+- Cognitive diversity weights hardcoded (train_ensemble_improved.py:745)
+- Keyword-based task classification (enhanced_strategies.py:128)
+- Agent metrics return all zeros (index-enhanced.js:612)
+
+### R33 Positive
+
+- **schemas.js** (95%) is production-grade validation — best JS infrastructure file
+- **persistence-pooled.js** (92%) has real retry, TTL, lifecycle management
+- **train_ensemble_improved.py** (85%) has genuine PyTorch ML — best Python code
+- **wasm-memory-optimizer.js** buddy allocator with block merging is correct
+- Real Bayesian optimization via scikit-optimize GP minimization
+
+## R36: neuro-divergent Training Framework (Session 36)
+
+6 neuro-divergent files (7,187 LOC) also tagged with swarm-coordination domain were deep-read in R36. These are production-quality ML training components in the ruv-FANN ecosystem:
+
+| File | LOC | Real% | Key Feature |
+|------|-----|-------|-------------|
+| **scheduler.rs** | 1,431 | **92-95%** | 8 schedulers. ForecastingAdam with temporal/seasonal correction (INNOVATION) |
+| **optimizer.rs** | 1,089 | **90-93%** | Adam/AdamW/SGD/RMSprop correct. Proper decoupled weight decay |
+| **loss.rs** | 1,233 | **88-92%** | 16 loss types with correct gradients (MAE/MSE/Huber/NLL/Pinball/CRPS) |
+| **features.rs** | 1,079 | **88-92%** | Lag/rolling/temporal/Fourier features, correct cyclic encoding |
+| **preprocessing.rs** | 1,183 | **85-90%** | 5 scalers, Box-Cox. QuantileTransformer normal approx poor |
+| **validation.rs** | 1,172 | **82-88%** | 4 outlier methods. CRITICAL: validate_seasonality() is EMPTY |
+
+**Cross-domain relevance**: These training utilities support swarm agent ML optimization. The ForecastingAdam optimizer with temporal gradient correction is a genuine innovation. Quality level matches neural-network-implementation crate (R23) — production-grade with proper math.
+
+See memory-and-learning domain analysis for full details on these files.
+
+### R36 Positive (+1)
+- **neuro-divergent** training framework provides production-quality ML training (8 schedulers, 16 loss functions, 4 optimizers) for swarm agent optimization (R36)
+
+## R37: Rust Workflow Execution — claude_integration.rs (Session 37)
+
+### Overview
+
+R37 deep-read includes claude_integration.rs (1,344 LOC), which implements workflow execution for coordinated agent tasks — the Rust equivalent of the JS swarm orchestration analyzed in R31/R33.
+
+### claude_integration.rs (1,344 LOC) — 70-75% REAL
+
+| Component | Lines | Quality | Notes |
+|-----------|-------|---------|-------|
+| **ClaudeModel enum** | ~100 | **95%** | Real API pricing and context windows for all Claude models (Haiku/Sonnet/Opus 3.5-4.5) |
+| **ToolDefinition** | ~150 | **90%** | Complete tool definition schema with parameter types, validation |
+| **WorkflowExecution** | ~300 | **85%** | Multi-step workflow orchestration with retry, timeout, state tracking |
+| **execute_workflow()** | ~200 | **15%** | **CRITICAL SIMULATION** — hardcodes `tokens_used: 500`, generates fake response text, no real API calls |
+| **ClaudeAgent** | ~200 | **80%** | Agent initialization with model, tools, context window management |
+| **TokenBudget** | ~100 | **90%** | Real budget tracking with per-step allocation and overage detection |
+
+**Key finding**: The workflow execution framework is well-architected (proper retry, timeout, state management) but the core `execute_workflow()` function returns simulated results. This means the Rust swarm coordination infrastructure is **structurally complete but functionally disconnected** from any real LLM — the same pattern seen in the JS `RuvSwarm` class (R31) where agent message-passing was a placeholder.
+
+### Cross-Domain Insight
+
+| Aspect | JS (ruv-swarm-core, R31) | Rust (ruvllm claude_integration, R37) |
+|--------|--------------------------|---------------------------------------|
+| Architecture | Complete swarm topology | Complete workflow executor |
+| Message passing | Placeholder (returns empty) | Simulation (returns fake 500 tokens) |
+| Agent coordination | RoundRobin broken (off-by-one) | Multi-step orchestration works |
+| Real execution | CLI demonstration only | No real API calls |
+
+Both implementations demonstrate the same ecosystem pattern: **sophisticated coordination frameworks with no real execution backend**. The Rust version is higher quality architecturally but equally non-functional for actual agent coordination.
+
+### R37 Updated Findings
+
+**CRITICAL** (+1):
+- **Rust workflow execution is SIMULATION** — claude_integration.rs execute_workflow() hardcodes 500 tokens and fake responses. Combined with JS RuvSwarm's placeholder message-passing (R31), means zero functional swarm execution across both languages. (R37)
+
+**Positive** (+1):
+- **claude_integration.rs TokenBudget** provides genuine budget enforcement with per-step allocation — the kind of practical guardrail missing from the JS swarm implementation (R37)
+
+## R40: ruv-swarm Neural Model Zoo (Session 40)
+
+### Overview
+
+4 JavaScript neural network implementation files from `ruv-swarm/npm/src/neural-models/`. These are the JS-side equivalents of the Rust neural-network-implementation crate (R23, 90-98%). **Weighted average: 82% real.**
+
+### Key Finding: REAL FORWARD-PASS, NO LEARNING
+
+All 4 files implement **genuine neural network algorithms** — not facades. The math is correct for LSTM gates, multi-head attention, GRU-gated message passing. However, **no file implements backpropagation**. Training runs forward passes and computes loss, but `backward()` inherited from base class is a `console.log` stub. Weights never update. Two files return hardcoded accuracy values.
+
+**ZERO connection to Rust crate** — no WASM, no NAPI, no FFI bindings. Pure standalone JS.
+
+### File Analysis
+
+| File | LOC | Real% | Verdict | Key Finding |
+|------|-----|-------|---------|-------------|
+| **base.js** (9644) | 269 | 75% | REAL utility | Float32Array tensor system, matmul, activations, dropout (inverted, correct), loss functions |
+| **lstm.js** (9649) | 551 | 85% | REAL forward | Correct 4-gate LSTM (Hochreiter 1997), bidirectional, Xavier init, forget-bias=1.0 (best practice). Hardcoded accuracy 0.864 |
+| **transformer.js** (9657) | 515 | 83% | REAL forward | Correct multi-head attention, sinusoidal PE (Vaswani 2017), layer norm. **CRITICAL: LR formula inverted** — grows without bound |
+| **gnn.js** (9646) | 447 | 81% | REAL forward | Genuine MPNN with GRU-gated updates (Gilmer 2017), 3 aggregation modes. Hardcoded accuracy 0.96 |
+
+### Findings
+
+**CRITICAL** (1):
+- Transformer learning rate `Math.sqrt(step)` instead of `1/Math.sqrt(step)` — training would diverge (transformer.js:321)
+
+**HIGH** (5):
+- No backpropagation in ANY file — weights never update during training
+- Hardcoded accuracy 0.864 in lstm.js (line 489)
+- Hardcoded accuracy 0.96 in gnn.js (line 364)
+- Token embedding uses modulo arithmetic + random noise instead of learned embeddings (transformer.js:338-339)
+- base.js backward() is console.log stub inherited by all subclasses
+
+**MEDIUM** (6):
+- Unused attention aggregation weights in GNN (gnn.js:56-59)
+- Dimension mismatch risk at layer 0 when nodeDim != hiddenDim (gnn.js:238-249)
+- Max aggregation initialized to 0 instead of -Infinity (gnn.js:198)
+- No causal masking — encoder-only transformer (transformer.js)
+- Shared LayerNorm between post-attention and post-FFN (transformer.js:119,125)
+- save()/load() stubs (base.js:203-221)
+
+### Cross-Language Neural Network Comparison
+
+| Aspect | Rust (R23) | JS (R40) |
+|--------|-----------|----------|
+| Quality | 90-98% | 75-85% |
+| Training | Full backprop | Forward-only |
+| SIMD | AVX-512/AVX2/NEON | None (Float32Array) |
+| Connection | N/A | Zero (no WASM/NAPI) |
+| Verdict | BEST IN ECOSYSTEM | Genuine inference, no learning |
+
+The JS neural models are the **inference-only counterpart** to the production Rust implementations. They demonstrate real algorithmic understanding but cannot train models.
+
+### Updated CRITICAL Count: 31 (+1 from R40)
+
+30. **All JS neural models lack backpropagation** — 4 files implement correct forward passes but none compute gradients. Training is a facade with hardcoded accuracy values. (R40)
+
+### Updated HIGH Count: 32 (+1 from R40)
+
+28. **JS neural models have zero Rust/WASM connection** — The npm neural-models/ directory is pure JS with no bindings to the production-quality Rust neural-network-implementation crate. (R40)
+
+## Remaining Gaps
+
+~851 files still NOT_TOUCHED in the swarm domain (192/1388 DEEP = 13.8%), mostly:
+- Jest cache transpiled copies (bulk of the count)
+- Additional agentic-flow `.claude/` copies of templates already read
+- `index-enhanced.js` (RuvSwarm class with WASM loader)
+- `persistence-pooled.js` (pooled persistence implementation)
+- ~~ruv-swarm-ml models/mod.rs, time_series/mod.rs~~ — DEEP (R31)
+- ~~ruv-swarm benchmarking suite (5 files)~~ — DEEP (R31)
+- ~~ruv-swarm CLI commands (3 files)~~ — DEEP (R31)
+- ~~ruv-swarm transport (2 files)~~ — DEEP (R31)
+- ~~claude-parser crate~~ — DEEP (R31)
+- ~~SWE-bench adapter (3 files)~~ — DEEP (R31)
+- ~~MCP orchestrator crate (4 files)~~ — DEEP (R31)
+- ~~WASM cognitive/neural (4 files)~~ — DEEP (R31)
+- ~~ruv-swarm DAA core runtime (coordinator, lib, traits)~~ — DEEP (R34)
+- ~~ruv-swarm-transport in_process.rs~~ — DEEP (R34)
+- ~~ruv-swarm-mcp limits.rs~~ — DEEP (R34)
+- ~~neuro-divergent training crates (6 files)~~ — DEEP (R36)
+- ruv-swarm-ml **neural_models** submodule (unknown LOC — critical to verify 27 model implementations)
+- ruv-swarm DAA test files: coordination_tests.rs (1,061), system_performance_tests.rs (970), gpu_acceleration_tests.rs (966)
+- ruv-swarm integration_test.rs (677 LOC)
+- ruv-swarm chaos_testing.rs (630 LOC)

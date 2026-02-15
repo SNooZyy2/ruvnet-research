@@ -1,0 +1,14 @@
+{
+  "totalDecisions": 14,
+  "modelDistribution": {
+    "haiku": 0,
+    "sonnet": 0,
+    "opus": 14,
+    "inherit": 0
+  },
+  "avgComplexity": 0.3745789612243236,
+  "avgConfidence": 0.5308950728291554,
+  "circuitBreakerTrips": 0,
+  "lastUpdated": "2026-02-15T14:23:44.122Z",
+  "learningHistory": []
+}

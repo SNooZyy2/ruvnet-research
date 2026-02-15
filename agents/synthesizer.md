@@ -28,12 +28,12 @@ const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.
 
 const domainName = 'cli';
 const files = db.prepare(\`
-  SELECT f.*, fd.relevance_score
+  SELECT f.*
   FROM files f
   JOIN file_domains fd ON f.id = fd.file_id
   JOIN domains d ON fd.domain_id = d.id
   WHERE d.name = ?
-  ORDER BY fd.relevance_score DESC, f.depth DESC, f.total_lines DESC
+  ORDER BY f.depth DESC, f.loc DESC
 \`).all(domainName);
 
 console.log(JSON.stringify(files, null, 2));
@@ -56,8 +56,8 @@ const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.
 
 const domainName = 'cli';
 const findings = db.prepare(\`
-  SELECT f.severity, f.category, f.description, f.evidence, f.line_ref,
-         fi.relative_path, f.resolved
+  SELECT f.severity, f.category, f.description, f.line_start, f.line_end,
+         fi.relative_path, f.followed_up
   FROM findings f
   JOIN files fi ON f.file_id = fi.id
   JOIN file_domains fd ON fi.id = fd.file_id
@@ -118,13 +118,13 @@ const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.
 
 const domainName = 'cli';
 const gaps = db.prepare(\`
-  SELECT f.relative_path, f.depth, f.total_lines, fd.relevance_score
+  SELECT f.relative_path, f.depth, f.loc
   FROM files f
   JOIN file_domains fd ON f.id = fd.file_id
   JOIN domains d ON fd.domain_id = d.id
   WHERE d.name = ?
     AND f.depth IN ('NOT_TOUCHED', 'SURFACE', 'MENTIONED')
-  ORDER BY fd.relevance_score DESC, f.total_lines DESC
+  ORDER BY f.loc DESC
   LIMIT 20
 \`).all(domainName);
 
@@ -290,19 +290,17 @@ const sourceFileId = db.prepare('SELECT id FROM files WHERE relative_path = ?').
 const targetFileId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get('target.js').id;
 
 const stmt = db.prepare(\`
-  INSERT INTO findings (file_id, session_id, severity, category, description, evidence, line_ref)
+  INSERT INTO findings (file_id, session_id, severity, category, description, line_start, line_end)
   VALUES (?, ?, 'HIGH', 'INTEGRATION', ?, ?, ?)
 \`);
 
 stmt.run(sourceFileId, sessionId,
-  'API mismatch between cli and memory domains',
-  'cli expects .search(query) but memory exports .semanticSearch(query)',
-  '45');
+  'API mismatch: cli expects .search(query) but memory exports .semanticSearch(query)',
+  45, 45);
 
 stmt.run(targetFileId, sessionId,
-  'API mismatch between cli and memory domains',
-  'memory exports .semanticSearch(query) but cli calls .search(query)',
-  '102');
+  'API mismatch: memory exports .semanticSearch(query) but cli calls .search(query)',
+  102, 102);
 
 db.close();
 "

@@ -74,8 +74,8 @@ const fileId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get('p
 const sessionId = 1; // current session
 
 db.prepare(\`
-  INSERT INTO file_reads (file_id, session_id, lines_read, depth_achieved, date)
-  VALUES (?, ?, ?, ?, date('now'))
+  INSERT INTO file_reads (file_id, session_id, lines_read, depth, notes)
+  VALUES (?, ?, ?, ?, 'Reader agent pass')
 \`).run(fileId, sessionId, 150, 'MEDIUM');
 
 db.close();
@@ -97,26 +97,26 @@ const findings = [
   {
     severity: 'HIGH',
     category: 'SECURITY',
-    description: 'Hardcoded credentials found',
-    evidence: 'const API_KEY = \"secret123\"',
-    line_ref: '45'
+    description: 'Hardcoded credentials found: const API_KEY = \"secret123\"',
+    line_start: 45,
+    line_end: 45
   },
   {
     severity: 'MEDIUM',
     category: 'QUALITY',
-    description: 'Missing error handling in async function',
-    evidence: 'async function fetchData() { const res = await fetch(url); }',
-    line_ref: '89-92'
+    description: 'Missing error handling in async function fetchData()',
+    line_start: 89,
+    line_end: 92
   }
 ];
 
 const stmt = db.prepare(\`
-  INSERT INTO findings (file_id, session_id, severity, category, description, evidence, line_ref)
+  INSERT INTO findings (file_id, session_id, severity, category, description, line_start, line_end)
   VALUES (?, ?, ?, ?, ?, ?, ?)
 \`);
 
 for (const f of findings) {
-  stmt.run(fileId, sessionId, f.severity, f.category, f.description, f.evidence, f.line_ref);
+  stmt.run(fileId, sessionId, f.severity, f.category, f.description, f.line_start, f.line_end);
 }
 
 db.close();
@@ -133,18 +133,15 @@ const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.
 
 const fileId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get('path/to/file.js').id;
 
-const domains = [
-  { name: 'cli', score: 0.9 },
-  { name: 'memory', score: 0.6 }
-];
+const domains = ['cli', 'memory'];
 
 const stmt = db.prepare(\`
-  INSERT OR IGNORE INTO file_domains (file_id, domain_id, relevance_score)
-  SELECT ?, id, ? FROM domains WHERE name = ?
+  INSERT OR IGNORE INTO file_domains (file_id, domain_id)
+  SELECT ?, id FROM domains WHERE name = ?
 \`);
 
-for (const d of domains) {
-  stmt.run(fileId, d.score, d.name);
+for (const name of domains) {
+  stmt.run(fileId, name);
 }
 
 db.close();

@@ -238,10 +238,136 @@ research/
 │   ├── scanner.md           # Phase 0 inventory agent
 │   ├── reader.md            # Deep reading agent
 │   ├── synthesizer.md       # Cross-domain synthesis agent
-│   └── mapper.md            # Dependency mapping agent
+│   ├── mapper.md            # Dependency mapping agent
+│   ├── facade-detector.md   # Stub/facade/placeholder detection
+│   ├── cross-repo-tracer.md # Systemic pattern tracing across repos
+│   └── realness-scorer.md   # Weighted realness % computation
 └── ADR-038-*.md             # Architecture decision record
 
 ```
+
+## Research Swarm Protocol
+
+### Agent Registry
+
+Each research agent `.md` file is a prompt template. To use it in a swarm, read its contents and inject them into a Task tool call with the appropriate `subagent_type`.
+
+| Research Agent | Task subagent_type | Model | Why |
+|---------------|-------------------|-------|-----|
+| `reader.md` | `Bash` | sonnet | Needs Bash for DB writes via `node -e` |
+| `scanner.md` | `Bash` | haiku | Simple filesystem walk + DB inserts |
+| `synthesizer.md` | `v3-coder` | sonnet | Needs Read + Write + Bash for docs + DB |
+| `mapper.md` | `Bash` | sonnet | Needs Read + Grep + Bash for tracing |
+| `facade-detector.md` | `Bash` | sonnet | Needs Read + Bash for analysis + DB |
+| `cross-repo-tracer.md` | `Bash` | sonnet | Needs Grep across repos + Bash for DB |
+| `realness-scorer.md` | `Bash` | haiku | Mostly DB queries, math, reporting |
+
+### Spawning a Research Agent
+
+To invoke a research agent in a swarm:
+
+1. Read the agent `.md` file to get its prompt template
+2. Spawn a Task with the mapped `subagent_type` and `model`
+3. Pass file-specific parameters (file path, session ID, etc.) in the prompt
+4. Use `run_in_background: true` for swarm parallelism
+
+Example:
+```
+Task(subagent_type="Bash", model="sonnet", run_in_background=true,
+     prompt="<contents of reader.md>\n\nAssignment:\n- File: {path}\n- File ID: {id}\n- Session ID: {sid}\n- Target depth: DEEP")
+```
+
+### Research Swarm Compositions
+
+These are standard agent combinations for common research workflows. When a trigger phrase is detected, spawn ALL listed agents in ONE message with `run_in_background: true`.
+
+#### 1. Deep-Read Swarm (trigger: "deep read", "read files", "analyze files")
+
+For reading a batch of files from the priority queue:
+
+| Agent | Count | Role |
+|-------|-------|------|
+| reader | 3-5 | One per file, reads + inserts findings + updates DB |
+| facade-detector | 1-2 | Runs on files suspected of being facades |
+| mapper | 1 | Traces dependencies from all read files |
+
+Spawn readers in parallel (one per file), then mapper after readers complete.
+
+#### 2. Pattern Trace Swarm (trigger: "trace pattern", "find systemic", "cross-repo")
+
+For tracing a specific pattern across all repositories:
+
+| Agent | Count | Role |
+|-------|-------|------|
+| cross-repo-tracer | 1 | Searches all 4 repos, classifies instances |
+| facade-detector | 1-2 | Verifies suspect files found by tracer |
+| reader | 1-2 | Deep-reads newly discovered files |
+
+#### 3. Scoring Swarm (trigger: "score realness", "compute scores", "quality report")
+
+For computing realness scores across crates or domains:
+
+| Agent | Count | Role |
+|-------|-------|------|
+| realness-scorer | 1 | Queries DB, computes scores, generates report |
+| facade-detector | 1-2 | Re-checks low-scoring files for new facade evidence |
+
+#### 4. Domain Synthesis Swarm (trigger: "synthesize domain", "write analysis", "update synthesis")
+
+For writing or updating domain analysis documents:
+
+| Agent | Count | Role |
+|-------|-------|------|
+| synthesizer | 1 | Writes/updates domain analysis.md |
+| mapper | 1 | Refreshes cross-domain dependency data |
+| realness-scorer | 1 | Computes domain-level realness for the doc |
+
+#### 5. Full Session Swarm (trigger: "full session", "research session")
+
+Complete research session workflow:
+
+| Phase | Agents | Parallel? |
+|-------|--------|-----------|
+| 1. Plan | Query `priority_gaps`, select files | Sequential |
+| 2. Read | reader ×3-5 + facade-detector ×2 | Parallel |
+| 3. Map | mapper ×1 | After phase 2 |
+| 4. Score | realness-scorer ×1 | After phase 2 |
+| 5. Synthesize | synthesizer ×1 | After phases 3-4 |
+
+### Research Trigger Phrases
+
+Add these to the existing trigger phrase table:
+
+| Phrase | Swarm Composition | Action |
+|--------|-------------------|--------|
+| "deep read" | Deep-Read Swarm | Spawn readers + facade-detector + mapper |
+| "trace pattern" | Pattern Trace Swarm | Spawn cross-repo-tracer + readers |
+| "score realness" | Scoring Swarm | Spawn realness-scorer + facade-detector |
+| "synthesize domain" | Domain Synthesis Swarm | Spawn synthesizer + mapper + scorer |
+| "full session" | Full Session Swarm | All 5 phases sequentially |
+| "facade check" | facade-detector ×1 | Single agent on specific file(s) |
+| "cross-repo trace" | cross-repo-tracer ×1 | Single agent for pattern search |
+
+### Swarm Rules for Research
+
+- ALL research agents MUST receive `session_id` in their prompt
+- ALL agents that write to DB MUST use `subagent_type: Bash` (not Explore/researcher — those lack Bash)
+- ALWAYS spawn readers in parallel (one per file) — they don't conflict on DB writes
+- NEVER spawn two synthesizers for the same domain — they'll overwrite each other
+- Mapper should run AFTER readers complete (needs their findings for context)
+- Realness-scorer should run AFTER readers complete (needs their findings data)
+- When spawning 5+ agents, use `model: haiku` for readers and `model: sonnet` for facade-detector/synthesizer
+
+### DB Schema Reminders for Agents
+
+These gotchas MUST be included in agent prompts to avoid errors:
+
+- `files` table: LOC column is `loc` (NOT `total_lines`)
+- `file_reads` table: columns are `file_id, session_id, depth, lines_read, line_ranges, notes` (NO `depth_achieved` or `date`)
+- `findings` table: columns are `file_id, session_id, line_start, line_end, severity, category, description, followed_up` (NO `evidence` or `line_ref`)
+- `file_domains` table: only `file_id, domain_id` (NO `relevance_score`)
+- Date in SQL: use `date('now')` with single quotes
+- `packages.base_path` uses `~` — expand with `.replace(/^~/, process.env.HOME)` in Node.js
 
 ## Common Tasks
 

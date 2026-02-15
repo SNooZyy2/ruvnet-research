@@ -91,9 +91,9 @@ const targetId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get(
 
 if (sourceId && targetId) {
   db.prepare(\`
-    INSERT OR IGNORE INTO dependencies (source_file_id, target_file_id, relationship, evidence)
-    VALUES (?, ?, ?, ?)
-  \`).run(sourceId, targetId, 'delegates-to', 'Line 45: return tools.memory_search(params);');
+    INSERT OR IGNORE INTO dependencies (source_file_id, target_file_id, relationship)
+    VALUES (?, ?, ?)
+  \`).run(sourceId, targetId, 'delegates-to');
   console.log('Dependency inserted:', source, '->', target);
 } else {
   console.log('File not found in database:', !sourceId ? source : target);
@@ -247,14 +247,13 @@ const sourceId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get(
 
 // Insert finding for missing target file
 db.prepare(\`
-  INSERT INTO findings (file_id, session_id, severity, category, description, evidence, line_ref)
+  INSERT INTO findings (file_id, session_id, severity, category, description, line_start, line_end)
   VALUES (?, ?, 'MEDIUM', 'INTEGRATION', ?, ?, ?)
 \`).run(
   sourceId,
   sessionId,
   'Import references file not in database: ../missing/module.js',
-  'const missing = require(\"../missing/module.js\");',
-  '12'
+  12, 12
 );
 
 console.log('Flagged unverified import');
