@@ -1,6 +1,6 @@
 # ADR-040: Restructure Existing Synthesis Documents
 
-**Status**: PROPOSED
+**Status**: IMPLEMENTED
 **Date**: 2026-02-15
 **Relates to**: ADR-038 (Research Database System), ADR-041 (Workflow Changes)
 

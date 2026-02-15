@@ -1,6 +1,6 @@
 # ADR-041: Research Workflow Changes for Topical Synthesis
 
-**Status**: PROPOSED
+**Status**: IMPLEMENTED
 **Date**: 2026-02-15
 **Depends on**: ADR-040 (Restructure Synthesis Documents)
 **Relates to**: ADR-038 (Research Database System)

@@ -86,17 +86,15 @@ JOIN files tf ON chain.target_file_id = tf.id;
 ```
 
 ### 8. Update file after reading
-```sql
--- Insert read record
-INSERT INTO file_reads (file_id, session_id, lines_read, depth_achieved, date)
-VALUES (?, ?, ?, ?, date('now'));
+```js
+// Compute date in JS to avoid quoting issues in node -e
+const today = new Date().toISOString().slice(0, 10);
 
--- Update file metadata
-UPDATE files SET
-  depth = ?,
-  lines_read = lines_read + ?,
-  last_read_date = date('now')
-WHERE id = ?;
+// Insert read record
+db.prepare('INSERT INTO file_reads (file_id, session_id, depth, lines_read, line_ranges, notes) VALUES (?, ?, ?, ?, ?, ?)').run(fileId, sessionId, depth, linesRead, lineRanges, notes);
+
+// Update file metadata
+db.prepare('UPDATE files SET depth = ?, lines_read = lines_read + ?, last_read_date = ? WHERE id = ?').run(depth, linesRead, today, fileId);
 ```
 
 ### 9. Add finding
@@ -126,7 +124,8 @@ VALUES (?, ?, ?, ?);
 ```bash
 node -e "
 const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
-const result = db.prepare('INSERT INTO sessions (name, date, focus) VALUES (?, date(\"now\"), ?)').run('session-2026-02-14', 'focus description');
+const today = new Date().toISOString().slice(0, 10);
+const result = db.prepare('INSERT INTO sessions (name, date, focus) VALUES (?, ?, ?)').run('session-2026-02-14', today, 'focus description');
 console.log('Session ID:', result.lastInsertRowid);
 db.close();
 "
@@ -372,7 +371,7 @@ These gotchas MUST be included in agent prompts to avoid errors:
 - `file_reads` table: columns are `file_id, session_id, depth, lines_read, line_ranges, notes` (NO `depth_achieved` or `date`)
 - `findings` table: columns are `file_id, session_id, line_start, line_end, severity, category, description, followed_up` (NO `evidence` or `line_ref`)
 - `file_domains` table: only `file_id, domain_id` (NO `relevance_score`)
-- Date in SQL: use `date('now')` with single quotes
+- Date: compute in JS (`new Date().toISOString().slice(0,10)`) and pass as parameter — avoids quoting issues in `node -e`
 - `packages.base_path` uses `~` — expand with `.replace(/^~/, process.env.HOME)` in Node.js
 
 ## Common Tasks

@@ -285,6 +285,24 @@ Weakest Areas: {list of lowest-scoring clusters}
 Strongest Areas: {list of highest-scoring clusters}
 ```
 
+### 7. Update Domain Synthesis Document (ADR-041)
+
+After computing scores, update the domain's `domains/{domain-name}/analysis.md` **in-place**:
+
+**Section 1 (Current State Summary)**:
+- REWRITE with the new weighted realness % for the domain
+- Update key verdicts if scores have materially changed (>5% delta)
+- Write in present tense
+
+**Section 2 (File Registry)**:
+- UPDATE the `Real%` column for any re-scored files
+- Do NOT duplicate rows — modify existing entries
+
+**Anti-Patterns (NEVER do these)**:
+- NEVER append a new "Realness Scoring" or "Updated Scores" section
+- NEVER re-list all file scores at each session boundary
+- NEVER create cumulative score tables outside Section 2
+
 ## Classification Thresholds
 
 | Score | Classification | Meaning |

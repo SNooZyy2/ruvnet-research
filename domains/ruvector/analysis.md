@@ -128,6 +128,14 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | hierarchy.rs | ruvector-mincut | 1,489 | 88% | DEEP | 3-level hierarchy. check_and_split_expander incomplete | R34 |
 | graph Cypher parser | ruvector-graph | 1,296 | 95% | DEEP | Production parser. CRIT: NO EXECUTOR | C |
 
+### Edge-Net P2P Transport
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| p2p.rs | edge-net (ruvector) | 845 | 92-95% | DEEP | **REVERSES R42**: Real libp2p (Gossipsub/Kademlia/RequestResponse/Identify), NOISE+yamux+TCP, direct RAC integration via broadcast_rac_event(), 6 gossipsub topics, production P2P | R44 |
+| advanced.rs | edge (ruvector) | 2041 | 72% | DEEP | MISNOMER — zero networking. ML primitives: Raft 85%, SNN 95% (STDP), HDC 93%, HNSW reimpl 88%, hash embeddings (8th occurrence), quantization 92% | R44 |
+| swarm.rs | edge (ruvector) | 612 | 72% | DEEP | Production crypto protocol (Ed25519+AES-256-GCM 88%, identity registry 85%, task claiming 80%) but 0% GUN network transport — all publish = stubs | R44 |
+
 ### SONA & Learning
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
@@ -200,6 +208,9 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | **ruvllm memory_pool** — BEST systems code. Lock-free bump allocator, RAII buffer pool, per-thread scratch. 95% real | memory_pool.rs | R34 |
 | **postgres SPARQL executor** — COMPLETE SPARQL 1.1 query engine. Property paths, all 7 aggregates, 30+ expression types | sparql_executor.rs | R34 |
 | **mincut wrapper** — Genuine bounded-range decomposition from arXiv:2512.13105 (Dec 2024). Among best algorithmic code | wrapper/mod.rs | R34 |
+| **edge-net P2P production libp2p** — REVERSES R42's "NO P2P transport". Real Gossipsub/Kademlia/RequestResponse, NOISE encryption, 6 topics, direct RAC integration via broadcast_rac_event() | p2p.rs (edge-net) | R44 |
+| **advanced.rs SNN excellence** — 95% real LIF neuron model with STDP Hebbian learning, refractory periods. Highest quality neural component in file | advanced.rs (edge) | R44 |
+| **swarm.rs cryptographic envelope** — 88% real Ed25519+AES-256-GCM, nonce replay protection, counter ordering, registry-based identity (never trusts envelope keys) | swarm.rs (edge) | R44 |
 | **ruvllm autodetect** — Real hardware feature detection with platform-specific probes. 92% real with 27 tests | autodetect.rs | R34 |
 | **ruvllm scheduler** — vLLM-style continuous batching, preemption (recompute+swap), chunked prefill. BEST serving code | scheduler.rs | R35 |
 | **ruvllm kernel extensions exceptional** — norm.rs, rope.rs, quantized.rs, activations.rs all 92-95% with real NEON | 4 files | R35 |
@@ -380,3 +391,6 @@ Phase C Rust source examination. CRITICAL placeholder embeddings discovered. HNS
 
 ### R39 (2026-02-15): ruQu completion (tile.rs + planner.rs)
 2 files, 3,603 LOC. Completes ruQu picture — 91.3% weighted real across all 7 files. HIGHEST QUALITY MULTI-FILE CRATE in ecosystem. Genuine quantum error correction throughout.
+
+### R44 (2026-02-15): Edge-Net P2P Transport
+3 files, 3,498 LOC, ~63 findings. **MAJOR REVERSAL**: p2p.rs (92-95%) has production libp2p with Gossipsub/Kademlia/RequestResponse, NOISE encryption, direct RAC integration via broadcast_rac_event() — edge-net IS a distributed system. advanced.rs (72%) is a MISNOMER — zero networking, actually ML primitives (SNN 95%, Raft 85%, HDC 93%, hash embeddings 8th occurrence). swarm.rs (72%) has excellent cryptographic protocol (Ed25519+AES-256-GCM) but 0% GUN network transport (all publish = stubs). Two parallel P2P architectures: edge-net uses libp2p (production), edge uses GUN relays (stubs).

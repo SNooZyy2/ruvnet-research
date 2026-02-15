@@ -1,22 +1,23 @@
 # Swarm Coordination Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: 14.1% (196/1388 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R40)
+> **Priority**: HIGH | **Coverage**: 16.6% (232/1402 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-15 (Session R50)
 
 ## 1. Current State Summary
 
-The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. Coordination operates at four distinct quality layers: agent templates (REAL algorithms), P2P crypto (REAL Ed25519/AES-256-GCM), shell coordination (REAL file-based IPC with race conditions), and distributed systems (FABRICATED Math.random() metrics).
+The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R45 examined the npm package's operational layer (7 files, 5,209 LOC) and found a **split between genuine infrastructure and theatrical features**.
 
 **Top verdicts:**
 
-- **Inverted quality gradient**: JS orchestration (88% real) is production-ready, Rust execution layer (25-35% real) is almost entirely facades. The npm layer correctly delegates to WASM/native backends, but those backends don't compute.
-- **Agent templates are algorithmically accurate** — CRDT, BFT, threshold crypto are textbook-correct, but implementations are stubs or non-existent.
+- **"Demonstration framework" DEFINITIVELY CONFIRMED** — claude-simulator.js (88%) + docker-compose creates a self-contained demo loop: simulator connects to test MCP server, never real services. mcp-workflows.js (72%) is a working JSON-RPC 2.0 client for a non-existent server.
+- **Infrastructure vs. Intelligence split** — Plumbing is real (sqlite-pool 92%, wasm-loader 82%, docs 87%, simulator 88%), but "smart" features are facades (neural.js 28%, simulated benchmarks 15-20%).
+- **NEW anti-pattern: "WASM delegation with ignored results"** — neural.js calls `neural_train()` but immediately overwrites return values with `Math.random()`. Worse than R40's "inference works, training facade."
+- **sqlite-pool.js PARTIALLY REVERSES R31** — Persistence layer is production-ready (92% genuine, WAL mode, worker threads, health monitoring), even though CLI layer is demonstration.
+- **Inverted quality gradient confirmed at npm layer**: sqlite-pool (92%), generate-docs (87%), wasm-loader (82%) are genuine; neural.js (28%) is facade.
 - **P2P crypto layer is production-grade** — Ed25519, X25519, AES-256-GCM, replay protection, canonical JSON serialization all genuine. Task execution and WebRTC signaling are stubs.
-- **Real coordination happens through Claude Code's Task tool + file-based message passing**, not distributed protocols. MCP tools reporting swarm state return hardcoded/random values.
-- **All neural training is forward-pass only** — JS neural models (82% real) implement correct LSTM/Transformer/GNN forward passes but zero backpropagation. Weights never update.
 - **Three-way interface drift epidemic** — Handlers, orchestrators, and service layers developed independently. ~12 API mismatches between handlers.rs and orchestrator.rs.
-- **Best infrastructure**: Transport layer (websocket.rs 88-92%, in_process.rs 92%), benchmarking SQL (storage.rs 95-98%), MCP validation (limits.rs 90%, validation.rs 92-95%).
-- **Worst gaps**: QUIC is empty everywhere, GPU operations are zero (despite 3 files named gpu*.rs), all swarm metrics fabricated, Rust training returns hardcoded loss curves.
+- **Best infrastructure**: sqlite-pool.js (92%), storage.rs (95-98%), in_process.rs (92%), simulator (88%).
+- **Worst gaps**: neural.js (28%), neural-coordination-protocol.js (10-15%), QUIC empty everywhere, GPU operations zero.
 
 ## 2. File Registry
 
@@ -146,6 +147,15 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | neural-coordination-protocol.js | ruv-swarm | 1,363 | 10-15% | DEEP | 8 coordination executions stubbed | R19 |
 | neural-network-manager.js | ruv-swarm | 1,938 | 15-20% | DEEP | SimulatedNeuralNetwork uses Math.random() when WASM fails | R19 |
 | hooks/index.js | ruv-swarm | 1,900 | 25-30% | DEEP | Real git commit, fabricated trainPatternsFromEdit | R19 |
+| wasm-loader.js | ruv-swarm | 602 | 82% | DEEP | GENUINE WASM loader — real WebAssembly.instantiate(), wasm-bindgen, 4-strategy path resolution. Facade fallback only on total failure | R45 |
+| sqlite-pool.js | ruv-swarm | 587 | 92% | DEEP | GENUINE production pool — WAL mode, worker threads, health monitoring, auto-recovery. Zero red flags | R45 |
+| neural.js | ruv-swarm | 574 | 28% | DEEP | MOSTLY FACADE — WASM calls exist but returns IGNORED, overwritten with Math.random(). Training/export/patterns all fabricated | R45 |
+| performance-benchmarks.js | ruv-swarm | 899 | 62% | DEEP | MIXED — SIMD/WASM/browser benchmarks real (78-95%), neural/Claude/parallel are setTimeout facades (15-20%) | R45 |
+| mcp-workflows.js | ruv-swarm | 991 | 72% | DEEP | MOSTLY REAL — genuine JSON-RPC 2.0 client, 5 workflows. ORPHANED: Rust MCP backend disabled | R45 |
+| generate-docs.js | ruv-swarm | 954 | 87% | DEEP | GENUINE regex-based source parser, extracts real API signatures. Only CLI docs hardcoded template | R45 |
+| claude-simulator.js | ruv-swarm | 602 | 88% | DEEP | GENUINE MCP test client — WebSocket, Prometheus, chaos injection. PROVES self-contained demo loop | R45 |
+| diagnostics.js | ruv-swarm | 533 | 87% | DEEP | GENUINE system diagnostics — real process.memoryUsage/cpuUsage/performance.now, process._getActiveHandles/_getActiveRequests for event loop monitoring. Pattern detection, actionable recommendations (thresholds: >10% failure, >500MB memory, >50 handles). Self-test harness | R48 |
+| errors.js | ruv-swarm | 528 | 90% | DEEP | GENUINE error taxonomy — 11 typed error classes (Validation/Swarm/Agent/Task/Neural/Wasm/Network/Persistence/Resource/Concurrency + base). ErrorFactory pattern, ErrorContext enrichment. Used EXTENSIVELY by mcp-tools-enhanced.js (26 import sites). Context-aware getSuggestions() per error type | R48 |
 
 ### ruv-swarm Neural Models JS (ruv-swarm)
 
@@ -190,6 +200,7 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | lib.rs (WASM) | ruv-swarm-wasm | 722 | 40-50% | DEEP | WasmNeuralNetwork forward pass REAL (17 activations). Forecasting naive | R29 |
 | learning_integration.rs | ruv-swarm-wasm | 736 | 30-40% | DEEP | "GPU" methods have ZERO GPU ops. All 4 optimization algorithms return pattern.clone() | R29 |
 | wasm.rs (DAA) | ruv-swarm-wasm | 736 | 45-55% | DEEP | Agent management genuine. Resource optimize() cosmetic | R29 |
+| simd_ops.rs | ruv-swarm-wasm | 419 | 72-78% | DEEP | Real portable SIMD via `wide::f32x4` (not native intrinsics). 8 real SIMD operations (dot product, add, scale, relu, sigmoid, tanh). Matrix multiply is SCALAR triple-loop. Downgraded vs ruvector-core (fixed 4-wide, no AVX-512/AVX2 specialization). Real benchmarking infra | R50 |
 | simd_optimizer.rs | ruv-swarm-wasm | 595 | 85-90% | DEEP | BEST SIMD — real f32x4 WASM SIMD128. tanh/gelu SCALAR despite names | R31 |
 | cognitive_diversity_wasm.rs | ruv-swarm-wasm | 639 | 75-80% | DEEP | Real Shannon diversity, 5 cognitive patterns. Optimization plan hardcoded +0.3/+0.2/+0.15 | R31 |
 | agent_neural.rs | ruv-swarm-wasm | 552 | 80-85% | DEEP | Genuine ruv_fann bridge. Trains IncrementalBackprop. 4/5 metrics placeholders | R31 |
@@ -212,6 +223,7 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
+| protocol.rs | ruv-swarm-transport | 378 | 92-95% | DEEP | PRODUCTION WIRE PROTOCOL. MessagePack (rmp_serde) + JSON dual codecs, complete state machine (handshake/flow-control/compression/disconnect), distributed RPC with UUID correlation IDs, TTL-based routing, priority queuing (0-255). Used by 3 transport backends | R50 |
 | websocket.rs | ruv-swarm-transport | 678 | 88-92% | DEEP | Production — exponential backoff, gzip, real-time stats. 137-line code duplication | R31 |
 | shared_memory.rs | ruv-swarm-transport | 482 | 85-88% | DEEP | Ring buffer with atomic head/tail. Misleadingly named "lock-free" (uses Mutex). 1ms polling | R31 |
 | in_process.rs | ruv-swarm-transport | 424 | 92% | DEEP | BEST transport. DashMap registry, mpsc+broadcast, bincode validation | R34 |
@@ -236,14 +248,22 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | swarm_coordinator_training.rs | ruv-swarm-ml | 1,838 | 25-35% | DEEP | Real GNN/attention/Q-learning/VAE algorithms. ALL 5 metrics hardcoded | R19 |
 | ml-training/lib.rs | ruv-swarm-ml | 1,371 | 30-40% | DEEP | Real LSTM/TCN/N-BEATS skeletons. Fake LCG random | R19 |
 
+### ruv-swarm-persistence Rust Crate (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| memory.rs | ruv-swarm-persistence | 434 | 95-98% | DEEP | PRODUCTION-QUALITY. 28/28 Storage trait methods, parking_lot::RwLock, atomic task claiming, multi-dimensional event ordering. Test harness for concurrent_tests.rs (100 agents). Three-backend architecture (Memory/SQLite/WASM) | R50 |
+| wasm.rs (persistence) | ruv-swarm-persistence | 694 | 95% | DEEP | Production IndexedDB via rexie. Only get_storage_size() stub | R31 |
+
 ### ruv-swarm SWE-bench Adapter + CLI (ruv-FANN)
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
 | prompts.rs | ruv-swarm-adapter | 534 | 98% | DEEP | BEST quality file. 4 difficulty-based Claude Code prompts | R31 |
-| wasm.rs (persistence) | ruv-swarm-persistence | 694 | 95% | DEEP | Production IndexedDB via rexie. Only get_storage_size() stub | R31 |
+| evaluation.rs | swe-bench-adapter | 469 | 62% | DEEP | BIMODAL: git patch/test execution 85-95% REAL (TokioCommand, git apply, sandbox). Dataset loading 0% (mock instances, hardcoded results). SWE-Bench = theatrical evaluation | R50 |
 | loader.rs | ruv-swarm-adapter | 493 | 75% | DEEP | Difficulty scoring real. download_instance() returns MOCK data | R31 |
 | lib.rs (adapter) | ruv-swarm-adapter | 580 | 70% | DEEP | Framework complete. evaluate_instance() hardcoded mock | R31 |
+| spawn.rs | ruv-swarm-cli | 412 | 8-12% | DEEP | COMPLETE FACADE. ZERO process spawning — all 5 operations are tokio::time::sleep() delays. Agents = JSON metadata objects. Comment admits "In a real implementation". DEFINITIVELY CONFIRMS R31 | R50 |
 | init.rs | ruv-swarm-cli | 538 | 65% | DEEP | Interactive config real. Actual spawning simulated (sleep) | R31 |
 | status.rs | ruv-swarm-cli | 687 | 60% | DEEP | Display logic production-ready. Loads stale JSON not live state | R31 |
 | orchestrate.rs | ruv-swarm-cli | 662 | 45% | DEEP | 4 strategies architecturally correct. execute_subtask() sleeps 1-2s | R31 |
@@ -253,6 +273,15 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
 | lib.rs | claude-parser | 788 | 85-88% | DEEP | Claude Code stream-json parser. Metric estimates hardcoded. 8 tests | R31 |
+
+### ruv-swarm Claude Integration (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| claude-integration/index.js | ruv-swarm | 209 | 72% | DEEP | MIXED — orchestrator wiring core/docs/remote. No real API calls, delegates to Claude CLI via execSync | R43 |
+| claude-integration/advanced-commands.js | ruv-swarm | 561 | 83% | DEEP | REAL GENERATOR — creates 9 markdown files in .claude/commands/. Content is aspirational templates | R43 |
+| claude-integration/remote.js | ruv-swarm | 408 | 15% | DEEP | COMPLETE FACADE — zero network transport. Generates local wrapper scripts (bash/batch/PowerShell). "Remote" = SSH env detection only | R43 |
+| claude-integration/docs.js | ruv-swarm | 1,548 | 78% | DEEP | GENUINE GENERATOR — real file merging, backups, writes 20+ command files. 41% functional code, 32% templates | R43 |
 
 ### Python ML Training (sublinear-time-solver)
 
@@ -308,6 +337,15 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | C30 | **All Python training data synthetic** — Accuracy claims unvalidated | train_ensemble_improved.py +4 | R33 | Open |
 | C31 | **All JS neural models lack backpropagation** — 4 files implement correct forward passes but no gradients. Training is facade | lstm.js, transformer.js, gnn.js, base.js | R40 | Open |
 | C32 | **Rust workflow execution SIMULATION** — claude_integration.rs execute_workflow() hardcodes 500 tokens | claude_integration.rs | R37 | Open |
+| C33 | **remote.js COMPLETE MISDIRECTION** — filename implies network transport but contains ZERO network code. Only local wrapper script generation | remote.js | R43 | Open |
+| C34 | **neural.js WASM delegation with ignored results** — calls neural_train()/neural_status() but immediately overwrites return values with Math.random() formulas. ALL training/export/patterns fabricated | neural.js | R45 | Open |
+| C35 | **performance-benchmarks.js neural/Claude/parallel sections are setTimeout facades** — claims to benchmark neural networks but uses simulateNeuralInference (Math.random() weights), ClaudeFlow coordination faked with setTimeout | performance-benchmarks.js | R45 | Open |
+| C36 | **mcp-workflows.js orphaned client** — genuine JSON-RPC 2.0 client connects to ws://localhost:3000/mcp, but Rust MCP server has handlers disabled (R31 C24). Working client for non-existent server | mcp-workflows.js | R45 | Open |
+| C37 | **claude-simulator.js proves self-contained demo loop** — docker-compose wires simulator to test/docker-mcp-validation.js (NOT real MCP server). DEFINITIVE proof of R31 "demonstration framework" | claude-simulator.js | R45 | Open |
+| C38 | **wasm-loader.js module manifest inflates capabilities** — declares 4 optional modules (neural, forecasting, swarm, persistence) marked exists:false. createBindingsApi() returns placeholder functions on total loading failure | wasm-loader.js | R45 | Open |
+| C39 | **path-security.ts ORPHANED** — 437 LOC of OWASP-compliant security code (canonicalization, null byte protection, symlink resolution, atomic writes) with ZERO imports found in AgentDB codebase. RuVectorBackend.ts reimplements its own validatePath() instead of using this module | path-security.ts | R48 | Open |
+| C40 | **spawn.rs ZERO process spawning** — 412 LOC named "spawn" but contains ZERO tokio::process, std::process, or fork/exec calls. All 5 runtime operations are tokio::time::sleep() delays. Comment "In a real implementation" at line 366 acknowledges simulation. Agents = JSON metadata objects with unpopulatable metrics. DEFINITIVELY CONFIRMS R31 "demonstration framework" in Rust | spawn.rs | R50 | Open |
+| C41 | **SWE-Bench evaluation uses mock dataset** — download_instance() returns hardcoded "mock/repo" with fabricated fields. Benchmarking simulates via sleep(10ms). Hardcoded ExecutionResult (output="Mock execution output", exit_code=0). SAME pattern as R43 rustc_benchmarks | evaluation.rs | R50 | Open |
 
 ### 3b. HIGH Findings
 
@@ -346,6 +384,17 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | H31 | **DAA duplicate DAACoordinator struct** — bin vs lib versions, potential field drift | bin/daa-coordinator.rs, lib.rs (DAA) | R34 | Open |
 | H32 | **MultiDatabaseCoordinator sync entirely simulated** — No actual network I/O | MultiDatabaseCoordinator.js | R33 | Open |
 | H33 | **JS neural models ZERO Rust/WASM connection** — Pure JS with no bindings to Rust crate | lstm.js +3 | R40 | Open |
+| H34 | **sqlite-pool.js GENUINE production infrastructure** — 92% real, WAL mode, worker threads, health monitoring, auto-recovery. PARTIALLY REVERSES R31 | sqlite-pool.js | R45 | Open (positive) |
+| H35 | **wasm-loader.js genuine WASM loader** — 82% real, WebAssembly.instantiate(), wasm-bindgen integration, 4-strategy path resolution for different deployment scenarios | wasm-loader.js | R45 | Open (positive) |
+| H36 | **performance-benchmarks.js split personality** — SIMD/WASM/browser tests real (78-95%), neural/Claude/parallel complete setTimeout facades (15-20%). Same deception pattern as R43 rustc_benchmarks but less severe (62% vs 15%) | performance-benchmarks.js | R45 | Open |
+| H37 | **mcp-workflows.js production-quality client code** — proper JSON-RPC 2.0 with ws library, real WebSocket reconnection. Would work immediately if Rust MCP server restored | mcp-workflows.js | R45 | Open (positive) |
+| H38 | **diagnostics.js genuine system monitoring** — Real process._getActiveHandles/Requests for event loop monitoring, error classification, hourly failure distribution, memory-at-failure correlation. Integrates with logging-config.js | diagnostics.js | R48 | Open (positive) |
+| H39 | **errors.js extensively used** — 26 import/usage sites in mcp-tools-enhanced.js (instanceof checks, ErrorFactory.createError calls). Real error boundaries between WASM, SQLite, neural, MCP layers | errors.js | R48 | Open (positive) |
+| H40 | **errors.js actionable suggestions** — ValidationError: type-specific checks (NaN for number, null for string). SwarmError: context-aware (not found→verify ID, capacity→increase maxAgents). NetworkError: HTTP status-specific (404→URL, 401→auth, 500→server logs). PersistenceError: SQLite-aware (constraint→duplicates, locked→retry) | errors.js | R48 | Open (positive) |
+| H41 | **memory.rs PRODUCTION PERSISTENCE** — 95-98% real. 28/28 Storage trait methods fully implemented. parking_lot::RwLock for concurrent access. Atomic task claiming, multi-dimensional event ordering (timestamp THEN id), auto-incrementing sequences. Used by concurrent_tests.rs (100 agents), property_tests.rs, security_tests.rs. FIRST 95%+ Rust file in ruv-swarm. PARTIALLY REVERSES R31 at persistence layer | memory.rs | R50 | Open (positive) |
+| H42 | **protocol.rs PRODUCTION WIRE PROTOCOL** — 92-95% real. MessagePack+JSON dual codecs via rmp_serde. Complete state machine (handshake/flow-control/compression/disconnect). Distributed RPC with UUID correlation IDs and TTL-based routing. Used by websocket.rs, shared_memory.rs, in_process.rs. Builder pattern for fluent API | protocol.rs | R50 | Open (positive) |
+| H43 | **simd_ops.rs real SIMD but downgraded** — 72-78%. Portable SIMD via `wide::f32x4` instead of ruvector-core's native intrinsics. 8 real operations but matrix multiply is pure scalar triple-loop. Real benchmarking infrastructure (SimdBenchmark) | simd_ops.rs | R50 | Open |
+| H44 | **SWE-Bench evaluation has REAL git infrastructure** — 85-95% real for sandbox creation (git clone --depth 1), patch application (git apply --check + git apply), test execution (TokioCommand with timeout), patch quality validation. Similar crate's TextDiff for comparison. Infrastructure works, data source mocked | evaluation.rs | R50 | Open (positive) |
 
 ## 4. Positives Registry
 
@@ -384,6 +433,18 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | **Real Bayesian optimization via scikit-optimize GP** | hyperparameter_optimizer.py | R33 |
 | **neuro-divergent training framework production-quality** — 8 schedulers, 16 loss functions, 4 optimizers for swarm agent optimization | scheduler.rs +5 | R36 |
 | **claude_integration.rs TokenBudget genuine budget enforcement** — Per-step allocation | claude_integration.rs | R37 |
+| **docs.js genuine documentation generator** — Real file merging, backup rotation, 20+ command file creation | docs.js | R43 |
+| **advanced-commands.js real file I/O** — Successfully generates 9 markdown command files | advanced-commands.js | R43 |
+| **sqlite-pool.js production connection pool** — 92% genuine, WAL mode, worker threads, health monitoring, auto-recovery, prepared statement caching. Backed by sqlite-worker.js + persistence-pooled.js | sqlite-pool.js | R45 |
+| **claude-simulator.js production MCP test infrastructure** — 88% genuine, real WebSocket client, Prometheus metrics, Winston logging, exponential backoff reconnection, 5 chaos injection modes | claude-simulator.js | R45 |
+| **generate-docs.js genuine documentation generator** — 87% real, regex-based source parsing, reads actual src/ files, extracts API signatures, generates 3 markdown output files | generate-docs.js | R45 |
+| **wasm-loader.js genuine WASM loader** — 82% real, WebAssembly.instantiate(), wasm-bindgen integration, 4-strategy path resolution, module caching with TTL | wasm-loader.js | R45 |
+| **mcp-workflows.js genuine JSON-RPC 2.0 client** — 72% real, proper request/response correlation, 5 structured workflows, would work if server existed | mcp-workflows.js | R45 |
+| **diagnostics.js genuine system monitoring** — 87% real, collects real metrics (memory, CPU, event loop), pattern detection with actionable recommendations, self-test harness | diagnostics.js | R48 |
+| **errors.js complete error taxonomy** — 90% real, 11 typed error classes with context-aware suggestions, ErrorFactory pattern, used extensively (26 sites in mcp-tools-enhanced.js) | errors.js | R48 |
+| **memory.rs production persistence** — 95-98% real. 28/28 Storage trait, atomic task claiming, three-backend architecture (Memory/SQLite/WASM). FIRST 95%+ ruv-swarm Rust file. Extensively tested (100 concurrent agents) | memory.rs | R50 |
+| **protocol.rs production wire protocol** — 92-95% real. MessagePack+JSON, complete state machine, distributed RPC with UUID IDs, TTL routing. Used by 3 transport backends | protocol.rs | R50 |
+| **SWE-Bench git infrastructure genuine** — 85-95% real patch application, sandboxing, test execution via TokioCommand. Dataset is mocked but infrastructure production-ready | evaluation.rs | R50 |
 
 ## 5. Subsystem Sections
 
@@ -470,6 +531,12 @@ The ruv-swarm npm package (R16, R29, R33) demonstrates an **inverted quality gra
 
 The JS layer correctly delegates to WASM/native backends via MCP tools — the problem is those backends don't compute (neural_swarm_coordinator.rs returns hardcoded loss curves, learning_integration.rs optimization algorithms return pattern.clone()).
 
+**R45+R48 npm operational layer** (9 files, 6,270 LOC, ~76% weighted average): Confirms the inverted quality gradient at the npm package level. sqlite-pool.js (587 LOC, 92%) is a genuine production connection pool — WAL mode, separate read/write connections, worker thread pool, health monitoring with EventEmitter, auto-recovery, and prepared statement caching. wasm-loader.js (602 LOC, 82%) has real WebAssembly.instantiate() with wasm-bindgen integration and 4-strategy path resolution (local/npm/global/inline), but creates facade placeholder API as last-resort fallback. neural.js (574 LOC, 28%) introduces a NEW anti-pattern: "WASM delegation with ignored results" — it calls neural_train() but immediately overwrites return values with Math.random() formulas, making the WASM call purely performative. performance-benchmarks.js (899 LOC, 62%) has real SIMD/WASM/browser benchmarks (78-95%) but complete setTimeout facades for neural/Claude/parallel tests (15-20%). mcp-workflows.js (991 LOC, 72%) is a genuine JSON-RPC 2.0 WebSocket client with proper request/response correlation, but is orphaned — the Rust MCP server it expects has disabled handlers (R31 C24). generate-docs.js (954 LOC, 87%) parses real source files via regex extraction. claude-simulator.js (602 LOC, 88%) is production-quality MCP test infrastructure (Prometheus, Winston, chaos injection) but its docker-compose reveals the self-contained demo loop — simulator connects to test/docker-mcp-validation.js, not real MCP server.
+
+**R48 additions**: diagnostics.js (533 LOC, 87%) is genuine system diagnostics — collects real metrics (process.memoryUsage, process.cpuUsage, performance.now, process._getActiveHandles/_getActiveRequests for event loop monitoring), performs error classification with hourly failure distribution, provides actionable recommendations (failure rate >10%, memory >500MB, handle count >50), includes self-test harness, used by cli-diagnostics.js. errors.js (528 LOC, 90%) is a genuine error taxonomy with 11 typed error classes defining clear boundaries between WASM, SQLite, neural, MCP, network, and concurrency layers. Each error class has context-aware getSuggestions() (e.g., ValidationError checks expectedType, SwarmError checks error context, NetworkError checks HTTP status). ErrorFactory provides single entry point for error creation + wrapping. **Used extensively** by mcp-tools-enhanced.js (26 import/usage sites).
+
+These two files **complete the ruv-swarm npm source picture**. The genuine infrastructure layer now totals 8 files (sqlite-pool 92%, errors 90%, simulator 88%, docs 87%, diagnostics 87%, claude-flow-enhanced 85%, wasm-loader 82%, mcp-workflows 72%) vs 1 facade (neural 28%). Infrastructure-to-facade ratio: **8:1 genuine**.
+
 ### 5i. Neural Models
 
 **JS neural models (R40)**: 4 files (lstm.js 85%, transformer.js 83%, gnn.js 81%, base.js 75%) implement genuine neural network algorithms — not facades. Correct 4-gate LSTM (Hochreiter 1997), multi-head attention with sinusoidal positional encoding (Vaswani 2017), MPNN with GRU-gated updates (Gilmer 2017). Math is correct for forward passes. However, **no file implements backpropagation**. Training runs forward passes and computes loss, but backward() inherited from base class is a console.log stub. Weights never update. Two files return hardcoded accuracy values (lstm.js 0.864, gnn.js 0.96). ZERO connection to Rust neural-network-implementation crate — no WASM, no NAPI, no FFI bindings. Pure standalone JS. The JS neural models are inference-only counterparts to production Rust implementations. Genuine algorithmic understanding but cannot train models.
@@ -555,6 +622,9 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 ### R34 (2026-02-15): DAA runtime + MCP limits + transport
 5 files, ~2,200 LOC. DAA runtime 67% (5 traits ZERO implementations, orchestrate_task facade). limits.rs 90% (absurd defaults). in_process.rs 92% BEST transport.
 
+### R50 (2026-02-15): ruv-swarm Rust crates first look
+5 files, 2,113 LOC, ~45 findings. **Same infrastructure-vs-intelligence split as JS**: memory.rs (95-98%) PRODUCTION-QUALITY with 28/28 Storage trait methods and parking_lot concurrency. protocol.rs (92-95%) production wire protocol with MessagePack+JSON dual codecs and distributed RPC. simd_ops.rs (72-78%) real portable SIMD via wide::f32x4 but 20-25pp gap vs ruvector-core. spawn.rs (8-12%) COMPLETE FACADE — zero process spawning, all 5 ops are tokio::time::sleep() delays, "In a real implementation" comment at L366. evaluation.rs (62%) bimodal: git sandbox/test execution 85-95% real, dataset loading 0% mock. PARTIALLY REVERSES R31 for Rust infrastructure while DEFINITIVELY CONFIRMING it for CLI.
+
 ### R36 (2026-02-15): neuro-divergent training framework
 6 files, 7,187 LOC. Production ML (92-95% schedulers, 88-92% loss functions, 90-93% optimizers). validate_seasonality() empty. See memory-and-learning domain.
 
@@ -563,3 +633,12 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R40 (2026-02-15): ruv-swarm neural model zoo JS
 4 files, 1,782 LOC. Real forward-pass (LSTM/Transformer/GNN), ZERO backpropagation. Hardcoded accuracy values. ZERO connection to Rust crate.
+
+### R43 (2026-02-15): ruv-swarm Claude Integration module
+4 files, 2,726 LOC, 58 findings. claude-integration/ is a **setup/documentation generation toolkit**, NOT a Claude API integration. Weighted average 69% real. index.js (72%) orchestrates 3 modules via execSync — no HTTP/fetch/streaming. advanced-commands.js (83%) genuinely creates 9 .claude/commands/ markdown files. docs.js (78%) has real file merging and backup rotation. remote.js (15%) is COMPLETE FACADE — zero network transport, just local wrapper scripts. Combined with R31+R41, confirms R31 "demonstration framework" verdict: ruv-swarm generates documentation and wrappers, never executes runtime agent operations.
+
+### R45 (2026-02-15): ruv-swarm npm package operational layer
+7 files, 5,209 LOC, 149 findings (C:17 H:31 M:42 I:55). **Infrastructure vs. Intelligence split**: sqlite-pool (92%) and wasm-loader (82%) are genuine production infrastructure; neural.js (28%) introduces "WASM delegation with ignored results" anti-pattern. claude-simulator (88%) definitively proves self-contained demo loop via docker-compose. mcp-workflows (72%) is orphaned client for disabled server. performance-benchmarks (62%) has real SIMD tests but fabricated neural/Claude benchmarks. DEEP files: 879→895.
+
+### R48 (2026-02-15): ruv-swarm npm runtime completion + AgentDB security
+2 swarm files, 1,061 LOC. diagnostics.js (87%) genuine system monitoring — real process internals, pattern detection, actionable recommendations. errors.js (90%) complete error taxonomy — 11 typed classes, used extensively (26 sites). COMPLETES ruv-swarm npm source picture: 8:1 genuine infrastructure-to-facade ratio. Also: path-security.ts (88-92%) is ORPHANED — 437 LOC of OWASP-compliant security code with zero imports in entire AgentDB codebase.

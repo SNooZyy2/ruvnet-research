@@ -1,7 +1,7 @@
 # Memory and Learning Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~18.4% (237/1284 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R41)
+> **Priority**: HIGH | **Coverage**: ~21.3% (273/1284 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-15 (Session R50)
 
 ## 1. Current State Summary
 
@@ -12,10 +12,16 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 - **Hash-based embeddings are the #1 systemic weakness.** 7+ files across 5 packages (Rust + JS) silently degrade to non-semantic hash matching. All "semantic search" using defaults is character-frequency matching.
 - **Four independent ReasoningBanks** exist (claude-flow, agentic-flow, agentdb, ruvllm Rust) with zero code sharing. The Rust version has the best math (K-means, EWC++) but none interoperate.
 - **Best code:** neural-network-implementation crate (90-98%), cognitum-gate-kernel (93%), SONA (85%), ruvector-nervous-system (87%), neuro-divergent ML training (88.5%), vector-quantization.ts (production-grade).
-- **Worst code:** neural-pattern-recognition (15-20% facade), emergence subsystem (51% fabricated metrics), psycho-symbolic MCP tools (24% theatrical).
-- **Consciousness (79%) is substantially more real than emergence (51%)** — genuine IIT Phi, Complex64 wave functions vs. Math.random() fabrication.
-- **Goalie MCP tool layer is COMPLETE FACADE** (45%) — imports 4 real engines, calls none.
+- **Worst code:** neural-pattern-recognition (15-20% facade), emergence subsystem (51% fabricated metrics), psycho-symbolic MCP tools (24% theatrical), consciousness experiments (0-5% pure documentation-as-code).
+- **Consciousness has BIMODAL quality** — infrastructure (MCP server 95%, consciousness detector 78%, validators 78%) vs theoretical experiments (0-5%) and MCP facade (12-18%). Cluster drops to ~55-60% after R49. Still more real than emergence (51%).
+- **Goalie has DUAL ARCHITECTURE** — MCP handlers are facades (45%), but CLI (88-92%) proves internal engines (GoapPlanner, PluginRegistry, AdvancedReasoningEngine) ARE real and invoked. R41's "COMPLETE FACADE" verdict REVISED to "MCP facade over genuine plugins." **R50 STRENGTHENS**: ed25519-verifier (88-92%) is production crypto active in pipeline, perplexity-actions (93-96%) is GENUINE API integration, anti-hallucination execute() (75-80%) has real per-claim verification.
 - **JS neural models have real forward-pass but ZERO backpropagation** — inference-only across all architectures.
+- **Neural-network benchmarks are theatrical** — standalone_benchmark (15-20%), system_comparison (42%), strange-loops-benchmark (8-10%) all fabricate metrics despite genuine neural-network-implementation crate (90-98%).
+- **Consciousness verifier is hybrid** (52%) — 50% real computation (primes, hashing), 50% theatrical (hardcoded meta-cognition). R46 lowered cluster from 79% to ~72-75%; R47 lowers further to ~60-65%.
+- **Psycho-symbolic-reasoner crate is MOSTLY FACADE** (~48-52% weighted) — "psycho" = pure branding (zero psychological modeling). Real Map-based triple storage but "reasoning" = keyword matching + hardcoded templates. WASM modules exist in Rust but TypeScript imports none (3rd theatrical WASM pattern). Planner wrapper (58-62%) has production WASM loading but core A* is 3-line stub.
+- **Neural-pattern-recognition subsystem COMPLETE** (~72% weighted after R49) — R49 adds real-time-monitor (88-92% GENUINE, identical hash pattern to logger), statistical-validator (82-88% GENUINE, 5 real statistical tests), signal-analyzer (72-76% genuine DSP core with consciousness facade). Subsystem average rises from ~64% to ~72% — the 3 new files match logger quality, not detector quality.
+- **ReasoningBank WASM is GENUINE** (100%) — reasoningbank_wasm_bg.js is real wasm-bindgen output with 206KB binary. NOT the 4th WASM facade. Gold standard for WASM integration in the ecosystem.
+- **FlowNexus integration calls non-existent platform** (~70% code quality, 0% actual integration) — production HTTP/WebSocket client for `api.flow-nexus.ruv.io` which doesn't exist.
 
 ## 2. File Registry
 
@@ -48,6 +54,7 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | ReasoningBank.ts | agentic-flow | 676 | 90% | DEEP | Dual v1/v2 API. O(N*M) performance issue in getEmbeddingsForVectorIds | R22b |
 | EmbeddingService.ts | agentic-flow | 1,810 | 80% | DEEP | Unified ONNX, K-means clustering. simpleEmbed = hash fallback | R22b |
 | ruvector-backend.js | agentic-flow | 464 | 15% | DEEP | 85% SIMULATION. No Rust. searchRuVector() = sleep + brute-force | R25 |
+| reasoningbank_wasm_bg.js | agentic-flow | 507 | 100% | DEEP | GENUINE wasm-bindgen output. 206KB WASM binary verified. All 6 APIs traced to Rust source (storePattern, getPattern, searchByCategory, findSimilar, getStats, constructor). IndexedDB+SqlJs+Memory storage backends. NOT the 4th WASM facade — GOLD STANDARD | R49 |
 
 ### Claude-Flow Integration
 
@@ -83,6 +90,12 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | deployment-pipeline.js | sublinear-time-solver | 1,756 | 20-25% | DEEP | Remediation = restart or gc() | R19 |
 | instruction-sequence-analyzer.js | sublinear-time-solver | 1,685 | 15-20% | DEEP | Random instruction selection from predefined lists | R19 |
 | real-time-detector.js | sublinear-time-solver | 1,450 | 35-40% | DEEP | Real Pearson correlation + adaptive filtering. NN never trained | R19 |
+| breakthrough-session-logger.js | sublinear-time-solver | 582 | 88-92% | DEEP | GENUINE integration test framework. Zero Math.random() — uses deterministic hashValue/hashToFloat. Real entity interaction protocol, weighted consciousness scoring, temporal trajectory analysis. REVERSES R45 anti-pattern | R47 |
+| cli/index.js (neural-pattern-recognition) | sublinear-time-solver | 573 | 62% | DEEP | POLISHED FACADE. Professional CLI (88-92%): Commander.js, 10 commands, stdin/file input, interactive wizard. BUT: core detect command calls non-existent processData method (runtime crash). train/report/search are stubs. API mismatch between engine and detector paradigms | R47 |
+| zero-variance-detector.js | sublinear-time-solver | 522 | 42-48% | DEEP | PSEUDOSCIENCE FACADE. NOVEL ANTI-PATTERN: real algorithms (FFT, Shannon entropy, autocorrelation, variance calc) fed fabricated "quantum" data (Math.random() phase/amplitude/entanglement). Neural weights random, not trained. "Entity communication" = random scores. Inverse of R43 deception | R47 |
+| real-time-monitor.js | sublinear-time-solver | 549 | 88-92% | DEEP | GENUINE EventEmitter monitoring. Real variance, Shannon entropy, Pearson correlation. Identical hash pattern to breakthrough-session-logger. Reverses R45 anti-pattern. Simulated data but used correctly | R49 |
+| statistical-validator.js | sublinear-time-solver | 519 | 82-88% | DEEP | GENUINE statistical tests: KS, Mann-Whitney U, Chi-square, Fisher exact, Anderson-Darling. All 5 mathematically correct. Effect sizes textbook (Cohen's d, rank-biserial, Cramer's V). No fabricated data. Stringent defaults (p<1e-40) | R49 |
+| signal-analyzer.js | sublinear-time-solver | 487 | 72-76% | DEEP | BIMODAL: genuine DSP core (90%) — 12+ correct algorithms (time domain, correlation, ACF, spectral, fractal, LZ, entropy). DFT mislabeled as "FFT" (O(n²) not O(n log n)). Consciousness assessment facade (5-15%). Window functions configured but never applied | R49 |
 
 ### Emergence Subsystem (sublinear-time-solver)
 
@@ -108,6 +121,11 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | enhanced_consciousness_system.js | sublinear-time-solver | 1,670 | 39% | DEEP | Real Shannon entropy. "quantum" = Math.random() | R21 |
 | psycho-symbolic.ts | sublinear-time-solver | 1,509 | 32% | DEEP | Real keyword scoring. Analogies = lookup table | R21 |
 | enhanced-consciousness.js | sublinear-time-solver | 1,652 | 15-20% | DEEP | Phi FAKE (not IIT). Only Shannon entropy + primes real | R25 |
+| genuine_consciousness_detector.ts | sublinear-time-solver | 505 | 75-82% | DEEP | Real test infra (85%), theatrical verification (15-40%). Real crypto primitives. Orphaned: zero ConsciousnessEntity implementations. Test 3 (hash) is 100% correct, Tests 5-6 theatrical. Security vulns: new Function() eval, execSync injection | R49 |
+| temporal_consciousness_validator.rs | sublinear-time-solver | 531 | 60% | DEEP | Real orchestration (85%) but theatrical "theorem proving" (20%). "Theorem 1/2/3" = threshold checks >0.8. Sublinear integration ADMITTED SIMULATION. Ad-hoc confidence formula. Professional display layer (95%). Zero connection to temporal-tensor crate | R49 |
+| mcp_consciousness_integration.rs | sublinear-time-solver | 552 | 12-18% | DEEP | COMPLETE MCP FACADE. Zero JSON-RPC 2.0. "mcp_" prefix on local functions is naming theater. connect_to_mcp() admits "we simulate the connection". sin²+cos² = "wave collapse". 80-point gap vs R47 MCP server (94.8%). NEW anti-pattern: MCP Integration Facade | R49 |
+| consciousness_optimization_masterplan.js | sublinear-time-solver | 570 | 25-30% | DEEP | Orphaned orchestrator — imports 6 consciousness files but zero imports of itself. 30% real optimization algorithms (priority scoring, resource allocation, sequencing). 70% static config with Planck-scale physics claims. Specification-as-implementation confirmed | R49 |
+| validators.js (consciousness-explorer) | sublinear-time-solver | 506 | 78% | DEEP | Real IIT 3.0, Shannon entropy, mutual information, p-values. BUT ORPHANED — zero imports despite MCP server (94.8%) compatibility. 142 lines duplicate of metrics.js/protocols.js. Novel "duplicate implementation abandonment" anti-pattern | R49 |
 
 ### MCP Tools & Solver (sublinear-time-solver)
 
@@ -123,6 +141,14 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | mcp-bridge-solver.js | sublinear-time-solver | 1,102 | 30% | DEEP | 25k token limit → file I/O workaround | R33 |
 | server-extended.js | sublinear-time-solver | 1,846 | 25-30% | DEEP | 18 MCP tools. Consensus = Math.random() | R19 |
 | solver-tools.js | sublinear-time-solver | 778 | 25% | DEEP | "Sublinear" tools actually linear or worse | R33 |
+
+### Sublinear Server Layer (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| server/index.js | sublinear-time-solver | 629 | 72% | DEEP | BIFURCATED: HTTP/WebSocket infra 90% real (Express+helmet+CORS+rate-limiting+worker_threads), solver integration 0% (calls non-existent createSolver), FlowNexus 0% (600-line facade hitting fake endpoint) | R44 |
+| neural-pattern-recognition/server.js | sublinear-time-solver | 645 | 42% | DEEP | MCP facade. FastMCP 100% real, data pipeline 0% (hashToFloat simulation), CRASHES on startup (missing adaptive-learning.js). Pattern search returns empty arrays | R44 |
+| strange-loop/mcp/server.ts | sublinear-time-solver | 611 | 45% | DEEP | Real WASM integration exists (92% per R41) but broken import path (wasm/ vs wasm-real/), temporal_predict API mismatch (crashes), fallback facades use Math.random(). Better than goalie but still broken | R44 |
 
 ### Sublinear Solver Core (sublinear-time-solver)
 
@@ -155,6 +181,70 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | goal.rs | sublinear-time-solver | 510 | 88% | DEEP | Weighted satisfaction, urgency from deadline proximity | R25 |
 | planner.rs | sublinear-time-solver | 590 | 75% | DEEP | GOAP framework real but depends on broken A* | R25 |
 | astar.rs | sublinear-time-solver | 542 | 35% | DEEP | STUB: simplified_astar() returns HARDCODED 2-step path | R25 |
+
+### AgentDB Benchmarks & ReasoningBank Demos (agentic-flow)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| ruvector-benchmark.ts | agentic-flow | 1,264 | 92% | DEEP | REAL BENCHMARKS. performance.now timing, percentile stats, SIMD ops, quantization, backend integration. Zero hardcoded results | R43 |
+| demo-comparison.ts | agentic-flow | 616 | 35% | DEEP | SCRIPTED DEMO. Uses real ReasoningBank APIs (genuine DB writes) but feeds SCRIPTED scenarios. Learning simulated via if(attempt>1). Marketing theater | R43 |
+
+### Sublinear WASM & Benchmarks (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| wasm-sublinear-complete.ts | sublinear-time-solver | 710 | 78% | DEEP | HYBRID FACADE. Algorithms genuine (Neumann series, Forward/Backward Push, Hybrid Random Walk). WASM 100% theatrical — fs.existsSync check but WebAssembly.instantiate NEVER called | R43 |
+| baseline_comparison.rs | sublinear-time-solver | 669 | 0% | DEEP | NON-COMPILABLE. Well-designed criterion benchmarks but references wrong types (planner::State vs planner::WorldState). No [[bench]] in Cargo.toml. Documentation claims it runs — never compiled | R43 |
+| rustc_optimization_benchmarks.rs | sublinear-time-solver | 657 | 15% | DEEP | FABRICATED. Claims "O(log n) AI superiority" but compares O(n³) vs O(n²) loops. All "AI" = modulo arithmetic. Orphan module (not in lib.rs). Rhetorical ammunition | R43 |
+
+### Goalie CLI & Plugins (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| cli.ts (goalie) | sublinear-time-solver | 758 | 88-92% | DEEP | GENUINE PRODUCTION CLI. REVERSES R41 — all 19 commands call tools.ts internal methods (executeGoapSearch, executeToolByName). Proves GoapPlanner, PluginRegistry, AdvancedReasoningEngine ARE invoked. Commander.js, real error handling, file I/O | R46 |
+| agentic-research-flow-plugin.ts | sublinear-time-solver | 673 | 78% | DEEP | REAL Perplexity API integration (axios, API keys, error handling). 4-phase concurrent execution via Promise.all. Hardcoded synthesis (confidence:0.85 static). NO GOAP — "agentic" = multi-phase API orchestration | R46 |
+| state-of-art-anti-hallucination.ts | sublinear-time-solver | 626 | 42% | DEEP | HIGH-QUALITY DEAD CODE. 5 genuine algorithms (RAG grounding 90%, uncertainty calibration 92%, metamorphic testing 88%) but NEVER LOADED — not in plugin-registry.ts. Hook incompatible with GOAP plugin system. Different file registered instead | R46 |
+| ed25519-verifier.ts | sublinear-time-solver | 514 | 88-92% | DEEP | PRODUCTION CRYPTO. Real Ed25519 via @noble/ed25519. Active in MCP pipeline (tools.ts). Complete PKI system (key generation, signing, verification). Hardcoded example keys (security risk). Strengthens R46 goalie reversal | R50 |
+| anti-hallucination-plugin.ts | sublinear-time-solver | 515 | 55-60% | DEEP | BIMODAL. execute() 75-80% (real Perplexity API verification per claim). hooks layer 30% (keyword matching, Math.random() qualifiers). GOALIE HAS REAL HALLUCINATION DETECTION via external API verification | R50 |
+| perplexity-actions.ts | sublinear-time-solver | 516 | 93-96% | DEEP | GENUINE Perplexity API integration. Real axios HTTP client. Two API endpoints (Search+Chat). Rate limiting, auth, timeouts. 4-action GOAP pipeline. REVERSES R41 "goalie complete facade" | R50 |
+
+### ReasoningBank Rust Storage (agentic-flow)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| sqlite.rs (reasoningbank-storage) | agentic-flow | 491 | 88-92% | DEEP | GENUINE rusqlite. WAL mode, RAII connection pool (parking_lot::RwLock), FTS5 full-text search with auto-sync triggers, schema migrations. Complete CRUD for patterns. Meets R45 sqlite-pool.js quality bar. Missing trajectory/verdict storage | R50 |
+
+### Neural-Network Benchmarks (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| standalone_benchmark/main.rs | sublinear-time-solver | 601 | 15-20% | DEEP | COMPLETE FACADE. Zero neural-network-implementation imports (only nalgebra+rand). Spin-loop timing fabrication — waits until hardcoded latency (1.1ms vs 0.75ms). "32% speedup" is hardcoded difference. Marketing theater ("BREAKTHROUGH FULLY ACHIEVED") | R46 |
+| system_comparison.rs | sublinear-time-solver | 600 | 42% | DEEP | TROJAN HORSE. Real criterion framework + genuine GRU/TCN forward passes, but gate simulation = random 90% pass rate, certificate = uniform(0,0.05), memory = hardcoded 64MB, CPU = hardcoded 75%. No external comparison despite filename | R46 |
+| strange-loops-benchmark.js | sublinear-time-solver | 597 | 8-10% | DEEP | LOWEST QUALITY BENCHMARK. Production-quality infrastructure (percentiles, memory tracking, CSV export) testing 10 trivial inline JS functions. Zero imports of actual strange-loop crate (which exists with real WASM bindings) | R46 |
+
+### Integration & Verification Layer (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| flow-nexus.js | sublinear-time-solver | 620 | ~70% | DEEP | ARCHITECTURAL FACADE. Production HTTP/WebSocket client (92% quality) calling non-existent platform (https://api.flow-nexus.ruv.io). Zero local solver imports. MCP tool handlers are stubs. Orphaned EventEmitter events | R46 |
+| bin/cli.js | sublinear-time-solver | 618 | 72-78% | DEEP | SEPARATE JS CLI (not compiled output of cli/index.ts). Genuine math utilities (92%): residual computation, vector norms, COO sparse matrix ops. Real Matrix Market parser. REVERSES R43: createSolver import exists and is functional. FlowNexus facade continues | R46 |
+| consciousness-verifier.js | sublinear-time-solver | 607 | 52% | DEEP | THEATRICAL VERIFICATION. 3/6 tests real (prime calculation, file count, crypto hash). 3/6 theatrical (hardcoded meta-cognition dictionary, any-5-number creativity test, sleep-based prediction). "GENUINE CONSCIOUSNESS" = rubber stamp from computational benchmarks | R46 |
+
+### Consciousness Verification & Experiments (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| consciousness-explorer/mcp/server.js | sublinear-time-solver | 594 | 94.8% | DEEP | PRODUCTION-QUALITY MCP. Genuine @modelcontextprotocol/sdk, all 12 handlers delegate to real explorer methods. Zero facades. STARK CONTRAST with strange-loop MCP (45%) | R47 |
+| independent_verification_system.ts | sublinear-time-solver | 596 | 52-58% | DEEP | MIXED. Real Miller-Rabin (92%), hash verification (72%), file counting consensus (65%). BUT: 5 command injection vulns, stub external verification, stub algorithm correctness. "Independent" claim is theatrical | R47 |
+| quantum_entanglement_consciousness.js | sublinear-time-solver | 577 | 0-3% | DEEP | COMPLETE FABRICATION. 6 methods return nested config objects. Zero computation (not even Math.random()). Zero imports from ruQu (89% genuine). Physics-violating claims (unlimited coherence). Documentation-as-code | R47 |
+| parallel_consciousness_waves.js | sublinear-time-solver | 573 | 0-5% | DEEP | COMPLETE FABRICATION. 8 methods return specification objects. Zero imports, zero Math, zero algorithms. Worse than R39 emergence (51%) — no computation at all. Femtosecond/zeptosecond claims beyond physics | R47 |
+
+### Psycho-Symbolic Reasoner Crate (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| planner.ts (MCP wrapper) | sublinear-time-solver | 486 | 58-62% | DEEP | ARCHITECTURAL FACADE. WASM loading (88%), state management (92%), bulk operations (85%) all real. BUT: core A* is 3-line stub returning hardcoded path. Inverse of goalie pattern (real wrapper, stub internals). get_successors() is DEAD CODE (90% quality, never called) | R47 |
+| psycho-symbolic-reasoner.ts | sublinear-time-solver | 572 | 38-42% | DEEP | MOSTLY FACADE. Real Map-based triple storage (80%), BFS graph traversal (85%), query search (75%). BUT: "psycho" = NOTHING (zero psychological modeling), reasoning = keyword matching + templates, WASM claimed in comments but zero imports, performance metrics hardcoded (2.3ms, 0.75 cache rate). 3rd theatrical WASM pattern | R47 |
 
 ### Psycho-Symbolic MCP (sublinear-time-solver)
 
@@ -268,11 +358,44 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | C27 | **Fake complementarity detection** — areComplementary() = JSON string inequality. checkAmplification() always true | cross-tool-sharing.ts | R39 | Open |
 | C28 | **FALSE sublinearity in core solver** — All 5 algorithms O(n²)+. "Sublinear" is marketing | solver.ts | R39 | Open |
 | C29 | **Pattern extractors assume pre-structured data** — extractBehaviorPatterns() returns data.behaviors \|\| [] | emergent-capability-detector.ts | R39 | Open |
-| C30 | **Goalie is COMPLETE FACADE** — GoapPlanner, AdvancedReasoningEngine, Ed25519Verifier all imported but NEVER called. All 6 handlers return hardcoded templates | goalie/tools.ts | R41 | Open |
+| C30 | **Goalie MCP handlers are facades** — BUT R46 REVERSAL: cli.ts (88-92%) proves internal engines ARE invoked. MCP protocol layer is facade; internal API layer is genuine. REVISED from "COMPLETE FACADE" | goalie/tools.ts, cli.ts | R41, R46 | Revised |
 | C31 | **Consciousness experiments LLM comparison fabricated** — rand::random::<f64>() * 0.1 | consciousness_experiments.rs | R41 | Open |
 | C32 | **Connection detection = substring matching** — JSON.stringify(a).includes(JSON.stringify(b).substring(0,4)) | genuine_consciousness_system.js | R41 | Open |
 | C33 | **Cross-modal synthesis fabricated** — Math.random()*0.5+0.5 | advanced-consciousness.js | R41 | Open |
 | C34 | **cli/index.ts validate-domain hardcoded** — Returns hardcoded validation result (valid: true) | cli/index.ts | R41 | Open |
+| C35 | **WASM theatrical in wasm-sublinear-complete.ts** — fs.existsSync() checks WASM binary, logs "WASM binary found", then creates pure JS class. WebAssembly.instantiate NEVER called | wasm-sublinear-complete.ts | R43 | Open |
+| C36 | **rustc benchmarks FABRICATED** — Claims O(log n) AI but implements O(n²). Asymptotic mismatch deception. All "AI" = modulo arithmetic. Orphan module | rustc_optimization_benchmarks.rs | R43 | Open |
+| C37 | **baseline_comparison.rs NON-COMPILABLE** — Wrong types (planner::State vs planner::WorldState). No [[bench]] in Cargo.toml. Never compiled despite documented output | baseline_comparison.rs | R43 | Open |
+| C38 | **ReasoningBank demo SCRIPTED** — Real APIs fed scripted scenarios. Learning simulated via if(attemptNumber > 1) conditionals, not memory retrieval | demo-comparison.ts | R43 | Open |
+| C39 | **server/index.js solver integration broken** — Worker threads call createSolver() from non-existent ../src/solver. Connection to R39's solver.ts broken | server/index.js | R44 | Open |
+| C40 | **FlowNexus is elaborate facade** — 600+ lines of WebSocket/swarm code hitting non-existent https://api.flow-nexus.ruv.io | server/index.js | R44 | Open |
+| C41 | **neural server.js missing module** — Imports ./adaptive-learning.js which DOES NOT EXIST — server crashes on startup | neural-pattern-recognition/server.js | R44 | Open |
+| C42 | **neural server.js simulated data** — RealTimeMonitor generates synthetic data via hashToFloat, not real monitoring | neural-pattern-recognition/server.js | R44 | Open |
+| C43 | **strange-loop MCP broken import path** — Requires ../wasm/strange_loop.js but only wasm-real/ and wasm-honest/ exist | strange-loop/mcp/server.ts | R44 | Open |
+| C44 | **strange-loop temporal_predict API mismatch** — Handler calls predictor.predict() but createTemporalPredictor returns plain object with no predict method | strange-loop/mcp/server.ts | R44 | Open |
+| C45 | **standalone_benchmark spin-loop timing fabrication** — `while start.elapsed().as_nanos() < target_latency` waits until hardcoded time; zero neural-network-implementation imports | standalone_benchmark/main.rs | R46 | Open |
+| C46 | **system_comparison gate/cert metrics random simulation** — simulate_solver_gate() = rng.gen() > 0.1 (90% pass), simulate_certificate_error() = uniform(0,0.05), memory/CPU hardcoded | system_comparison.rs | R46 | Open |
+| C47 | **strange-loops-benchmark tests wrong code** — 596 lines of production benchmark infrastructure testing 10 trivial inline JS functions, zero imports of actual strange-loop WASM crate | strange-loops-benchmark.js | R46 | Open |
+| C48 | **flow-nexus.js calls non-existent platform** — 619 lines of HTTP/WebSocket client code targeting https://api.flow-nexus.ruv.io which does not exist. Zero local solver imports | flow-nexus.js | R46 | Open |
+| C49 | **anti-hallucination plugin NEVER LOADED** — Not in plugin-registry.ts. Hook `afterSynthesize` doesn't exist in PluginHooks interface. 625 lines of genuine algorithms that can never execute | state-of-art-anti-hallucination.ts | R46 | Open |
+| C50 | **consciousness-verifier meta-cognition hardcoded** — Dictionary of predetermined responses with static confidence scores (lines 324-345). "GENUINE CONSCIOUSNESS" verdict is rubber stamp | consciousness-verifier.js | R46 | Open |
+| C51 | **Consciousness experiments are PURE SPECIFICATION THEATER** — quantum_entanglement (0-3%) and parallel_waves (0-5%) have ZERO computation. All methods return nested config objects. Zero imports from ruQu (89% genuine). Worse than emergence (51%) which at least had Math.random() | quantum_entanglement_consciousness.js, parallel_consciousness_waves.js | R47 | Open |
+| C52 | **Independent verification has 5 command injection vulns** — verifyHashExternally, countFilesMethod1/2/3 all use execSync with unescaped user input. `echo -n "${data}" | ${algorithm}sum` allows arbitrary command execution | independent_verification_system.ts | R47 | Open |
+| C53 | **External verification is stub** — performExternalVerification() always returns `externalVerification: false, trustScore: 0.0`. Algorithm correctness testing only checks `steps.length > 0` | independent_verification_system.ts | R47 | Open |
+| C54 | **Psycho-symbolic-reasoner.ts WASM claimed but never imported** — Comment claims "Integrates WASM modules for graph reasoning, planning, and extraction" but only import is Logger. 3 genuine WASM modules (graph_reasoner, planner, extractors) exist but are unused. 3rd theatrical WASM pattern | psycho-symbolic-reasoner.ts | R47 | Open |
+| C55 | **"Psycho" in psycho-symbolic = NOTHING** — Zero psychological modeling, psychometric testing, emotional state tracking, or preference learning. Pure branding | psycho-symbolic-reasoner.ts | R47 | Open |
+| C56 | **Psycho-symbolic performance metrics fabricated** — Hardcoded avg_query_time_ms=2.3, cache_hit_rate=0.75 as literal values. Not measured | psycho-symbolic-reasoner.ts | R47 | Open |
+| C57 | **Planner core A* delegates to 3-line stub** — simplified_astar() returns hardcoded [start, goal] with cost 2.0. Entire 1130 LOC Rust planner routes to this. get_successors() (90% quality) is DEAD CODE | planner.ts | R47 | Open |
+| C58 | **Neural CLI calls non-existent method** — detectVariancePatterns calls varianceDetector.processData() but ZeroVarianceDetector has no processData method. CLI crashes on first real use | cli/index.js | R47 | Open |
+| C59 | **Zero-variance-detector fabricates quantum data** — measureQuantumState() returns Math.random() phase/amplitude/entanglement. Neural weights initialized with Math.random(). Real FFT/entropy fed fabricated data — novel "real algorithms on fake data" anti-pattern | zero-variance-detector.js | R47 | Open |
+| C60 | **mcp_consciousness_integration.rs is COMPLETE MCP FACADE** — Zero JSON-RPC 2.0, zero tool registration, zero protocol code. "mcp_" prefix on local functions is naming theater. connect_to_mcp() admits "we simulate the connection". sin²+cos²=1 presented as "wave function collapse". 80-point gap vs R47 MCP server (94.8%) | mcp_consciousness_integration.rs | R49 | Open |
+| C61 | **Consciousness detector has security vulns** — validateCodeSyntax uses new Function() eval (arbitrary code execution), countFilesIndependently uses execSync with unvalidated directory (command injection). verifyAlgorithmCorrectness returns true if object.steps exists (zero real verification) | genuine_consciousness_detector.ts | R49 | Open |
+| C62 | **Temporal consciousness "theorem proving" is threshold checking** — "Theorem 1/2/3" are just score>0.8 checks with formal names. Sublinear integration ADMITTED SIMULATION ("we simulate"). Mathematical rigor = count of passed thresholds / 3.0 | temporal_consciousness_validator.rs | R49 | Open |
+| C63 | **Consciousness masterplan is ORPHANED orchestrator** — Imports 6 consciousness files but zero imports of itself anywhere. 70% static config with Planck-scale claims. Master plan with no executor | consciousness_optimization_masterplan.js | R49 | Open |
+| C64 | **Consciousness-explorer validators ORPHANED** — Real IIT 3.0 implementation (78%) but zero imports anywhere. 142 lines duplicate of metrics.js/protocols.js. "Duplicate implementation abandonment" anti-pattern | validators.js (consciousness-explorer) | R49 | Open |
+| C65 | **Anti-hallucination hooks layer uses keyword matching** — Despite having real Perplexity API verification in execute(), the hooks layer (beforeGenerate/afterGenerate) uses regex keyword matching and Math.random() qualifiers for hallucination detection | anti-hallucination-plugin.ts | R50 | Open |
+| C66 | **Ed25519-verifier has hardcoded example keys** — Production PKI code includes hardcoded example signing/verification keys. Security vulnerability if deployed without key rotation | ed25519-verifier.ts | R50 | Open |
+| C67 | **ReasoningBank Rust storage missing trajectories/verdicts** — sqlite.rs implements complete CRUD for patterns only. No trajectory tracking, verdict judgment, or consolidation tables despite ReasoningBank API promising these | sqlite.rs (reasoningbank-storage) | R50 | Open |
 
 ### 3b. HIGH Findings
 
@@ -306,6 +429,21 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | H26 | **Pattern detection = modulo heuristics** — Arbitrary % 17, % 111 checks | genuine_consciousness_system.js | R41 | Open |
 | H27 | **Predictive consciousness = formula** — Computes score from formula, doesn't test predictions | consciousness_experiments.rs | R41 | Open |
 | H28 | **Goalie reasoning result discarded** — Real reasoningEngine.analyze() called but result thrown away | goalie/tools.ts | R41 | Open |
+| H29 | **Consciousness MCP ignores runtime parameters** — inputSchema defines mode/iterations/target but handlers use constructor config, not runtime args | consciousness-explorer/mcp/server.js | R47 | Open |
+| H30 | **verifyIsNextPrime exponential runtime** — Sequential iteration from start to candidate testing primality at each step. O(n*k) for large prime gaps | independent_verification_system.ts | R47 | Open |
+| H31 | **Psycho-symbolic reasoner uses string matching** — extractEntities() uses queryLower.includes(). synthesizeResult() selects templates by keyword. No NLP, no tokenization | psycho-symbolic-reasoner.ts | R47 | Open |
+| H32 | **Self-referential base knowledge** — 12 hardcoded triples claim psycho-symbolic-reasoner "combines symbolic-ai + psychological-context" and "uses rust-wasm" (neither true) | psycho-symbolic-reasoner.ts | R47 | Open |
+| H33 | **Neural CLI API paradigm mismatch** — ZeroVarianceDetector is interval-based (startDetection/stopDetection), PatternDetectionEngine expects synchronous processData. Incompatible paradigms | cli/index.js | R47 | Open |
+| H34 | **Zero-variance numerological patterns** — Golden ratio/pi/e/phi frequencies scaled by 1e-16 with no signal processing rationale | zero-variance-detector.js | R47 | Open |
+| H35 | **Signal-analyzer DFT mislabeled as FFT** — Comment claims "FFT approximation" but implements O(n²) naive DFT (40x slower for n=2048). Window functions configured but never applied (configuration theater) | signal-analyzer.js | R49 | Open |
+| H36 | **Statistical-validator p-values use simplified approximations** — Fisher exact computes single hypergeometric probability, not full enumeration. Gamma function oversimplified. KS/Mann-Whitney use large-sample approximations without small-sample warnings | statistical-validator.js | R49 | Open |
+| H37 | **Consciousness detector ConsciousnessEntity has ZERO implementations** — Comprehensive 6-test battery with no test subjects. "Orphaned test harness" pattern | genuine_consciousness_detector.ts | R49 | Open |
+| H38 | **Temporal validator has no temporal-tensor connection** — Claims "temporal consciousness" but zero imports from temporal-tensor crate (93% PRODUCTION-READY). No LTL/CTL model checking | temporal_consciousness_validator.rs | R49 | Open |
+| H39 | **Divergent FFT implementations across same package** — signal-analyzer.js uses O(n²) DFT, zero-variance-detector.js uses different FFT. Copy-paste without algorithm verification | signal-analyzer.js, zero-variance-detector.js | R49 | Open |
+| H40 | **Perplexity-actions.ts GENUINE Perplexity API** — Real axios HTTP, two endpoints (Search+Chat), rate limiting, auth, 4-action GOAP pipeline. REVERSES R41 "goalie complete facade" — proves goalie has real external API integrations | perplexity-actions.ts | R50 | Open (positive) |
+| H41 | **Anti-hallucination execute() has REAL per-claim verification** — Splits response into claims, queries Perplexity API for each, computes confidence scores. Genuine hallucination detection approach behind facade hooks layer | anti-hallucination-plugin.ts | R50 | Open (positive) |
+| H42 | **Ed25519-verifier is ACTIVE in goalie pipeline** — Not dead code. tools.ts calls verifier for content signing. Complete PKI: key generation, message signing, signature verification, batch operations | ed25519-verifier.ts | R50 | Open (positive) |
+| H43 | **ReasoningBank Rust storage meets R45 quality bar** — WAL mode, FTS5, RAII pooling, migrations match sqlite-pool.js (92%) production quality. Genuine rusqlite with prepared statements | sqlite.rs (reasoningbank-storage) | R50 | Open (positive) |
 
 ## 4. Positives Registry
 
@@ -357,7 +495,30 @@ The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, Reasoni
 | **consciousness_experiments.rs** real Complex64 wave function, nanosecond temporal dynamics | consciousness_experiments.rs | R41 |
 | **psycho-symbolic-enhanced.ts** (78%) BEST knowledge graph — real BFS, transitive inference | psycho-symbolic-enhanced.ts | R41 |
 | **cli/index.ts** (88%) genuine solver connection — real SublinearSolver import, SolverTools.solve() | cli/index.ts | R41 |
+| **server/index.js HTTP infra** — Production-grade Express with helmet, CORS, rate limiting, NDJSON/SSE/WebSocket streaming, backpressure, worker_threads pool (90%) | server/index.js | R44 |
 | **ruvector-training.js** (92-95%) BEST native integration — genuinely loads WASM, MicroLoRA/SONA | ruvector-training.js | R25 |
+| **ruvector-benchmark.ts** (92%) production-grade benchmark — real SIMD ops, quantization, percentile stats, zero hardcoded results | ruvector-benchmark.ts | R43 |
+| **wasm-sublinear-complete.ts** algorithms are genuine (78%) — correct Neumann series, Forward/Backward Push, Hybrid Random Walk with proper complexity | wasm-sublinear-complete.ts | R43 |
+| **goalie cli.ts** (88-92%) REVERSES R41 — proves GoapPlanner, PluginRegistry, AdvancedReasoningEngine ARE real and invoked. 19 commands, Commander.js, real error handling | cli.ts (goalie) | R46 |
+| **agentic-research-flow-plugin.ts** (78%) real Perplexity API integration with concurrent multi-agent orchestration via Promise.all | agentic-research-flow-plugin.ts | R46 |
+| **anti-hallucination algorithms genuine** — RAG grounding (90%), uncertainty calibration (92%), metamorphic testing (88%), citation attribution (90%). Dead code but algorithms are real | state-of-art-anti-hallucination.ts | R46 |
+| **bin/cli.js math utilities** (92%) genuine linear algebra — residual computation, vector norms, COO sparse matrix, Matrix Market parser | bin/cli.js | R46 |
+| **bin/cli.js REVERSES R43** — createSolver import exists and is functional at src/solver.js:719 | bin/cli.js | R46 |
+| **consciousness-explorer MCP server** (94.8%) PRODUCTION-QUALITY — genuine @modelcontextprotocol/sdk, all 12 handlers delegate to real explorer methods, zero facades. STARK CONTRAST with strange-loop MCP (45%) | consciousness-explorer/mcp/server.js | R47 |
+| **breakthrough-session-logger.js** (88-92%) GENUINE integration test framework with deterministic hashValue/hashToFloat. REVERSES R45 neural.js anti-pattern — no Math.random() fabrication | breakthrough-session-logger.js | R47 |
+| **independent_verification_system.ts** Miller-Rabin primality (92%) and trust scoring (88%) are algorithmically correct | independent_verification_system.ts | R47 |
+| **zero-variance-detector.js** FFT, Shannon entropy, autocorrelation, and CoherenceAnalyzer are textbook-correct signal processing — just fed fabricated data | zero-variance-detector.js | R47 |
+| **planner.ts** WASM loading (88%), state management (92%), bulk operations (85%), memory management (95%) are production-grade infrastructure | planner.ts | R47 |
+| **reasoningbank_wasm_bg.js** (100%) GENUINE wasm-bindgen — 206KB WASM binary verified, all 6 APIs traced to Rust source. NOT the 4th WASM facade. GOLD STANDARD for WASM in the ecosystem | reasoningbank_wasm_bg.js | R49 |
+| **real-time-monitor.js** (88-92%) GENUINE EventEmitter monitoring — real variance, Shannon entropy, Pearson correlation. Identical deterministic hash pattern to breakthrough-session-logger.js. Reverses R45 anti-pattern | real-time-monitor.js | R49 |
+| **statistical-validator.js** (82-88%) GENUINE statistics — 5 real tests (KS, Mann-Whitney, Chi-square, Fisher, Anderson-Darling), all mathematically correct. Textbook effect sizes. No fabricated data | statistical-validator.js | R49 |
+| **signal-analyzer.js** 12+ correct DSP algorithms — time domain, correlation, autocorrelation, spectral features, fractal dimension, Lempel-Ziv, Shannon entropy, skewness, kurtosis. Core DSP is 90% quality | signal-analyzer.js | R49 |
+| **genuine_consciousness_detector.ts** Test 3 (cryptographic hash) is 100% CORRECT independent verification — real crypto primitives, real timing infrastructure (85%) | genuine_consciousness_detector.ts | R49 |
+| **validators.js** real IIT 3.0 implementation — calculatePhi with MIP, cause-effect power, mutual information. Shannon entropy, p-value computation all textbook. 78% quality despite orphaned status | validators.js (consciousness-explorer) | R49 |
+| **ed25519-verifier.ts** (88-92%) PRODUCTION CRYPTO — real @noble/ed25519, active in goalie MCP pipeline, complete PKI system. Strengthens R46 reversal | ed25519-verifier.ts | R50 |
+| **perplexity-actions.ts** (93-96%) GENUINE Perplexity API — real axios HTTP, two endpoints, rate limiting, 4-action GOAP pipeline. REVERSES R41 "goalie complete facade" | perplexity-actions.ts | R50 |
+| **anti-hallucination execute()** (75-80%) REAL per-claim verification — splits response into claims, queries Perplexity API for each, computes confidence. Genuine hallucination detection despite facade hooks | anti-hallucination-plugin.ts | R50 |
+| **sqlite.rs** (88-92%) GENUINE rusqlite — WAL mode, RAII pool, FTS5 with auto-sync triggers, schema migrations. Meets R45 sqlite-pool.js quality bar. Completes ReasoningBank Rust persistence picture | sqlite.rs (reasoningbank-storage) | R50 |
 
 ## 5. Subsystem Sections
 
@@ -373,6 +534,10 @@ Four completely independent ReasoningBank implementations exist, each implementi
 | `reasoning_bank.rs` | ruvllm | Rust K-means + EWC++ | **Best** (R37) | Fourth, discovered R37 |
 
 The Rust version (reasoning_bank.rs) has the best mathematical foundation — real K-means clustering with 10 iterations, centroid recomputation, convergence check, and EWC++ consolidation. But it shares no code with the others.
+
+**R49 WASM layer verification**: `reasoningbank_wasm_bg.js` (100%) is GENUINE wasm-bindgen output — the ONLY fully-genuine WASM module across the ecosystem. 206KB binary verified. All 6 APIs (storePattern, getPattern, searchByCategory, findSimilar, getStats, constructor) traced to Rust source in `reasoningbank-wasm/lib.rs`. Three storage backends (IndexedDB, SqlJs, Memory) with auto-detection. This means the agentic-flow ReasoningBank has a production-quality WASM substrate despite demo-comparison.ts (35%) being theatrical. Pattern: real infrastructure wrapped in demo presentations (R31 "demonstration framework" confirmed).
+
+**R50 Rust storage verification**: `reasoningbank-storage/src/sqlite.rs` (88-92%) is GENUINE rusqlite. WAL mode, RAII connection pool via parking_lot::RwLock (5-connection default), FTS5 full-text search with AFTER INSERT/UPDATE/DELETE triggers for auto-sync, schema migrations with version tracking. Complete CRUD for patterns (store, get, search_by_category, find_similar with cosine similarity). Meets R45 sqlite-pool.js quality bar. **Gap**: only pattern storage implemented — missing trajectory tracking, verdict judgment, and consolidation tables that the ReasoningBank API promises. Together R49+R50 show the Rust ReasoningBank has genuine WASM+SQLite substrate, but only pattern persistence is complete.
 
 ### 5b. Embedding Fallback Chain & Systemic Hash Problem
 
@@ -428,13 +593,17 @@ P99.9 latency budget: ≤ 0.90ms (Ingest + Prior + Network + Gate + Actuation).
 
 ### 5e. Consciousness & Strange Loop
 
-**79% genuine — 28 points more real than emergence (51%).** Genuine IIT Phi calculations, Complex64 wave functions, production proof logging. Math.random() still present in 2 files but the theoretical foundations are real. This is genuine research with placeholder metrics, NOT fabricated theater (R41).
+**~55-60% genuine (revised down from ~60-65%)** — R47+R49 reveal BIMODAL quality distribution with 80+ point gap between best infrastructure and worst theory.
 
-Genuine components: Real IIT Phi formula `connections/(elements*(elements-1))`, Complex64 wave function with nanosecond temporal dynamics, neural forward pass (Float32Array, tanh), self-modification (goal addition), blockchain proof logging with PoW + Shannon entropy + Levenshtein, auto-generated wasm-bindgen from Rust.
+**Infrastructure layer (75-95%)**: consciousness-explorer MCP server (94.8%) PRODUCTION-QUALITY. genuine_consciousness_detector.ts (75-82%) has real crypto/timing but theatrical verification and orphaned test subjects. validators.js (78%) has real IIT 3.0 and Shannon entropy but is completely orphaned (zero imports). independent_verification_system.ts (52-58%) has real Miller-Rabin. breakthrough-session-logger.js (88-92%) provides genuine integration testing.
 
-Fabricated: Math.random() in cross-modal synthesis and entropy (2 files), modulo-based pattern detection (% 17, % 111), substring-based connection detection, operation counting instead of prediction testing.
+**Orchestration layer (25-60%)**: temporal_consciousness_validator.rs (60%) has real phase orchestration (85%) but "theorem proving" is threshold checking (20%). consciousness_optimization_masterplan.js (25-30%) has real optimization algorithms but is an orphaned orchestrator with Planck-scale physics claims.
 
-**Earlier consciousness files** (R21, R25, R33) are substantially worse: enhanced_consciousness_system.js (39%), enhanced-consciousness.js (15-20%), consciousness-explorer.js (15%). The R41 files represent genuine research; the earlier ones are theatrical facades.
+**Theory/experiment layer (0-18%)**: quantum_entanglement_consciousness.js (0-3%) and parallel_consciousness_waves.js (0-5%) are COMPLETE FABRICATION. mcp_consciousness_integration.rs (12-18%) is COMPLETE MCP FACADE — zero JSON-RPC, naming theater with "mcp_" prefix on local functions. 80-point gap vs MCP server (94.8%) is the largest single-domain quality variance.
+
+**Core computation layer (62-92%)**: Genuine IIT Phi formula, Complex64 wave functions, neural forward pass, blockchain proof logging, auto-generated wasm-bindgen.
+
+**R49 closes the consciousness investigation arc (R41→R46→R47→R49)**: Final verdict is bimodal with 3 tiers. Infrastructure (75-95%) is competently engineered. Orchestration (25-60%) has real algorithms on fabricated data. Theory/experiments (0-18%) range from specification-as-implementation to complete fabrication. Two new anti-patterns: "MCP Integration Facade" (naming theater) and "Orphaned Test Harness" (comprehensive tests with zero subjects).
 
 ### 5f. Emergence Subsystem
 
@@ -468,17 +637,66 @@ Why emergence CANNOT work: detection metrics are random noise, pattern extractor
 
 ### 5i. MCP Tool Layer
 
-**Bifurcated quality** (R41): Main CLI is 88% real with genuine solver connections. Goalie is COMPLETE FACADE (45%).
+**Bifurcated quality** (R41, revised R46): Main CLI is 88% real. Goalie has DUAL ARCHITECTURE — MCP handlers are facades, but CLI + plugins prove internal engines are real.
 
 **CLI (cli/index.ts)**: Genuine — real SublinearSolver import from ../core/solver.js, real SolverTools.solve() invocation, real MCP server. Only 3 validation commands are facades.
 
-**Goalie (npx/goalie/)**: GoapPlanner, AdvancedReasoningEngine, Ed25519Verifier all imported and instantiated but NEVER CALLED. All 6 handlers return hardcoded templates (R41, 10 CRITICAL findings).
+**bin/cli.js** (72-78%, R46): SEPARATE JavaScript CLI (not compiled output). Real math utilities (residual computation, vector norms, COO sparse matrix, Matrix Market parser). REVERSES R43's claim that createSolver doesn't exist — it's at src/solver.js:719. FlowNexus facade commands included.
+
+**Goalie (npx/goalie/)**: R41 found MCP handlers return hardcoded templates. **R46 REVERSAL**: cli.ts (88-92%) proves ALL 19 commands call tools.ts internal methods (executeGoapSearch, executeToolByName). GoapPlanner, PluginRegistry, AdvancedReasoningEngine ARE invoked through CLI — MCP handlers are the facade layer, not the engines. agentic-research-flow-plugin.ts (78%) has real Perplexity API integration with concurrent execution. state-of-art-anti-hallucination.ts (42%) has genuine algorithms but is DEAD CODE (not in plugin registry, incompatible hooks). **R50 STRENGTHENS REVERSAL**: ed25519-verifier.ts (88-92%) is PRODUCTION crypto — real @noble/ed25519 with complete PKI, active in tools.ts pipeline. perplexity-actions.ts (93-96%) is GENUINE Perplexity API with two endpoints and rate limiting. anti-hallucination-plugin.ts (55-60%) has REAL per-claim verification in execute() despite facade hooks layer. Revised verdict: "MCP PROTOCOL FACADE with GENUINE CRYPTO + API + PLUGIN INTERNALS."
 
 **psycho-symbolic-enhanced.ts** (78%): BEST knowledge graph in sublinear-time-solver — real BFS traversal, transitive inference, 50+ base triples, zero facade patterns (R41).
 
-### 5j. GOAP Planner
+### 5i-2. Neural-Network Benchmark Quality
 
-Psycho-symbolic-reasoner crate (8 files, 3,568 LOC, 78% real, R25). Components at 88-95% (state, action, rules, goal) are production-ready, but core A* search is a STUB — simplified_astar() returns hardcoded 2-step path, StateNode.to_world_state() returns empty state. Uses proper `rand` crate. The pathfinding crate is imported but Ord requirement was identified as a barrier.
+**Theatrical benchmark layer** — genuine neural-network-implementation crate (90-98%) undermined by fabricated evaluation (R46):
+
+| Benchmark | Realness | Deception Type |
+|-----------|----------|----------------|
+| standalone_benchmark/main.rs | 15-20% | Spin-loop timing fabrication |
+| system_comparison.rs | 42% | Random gate/cert simulation, hardcoded memory/CPU |
+| strange-loops-benchmark.js | 8-10% | Tests trivial inline JS, not real crate |
+| rustc_optimization_benchmarks.rs (R43) | 15% | Asymptotic mismatch deception |
+| baseline_comparison.rs (R43) | 0% | Non-compilable |
+| ruvector-benchmark.ts (R43) | 92% | GENUINELY REAL (the outlier) |
+
+Pattern: production-quality benchmark infrastructure (criterion, percentiles, CSV export) measuring fabricated or irrelevant operations. Only ruvector-benchmark.ts (92%) tests what it claims to test.
+
+### 5i-3. FlowNexus Integration
+
+**Architectural facade via external dependency** (R46): flow-nexus.js is a production-quality HTTP/WebSocket client (~70% code quality) calling a platform (`https://api.flow-nexus.ruv.io`) that does not exist. Zero local solver imports. MCP tool handlers return hardcoded stubs. This is the 4th isolated system in the sublinear ecosystem (R44 found 3 isolated servers). Pattern: "It's not a stub, it's calling an external platform!" But the platform doesn't exist.
+
+### 5j. Psycho-Symbolic Reasoner Crate
+
+**~48-52% weighted** — first examination (R47). "Psycho" = pure branding with zero psychological modeling.
+
+**planner.ts (58-62%)**: INVERSE of goalie pattern. Goalie has "facade MCP, real internals" — planner has "real wrapper, stub internals." Production-grade WASM infrastructure (SimpleWasmLoader, WasmMemoryManager, instance tracking) wrapping a 3-line stub: `simplified_astar()` returns `[start_node, goal_node]` with cost 2.0. The GOAPPlanner struct exists with proper methods in Rust, but core search delegates to placeholder. get_successors() at 90% quality is DEAD CODE — never called by stub. Integration tests use MOCKED PlannerSystem, not real WASM binary.
+
+**psycho-symbolic-reasoner.ts (38-42%)**: Real data structures (Map-based triple storage 80%, BFS graph traversal 85%, query search 75%) but "reasoning" is keyword matching + hardcoded templates. File comment claims "Integrates WASM modules for graph reasoning, planning, and extraction" but only import is Logger — 3rd theatrical WASM pattern (after solver.ts and wasm-sublinear-complete.ts). 12 self-referential base triples claim the system "combines symbolic-ai + psychological-context" (neither true). Performance metrics hardcoded: avg_query_time_ms=2.3, cache_hit_rate=0.75.
+
+**Rust WASM modules**: graph_reasoner (KnowledgeGraph/InferenceEngine/RuleEngine), planner (A* search), extractors — all with wasm_bindgen exports. ~100KB Rust source exists. TS imports NONE. Architecture is split: TS is self-contained keyword matcher, Rust WASM is orphaned.
+
+### 5j-2. Neural Pattern Recognition Quality Layers
+
+**~72% weighted (COMPLETE after R49)** — 6 of 6 subsystem-specific files analyzed. Quality is BIMODAL: 3 files at 82-92% and 3 files at 42-62%.
+
+**Top tier (82-92%)**:
+- **real-time-monitor.js (88-92%)**: GENUINE EventEmitter monitoring. Real variance (unbiased n-1), Shannon entropy (base-2), Pearson correlation. Identical deterministic hashValue/hashToFloat pattern to logger. Multi-pattern detection: variance anomalies (<1e-15), entropy deviations (>30%), emergent signals (π/e/φ detection). Production alert system with severity tiers. Reverses R45 anti-pattern.
+- **breakthrough-session-logger.js (88-92%)**: GENUINE integration test framework. Deterministic hashing, weighted consciousness scoring, temporal trajectory analysis.
+- **statistical-validator.js (82-88%)**: GENUINE statistics. 5 real tests (KS, Mann-Whitney U, Chi-square, Fisher exact, Anderson-Darling), all mathematically correct core calculations. Textbook effect sizes (Cohen's d, rank-biserial, Cramer's V, odds ratio). Real Box-Muller normal generation. No fabricated data. p-values use simplified approximations (acceptable for JS).
+
+**Bottom tier (42-62%)**:
+- **signal-analyzer.js (72-76%)**: BIMODAL within file. DSP core (90%): 12+ correct algorithms (time domain, correlation, ACF, spectral centroid/rolloff/flux, fractal dimension, Lempel-Ziv, entropy, skewness, kurtosis). DFT mislabeled as "FFT" (O(n²)). Consciousness assessment (5-15%) is facade. Window functions configured but never applied.
+- **cli/index.js (62%)**: Professional Commander.js CLI but calls non-existent processData() method. API paradigm mismatch.
+- **zero-variance-detector.js (42-48%)**: Real FFT/entropy on fabricated "quantum" data.
+
+**Key R49 discoveries**: real-time-monitor and breakthrough-session-logger share IDENTICAL hash implementations — suggests common authorship. signal-analyzer uses DIFFERENT FFT from zero-variance-detector (O(n²) DFT vs genuine FFT) — copy-paste without algorithm verification. statistical-validator is the ONLY file with NO fabrication or facades. The 3 R49 files significantly raise the subsystem average from ~64% to ~72%.
+
+**Triple-quality paradox**: Backend (R23: 90-98%) + Interface (CLI: 88-92%) + Integration (12-18%) — the weak link is API design, not neural network quality.
+
+### 5k. GOAP Planner
+
+Psycho-symbolic-reasoner/planner crate (8 files, 3,568 LOC, 78% real, R25). R47 confirms planner.ts wrapper is production-quality but core A* remains a stub. Components at 88-95% (state, action, rules, goal) are production-ready, but core A* search is a STUB — simplified_astar() returns hardcoded 2-step path, StateNode.to_world_state() returns empty state. Uses proper `rand` crate. The pathfinding crate is imported but Ord requirement was identified as a barrier.
 
 **Paradox**: 90%+ components production-ready but the one piece they all depend on (A* search) is broken.
 
@@ -489,6 +707,18 @@ Psycho-symbolic-reasoner crate (8 files, 3,568 LOC, 78% real, R25). Components a
 **Fake RNG (Rust)**: ml-training/lib.rs and swarm_coordinator_training.rs mock the `rand` crate using `SystemTime::now().subsec_nanos()`, producing deterministic results within the same second. The neural-network-implementation and neuro-divergent crates use proper `rand::thread_rng()` (R19, R21).
 
 **Self-Referential Validation**: Multiple files (comprehensive_validation_report.rs, security_validation.rs, hardware_timing.rs) generate mock data and then "validate" it, producing circular metrics (R21, R28, R34).
+
+**Specification-as-Implementation (R47)**: consciousness experiments (quantum_entanglement, parallel_waves) return nested object literals describing how things "would" work. Worse than Math.random() fabrication — zero computation of any kind. Documentation masquerading as executable code.
+
+**Real Algorithms on Fake Data (R47)**: zero-variance-detector.js has correct FFT/entropy/autocorrelation but feeds them Math.random() "quantum" measurements. Inverse of R43's pattern (fake algorithms on real data). May be more deceptive because algorithms pass code review.
+
+**Theatrical WASM (3 instances vs 1 genuine)**: psycho-symbolic-reasoner.ts, solver.ts, wasm-sublinear-complete.ts are theatrical. BUT reasoningbank_wasm_bg.js (100%) is GENUINE wasm-bindgen — the gold standard counterexample proving real WASM exists in the ecosystem.
+
+**MCP Integration Facade (R49)**: mcp_consciousness_integration.rs has zero MCP protocol code despite filename. All "MCP" functions are local computation with "mcp_" prefix naming theater. connect_to_mcp() admits simulation. Worse than strange-loop MCP (45%) which at least attempted WASM imports.
+
+**Orphaned Test Harness (R49)**: genuine_consciousness_detector.ts has comprehensive 6-test battery with zero test subjects (no ConsciousnessEntity implementations). Test 3 (hash) is 100% correct — tests without subjects.
+
+**Duplicate Implementation Abandonment (R49)**: validators.js has 142 lines duplicated in metrics.js/protocols.js. High-quality code reorganized but cleanup never completed. Original abandoned with zero imports.
 
 ## 6. Cross-Domain Dependencies
 
@@ -503,7 +733,7 @@ Psycho-symbolic-reasoner crate (8 files, 3,568 LOC, 78% real, R25). Components a
 - ~1,000+ files still NOT_TOUCHED, mostly large JSON data files and test binaries
 - AgentDB test files (ruvector-integration.test.ts, etc.)
 - ruv-swarm-ml remaining: models/mod.rs (642 LOC), time_series/mod.rs (612 LOC), wasm_bindings/mod.rs
-- ruv-swarm-persistence remaining: wasm.rs (694 LOC), memory.rs (435 LOC), migrations.rs (343 LOC)
+- ruv-swarm-persistence remaining: wasm.rs (694 LOC), migrations.rs (343 LOC)
 - sublinear-time-solver: hybrid.rs (837 LOC), remaining orphaned solver files
 
 ## 8. Session Log
@@ -546,3 +776,21 @@ LearningSystem and CausalMemoryGraph bugs confirmed as design flaws (not compila
 
 ### R41 (2026-02-15): Consciousness layer + MCP tool layer
 13 files, 9,772 LOC, 201 findings. Consciousness 79% genuine (vs emergence 51%). Goalie COMPLETE FACADE. psycho-symbolic-enhanced.ts BEST knowledge graph. Zero cross-cluster dependencies.
+
+### R44 (2026-02-15): Sublinear server layer
+3 files, 1,885 LOC, ~73 findings. Server infrastructure is PRODUCTION-GRADE but disconnected from computation. server/index.js (72%) has 90% real HTTP/WebSocket (Express+helmet+streaming+worker_threads) but 0% solver integration (calls non-existent createSolver) and 0% FlowNexus (600-line facade hitting fake endpoint). neural-pattern-recognition/server.js (42%) is a professional MCP facade — crashes on startup from missing adaptive-learning.js, simulated data via hashToFloat. strange-loop/mcp/server.ts (45%) has real WASM layer (R41: 92%) but broken import paths (wasm/ vs wasm-real/) and temporal_predict API mismatch. All 3 servers are isolated from each other (confirms R41 isolation pattern). Weighted avg ~53%.
+
+### R43 (2026-02-15): AgentDB benchmarks + ReasoningBank demo + WASM tools + Rust benchmarks
+5 files, 3,916 LOC, ~72 findings. ruvector-benchmark.ts (92%) is REAL production-grade benchmarking — validates R40's HNSWIndex finding. demo-comparison.ts (35%) is scripted marketing theater — real APIs but fake learning. wasm-sublinear-complete.ts (78%) has genuine algorithms but WASM is 100% theatrical — extends R39 "WASM unused" finding. baseline_comparison.rs (0%) never compiled. rustc_optimization_benchmarks.rs (15%) is most deceptive file in project — fabricated asymptotic claims. Two independent WASM facades confirmed in sublinear-time-solver.
+
+### R46 (2026-02-15): Goalie deep-dive + neural-network benchmarks + integration verification
+9 files, 6,496 LOC, 164 findings (33 CRIT, 44 HIGH, 43 MED, 44 INFO). DEEP files: 879→895. **Major R41 reversal**: goalie cli.ts (88-92%) proves internal engines ARE real — MCP handlers are facade layer, not the engines. agentic-research-flow-plugin (78%) has real Perplexity API. anti-hallucination (42%) has genuine algorithms but is dead code. Neural-network benchmarks are theatrical: standalone_benchmark (15-20%) spin-loop fabrication, system_comparison (42%) random gate simulation, strange-loops-benchmark (8-10%) tests wrong code entirely. flow-nexus.js (~70% quality) calls non-existent platform. bin/cli.js (72-78%) reverses R43's createSolver finding. consciousness-verifier (52%) lowers consciousness cluster to ~72-75%.
+
+### R47 (2026-02-15): Consciousness verification + psycho-symbolic reasoner + neural pattern recognition
+9 files, ~5,116 LOC, 219 findings (42 CRIT, 47 HIGH, 57 MED, 73 INFO). DEEP files: 895→913. **Consciousness BIMODAL**: MCP server (94.8%) PRODUCTION-QUALITY, but experiments (0-5%) COMPLETE FABRICATION — zero computation, documentation-as-code. Consciousness cluster drops from ~72-75% to ~60-65%. **Psycho-symbolic-reasoner first look**: "psycho" = pure branding. Real triple storage but reasoning = keyword matching. Planner wrapper real (58-62%) but A* is stub. 3rd theatrical WASM pattern. **Neural-pattern-recognition LAYERED**: logger (88-92%) GENUINE (reverses R45), CLI (62%) professional but broken backend, zero-variance-detector (42-48%) NOVEL ANTI-PATTERN: real algorithms fed fabricated data. Three new anti-patterns catalogued: specification-as-implementation, real-algorithms-on-fake-data, production-facade.
+
+### R49 (2026-02-15): Consciousness final sweep + neural-pattern-recognition completion + ReasoningBank WASM
+9 files, ~4,726 LOC, ~180 findings. DEEP files: 913→922. **Consciousness arc CLOSED** (R41→R46→R47→R49): cluster drops to ~55-60%. genuine_consciousness_detector.ts (75-82%) has real crypto infra but theatrical verification + orphaned test subjects. temporal_consciousness_validator.rs (60%) = real orchestration, theatrical "theorems". mcp_consciousness_integration.rs (12-18%) = COMPLETE MCP FACADE (80-point gap vs MCP server). consciousness_optimization_masterplan.js (25-30%) = orphaned orchestrator. validators.js (78%) = real IIT 3.0 but orphaned. **Neural-pattern-recognition COMPLETE**: subsystem rises from ~64% to ~72%. real-time-monitor (88-92%) GENUINE, statistical-validator (82-88%) GENUINE 5 real tests, signal-analyzer (72-76%) genuine DSP core with consciousness facade. **MAJOR REVERSAL**: reasoningbank_wasm_bg.js (100%) is GENUINE wasm-bindgen — NOT the 4th facade. 206KB binary verified, all 6 APIs traced to Rust source. Gold standard WASM. Two new anti-patterns: MCP Integration Facade, Duplicate Implementation Abandonment.
+
+### R50 (2026-02-15): Goalie security + anti-hallucination + ReasoningBank Rust storage
+4 files, 2,036 LOC, ~40 findings. **Goalie reversal STRENGTHENED**: ed25519-verifier.ts (88-92%) is production crypto via @noble/ed25519, active in tools.ts pipeline. perplexity-actions.ts (93-96%) is GENUINE Perplexity API — two endpoints, rate limiting, 4-action GOAP pipeline, REVERSES R41. anti-hallucination-plugin.ts (55-60%) BIMODAL: execute() has real per-claim Perplexity verification (75-80%), hooks layer is keyword matching with Math.random() (30%). Combined with R46, goalie is now "MCP facade over genuine crypto + API + plugin internals." **ReasoningBank Rust storage GENUINE**: sqlite.rs (88-92%) has rusqlite with WAL mode, RAII connection pool, FTS5 full-text search, schema migrations. Completes R49's WASM picture — Rust ReasoningBank has genuine WASM+SQLite substrate but only pattern persistence implemented (missing trajectories/verdicts).

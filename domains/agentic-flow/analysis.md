@@ -56,6 +56,14 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | p2p-swarm-v2.ts | agentic-flow | 2,280 | 85% | DEEP | Production crypto. Task execution stub. Fake IPFS CIDs | R22 |
 | quic.ts | agentic-flow | 599 | 24% | DEEP | COMPLETE FACADE. loadWasmModule returns {}, all stubs | R40 |
 
+### Core Integration Bridges (R44)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| RuvLLMOrchestrator.ts | agentic-flow | 635 | 35-40% | DEEP | FACADE — "FastGRNN"=sort-by-score, "TRM"=sentence splitting, "SONA"=uniform weights. THIRD parallel routing system. Zero ruvllm connection. Orphaned (never imported by execution code) | R44 |
+| ruvector-backend.ts | agentic-flow | 626 | 12% | DEEP | COMPLETE FACADE — zero ruvector imports, isRustAvailable()=always true, searchRuVector()=sleep+brute-force, "125x speedup"=hardcoded constant, NEVER imported anywhere | R44 |
+| sona-service.ts | agentic-flow | 592 | 78% | DEEP | GENUINE wrapper around @ruvector/sona SonaEngine. 5 vibecast profiles. API mismatch with ruvector-integration.ts (beginTrajectory vs startTrajectory). Parallel incompatible SONA paths | R44 |
+
 ### AgentDB Controllers
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
@@ -153,6 +161,14 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | H21 | **p95 latency is high-water mark** — Not real percentile calculation | worker-agent-integration.ts | R40 | Open |
 | H22 | **Incomplete benchmark compliance** — Only 3 of 6+ metrics checked | worker-agent-integration.ts | R40 | Open |
 | H23 | **All QUIC config stored but never read** — Dead configuration code | quic.ts | R40 | Open |
+| C10 | **RuvLLMOrchestrator is THIRD parallel routing system** — No connection to ADR-008 or ruvllm backend. Imports only agentdb (ReasoningBank) | RuvLLMOrchestrator.ts | R44 | Open |
+| C11 | **ruvector-backend.ts COMPLETE FACADE** — Zero ruvector imports, hardcoded "125x speedup" constant, never imported anywhere. isRustAvailable()=always true | ruvector-backend.ts | R44 | Open |
+| C12 | **"FastGRNN" is NOT a neural network** — Just sorts patterns by weight and picks top. Marketing terminology for simple heuristics | RuvLLMOrchestrator.ts | R44 | Open |
+| C13 | **Unguarded optional dependency import** — sona-service.ts will crash if @ruvector/sona not installed | sona-service.ts | R44 | Open |
+| H24 | **Parallel incompatible SONA integrations** — sona-service.ts uses beginTrajectory() but ruvector-integration.ts expects startTrajectory() | sona-service.ts, ruvector-integration.ts | R44 | Open |
+| H25 | **sona-service.ts unbounded memory** — trajectories Map grows without cleanup | sona-service.ts | R44 | Open |
+| H26 | **ruvector-backend.ts fabricated metrics** — All performance numbers are formula-based constants, not measurements | ruvector-backend.ts | R44 | Open |
+| H27 | **RuvLLMOrchestrator.ts orphaned** — Only imported by llm/index.ts and tests, NOT by execution code | RuvLLMOrchestrator.ts | R44 | Open |
 
 ## 4. Positives Registry
 
@@ -174,6 +190,7 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | **RuVectorBackend production-ready** — Excellent security, adaptive HNSW, semaphore (90%) | RuVectorBackend | Initial |
 | **82 agent prompt templates** — Well-crafted system prompts for various roles | .claude/agents/ | Initial |
 | **EMA-based performance tracking** — Good pattern in worker-agent-integration (alpha=0.2) | worker-agent-integration.ts | R40 |
+| **sona-service.ts genuine SONA integration** — Real SonaEngine wrapper with 5 vibecast profiles, real trajectory/LoRA delegation, proper EventEmitter lifecycle | sona-service.ts | R44 |
 
 ## 5. Subsystem Sections
 
@@ -379,3 +396,6 @@ Package structure, agent system, MCP tools, ReasoningBank fragmentation, multi-p
 
 ### R40 (2026-02-08): Worker system & QUIC transport
 3 files, 1,874 LOC, 12 findings. Characterized as functional single-node task runner. QUIC confirmed complete facade (24%). Worker-registry real SQLite persistence, worker-agent-integration advisory-only.
+
+### R44 (2026-02-15): Core integration bridges (LLM, ruvector, SONA)
+3 files, 1,853 LOC, ~68 findings. Integration bridges are mostly facades. RuvLLMOrchestrator.ts (35-40%) is a THIRD parallel routing system — "FastGRNN/TRM/SONA" marketing names hide simple heuristics, zero ruvllm connection, orphaned. ruvector-backend.ts (12%) is COMPLETE FACADE — zero ruvector imports, hardcoded "125x speedup", never imported anywhere. sona-service.ts (78%) is the ONLY genuine bridge — real @ruvector/sona wrapper, but has parallel incompatible API with ruvector-integration.ts (beginTrajectory vs startTrajectory). Confirms R40's "single-node task runner" characterization — bridges don't add real cross-system connectivity.
