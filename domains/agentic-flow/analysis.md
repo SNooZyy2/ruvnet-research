@@ -1,714 +1,381 @@
-# Agentic-Flow Repository Analysis
-
-**Repository**: https://github.com/ruvnet/agentic-flow
-**Published Package**: `agentic-flow` on npm
-**Analyzed Version**: 2.0.6 (npm) / 2.0.2-alpha (repo root)
-**Analysis Date**: 2026-02-08
-**GitHub Stars**: 422 | **Forks**: 99 | **Contributors**: 1 (ruvnet, 342 commits)
-**Created**: September 2, 2024
-**License**: MIT
-
----
-
-## Executive Summary
-
-Agentic-flow is a TypeScript-based AI agent orchestration platform built on
-Anthropic's Claude Agent SDK. It lives in a monorepo containing 5 sub-packages
-(including AgentDB). Key findings:
-
-1. **Agents are prompt templates, not code** -- 82 markdown files with system
-   prompts, loaded by thin JS wrappers around the Claude Agent SDK.
-2. **MCP tools shell out to `npx claude-flow@alpha`** -- circular dependency,
-   not in-process implementations. The "213 tools" claim counts external packages.
-3. **Three separate ReasoningBanks exist that share zero code** -- agentic-flow
-   has the most sophisticated one (5 algorithms from DeepMind paper), but
-   claude-flow never calls its learning functions.
-4. **Real multi-provider routing** (Anthropic/OpenRouter/Gemini/ONNX) with
-   proper API translation and fallback chains -- this is genuine value.
-5. **QUIC transport and Federation are complete stubs** -- WASM binary exists
-   but is never loaded; network calls return empty arrays.
-6. **574 MB package is 96% bundled deps** -- onnxruntime-node alone is 513 MB.
-7. **AgentDB is genuinely substantive** -- real controllers grounded in published
-   papers (Reflexion, Voyager, Pearl's do-calculus), not thin abstractions.
-8. **The gap between what EXISTS and what RUNS is significant** -- sophisticated
-   learning algorithms exist in the codebase but claude-flow only uses the
-   simplest local implementations.
-
----
-
-## 1. Package Structure
-
-### Monorepo Layout
-
-```
-agentic-flow/
-  agentic-flow/         Main workspace package
-  packages/
-    agentdb/            Memory/vector database (npm: agentdb)
-    agent-booster/      WASM code editing (npm: agent-booster)
-    agentdb-onnx/       ONNX embeddings (not published)
-    agentic-jujutsu/    Jujutsu VCS integration (npm: agentic-jujutsu)
-    agentic-llm/        LLM routing layer
-  src/                  Main source (TypeScript)
-  crates/               Rust crates for @ruvector bindings
-  docker/               Docker infrastructure
-  bench/                Performance benchmarking
-  docs/                 Documentation
-```
-
-### npm Package Metadata
-
-| Package | Version | Size | Monthly Downloads |
-|---------|---------|------|-------------------|
-| `agentic-flow` | 2.0.6 | 574 MB installed (2.2 MB unpacked) | 84,541 |
-| `agentdb` | 2.0.0-alpha.3.4 | 68 MB installed (909 KB unpacked) | 111,686 |
-| `agent-booster` | 0.2.2 | Small | — |
-| `agentic-jujutsu` | 2.3.6 | Small | — |
-
-### Size Breakdown
-
-| Component | Size | % of Total |
-|-----------|------|------------|
-| node_modules/ (bundled) | 553 MB | 96.3% |
-| — onnxruntime-node | 513 MB | 89.4% |
-| — better-sqlite3 | 27 MB | 4.7% |
-| — fastmcp | 11 MB | 1.9% |
-| dist/ (application code) | 13 MB | 2.3% |
-| Agent markdown files | ~2 MB | 0.3% |
-
-### Dependencies
-
-**Runtime**: @anthropic-ai/sdk, @anthropic-ai/claude-agent-sdk, claude-flow,
-fastmcp, express, tiktoken, zod, axios, onnxruntime-node, better-sqlite3,
-@google/genai
-
-**Optional**: @ruvector/core, @ruvector/sona, @ruvector/attention, ruvector,
-@ruvector/edge-full, @ruvector/router, @ruvector/ruvllm, @ruvector/tiny-dancer
-
----
-
-## 2. Agent System
-
-### What's Advertised
-- "66 specialized self-learning agents"
-- Autonomous multi-agent swarms
-- Queen/worker hierarchy
-
-### What the Code Shows
-
-**82 markdown agent definition files** in `.claude/agents/` organized across
-20 categories (analysis, architecture, consensus, core, development, etc.).
-
-Each file has YAML frontmatter with name, description, capabilities, hooks,
-followed by a system prompt body. Example structure:
+# Agentic Flow Domain Analysis
+
+> **Priority**: HIGH | **Coverage**: ~8.5% (60/714 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-08 (Session R40)
+
+## 1. Current State Summary
+
+The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a TypeScript monorepo containing 5 sub-packages. Published on npm as `agentic-flow` (2.0.6) with 84,541 monthly downloads. Quality bifurcates dramatically — from 100% (hooks.ts pure delegation) to 24% (quic.ts complete facade).
+
+**Top-level verdicts:**
+
+- **Agents are prompt templates, not code** — 82 markdown files with YAML frontmatter, loaded by thin SDK wrappers.
+- **MCP tools shell out to `npx claude-flow@alpha`** — circular dependency, not in-process. "213 tools" counts external packages.
+- **Three separate ReasoningBanks** (claude-flow, agentic-flow, agentdb) share zero code. Agentic-flow has the most sophisticated (5 DeepMind algorithms) but claude-flow never calls it.
+- **Multi-provider routing is the genuine value** — real Anthropic/OpenRouter/Gemini/ONNX translation with fallback chains (91-95%).
+- **QUIC and Federation are complete stubs** — WASM exists but never loads, all network calls return empty arrays.
+- **AgentDB is substantive** — 23 controllers grounded in published papers (Reflexion, Voyager, Pearl's do-calculus), not thin abstractions.
+- **Hash-based embeddings are systemic** — 4+ files (optimized-embedder, ruvector-integration, edge-full, agentdb-wrapper) silently degrade to character-frequency matching.
+- **Gap between EXISTS and RUNS is vast** — sophisticated learning algorithms exist but claude-flow only uses LocalReasoningBank (patterns.json).
+- **Worker system is functional single-node** — real SQLite persistence, real file I/O, but distributed transport is facade.
+- **Best code:** cli-proxy.ts (95%), hooks.ts (100%), TypeScript sources (80-95%), agentdb controllers (82-95%).
+- **Worst code:** quic.ts (24%), enhanced-consciousness.js (15-20%), neural-coordination-protocol.js (10-15%).
+
+## 2. File Registry
+
+### Agentic-Flow Core
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| hooks.ts | agentic-flow | 1,149 | 100% | DEEP | Pure CLI delegation. 10+ hook tools via Commander.js | R22 |
+| cli-proxy.ts | agentic-flow | 1,432 | 95% | DEEP | Multi-provider proxy (OpenRouter/Gemini/ONNX/Requesty). QUIC transport | R22 |
+| workers.ts | agentic-flow | 1,082 | 95% | DEEP | 15+ subcommands. dispatch-prompt swallows all errors | R22 |
+| types.rs (agentic-jujutsu) | agentic-flow | 816 | 98% | DEEP | Clean type definitions with napi(object), builder patterns | R22 |
+| wrapper.rs (agentic-jujutsu) | agentic-flow | 1,300 | 90% | DEEP | Embeds real jj binary. 15 genuine JJ operations | R22 |
+| operations.rs (agentic-jujutsu) | agentic-flow | 1,449 | 95% | DEEP | 30 genuine JJ variants with 15 real unit tests | R22 |
+| reasoning_bank.rs (agentic-jujutsu) | agentic-flow | 731 | 85% | DEEP | EMA-based pattern extraction adapted for VCS | R22 |
+| anthropic-to-requesty.ts | agentic-flow | 880 | 93% | DEEP | Real proxy with streaming. API key prefix leaked in logs | R22 |
+| anthropic-to-openrouter.ts | agentic-flow | 775 | 90% | DEEP | ~95% identical to Requesty. No request timeout | R22 |
+| optimized-embedder.ts | agentic-flow | 917 | 90% | DEEP | Real O(1) LRU + FNV-1a. simpleTokenize is hash fallback | R22 |
+| neural-substrate.ts | agentic-flow | 817 | 92% | DEEP | Real SemanticDriftDetector, MemoryPhysics (hippocampal) | R22 |
+| agentdb-cli.ts | agentic-flow | 862 | 95% | DEEP | Standalone CLI initializes EmbeddingService with ONNX | R22 |
+| EmbeddingCache.ts | agentic-flow | 726 | 90% | DEEP | 3-tier cache (native SQLite > WASM > Memory), SHA-256 keys | R22 |
+| IntelligenceStore.ts | agentic-flow | 698 | 90% | DEEP | SQLite dual backend. SQL injection risk in incrementStat | R22 |
+| sona-tools.ts | agentic-flow | 676 | 90% | DEEP | 15 tools delegating to sonaService singletons | R22 |
+| EmbeddingService.ts | agentic-flow | 1,810 | 80% | DEEP | ONNX, K-means clustering. simpleEmbed = hash fallback | R22 |
+| worker-registry.ts | agentic-flow | 662 | 80% | DEEP | SQLite WAL persistence. sql.js race condition | R40 |
+| RuVectorIntelligence.ts | agentic-flow | 1,200 | 80% | DEEP | SONA Micro-LoRA, 6 attention types, HNSW, LRU | R22 |
+| dispatch-service.ts | agentic-flow | 1,212 | 80% | DEEP | 12 worker types, secret detection, dependency scanning | R22 |
+| agentdb-wrapper-enhanced.ts | agentic-flow | 899 | 80% | DEEP | AttentionService stub fallback. calculateRecall wrong | R22 |
+| edge-full.ts | agentic-flow | 943 | 75% | DEEP | 6 ruvector WASM modules. JS fallback for 5/6 | R22 |
+| agent-booster-enhanced.ts | agentic-flow | 1,428 | 75% | DEEP | Pattern caching, 5-tier compression. External npx dep | R22 |
+| ruvector-integration.ts | agentic-flow | 718 | 75% | DEEP | 5-priority embedding fallback. Hash placeholders | R22 |
+| intelligence-bridge.ts | agentic-flow | 1,371 | 70% | DEEP | Bridge to RuVectorIntelligence. 9 RL config-only | R22 |
+| worker-agent-integration.ts | agentic-flow | 613 | 68% | DEEP | Advisory agent selection. No IPC or lifecycle | R40 |
+| standalone-stdio.ts | agentic-flow | 813 | 85% | DEEP | FastMCP server, 15 tools. SHELL INJECTION risk | R22 |
+| p2p-swarm-v2.ts | agentic-flow | 2,280 | 85% | DEEP | Production crypto. Task execution stub. Fake IPFS CIDs | R22 |
+| quic.ts | agentic-flow | 599 | 24% | DEEP | COMPLETE FACADE. loadWasmModule returns {}, all stubs | R40 |
+
+### AgentDB Controllers
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| ReflexionMemory | agentdb | 815 | 82% | SURFACE | Episodic replay, 4 retrieval strategies, GNN enhancement | Initial |
+| SkillLibrary | agentdb | 697 | 82% | SURFACE | Voyager-based pattern extraction, composite scoring | Initial |
+| CausalMemoryGraph | agentdb | 602 | 82% | SURFACE | Pearl's do-calculus, uplift modeling, t-stats | Initial |
+| AttentionService | agentdb | 517 | 70% | SURFACE | JS fallback works. Flash/MoE require @ruvector/attention | Initial |
+| RuVectorBackend | agentdb | 776 | 90% | SURFACE | Semaphore concurrency, security, adaptive HNSW params | Initial |
+| HNSWIndex | agentdb | 437 | 88% | SURFACE | Real wrapper around hnswlib-node (C++) | Initial |
+| QUICServer | agentdb | 383 | 15% | SURFACE | STUB — "Actual QUIC would use a library" | Initial |
+| QUICClient | agentdb | 489 | 15% | SURFACE | sleep(100) + {success: true} | Initial |
+| SyncCoordinator | agentdb | 553 | 40% | SURFACE | Real logic on stub QUIC transport | Initial |
+| ReasoningBank | agentdb | ~400 | 82% | SURFACE | Real pattern store with optional GNN | Initial |
+
+### ReasoningBank Implementations
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| retrieve.js | agentic-flow | 87 | 95% | SURFACE | MMR diversity-aware with 4-factor scoring | Initial |
+| judge.js | agentic-flow | ~150 | 70% | SURFACE | LLM-as-Judge via ModelRouter. Heuristic fallback | Initial |
+| distill.js | agentic-flow | ~100 | 60% | SURFACE | LLM-based extraction + PII scrub. Returns [] without API | Initial |
+| consolidate.js | agentic-flow | ~120 | 90% | SURFACE | Dedup (cosine ≥0.95), contradiction, pruning (180d) | Initial |
+| matts.js | agentic-flow | ~80 | 75% | SURFACE | Memory-aware test-time scaling. Requires LLM | Initial |
+| intelligence.js | claude-flow | ~200 | 30% | SURFACE | In-memory Map + JSON. O(n) linear scan | Initial |
+
+### Orchestration & Routing
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| RuvLLMOrchestrator.js | agentic-flow | ~400 | 60% | SURFACE | Real embedding search. "TRM" = word count heuristics | Initial |
+| router.js | agentic-flow | ~600 | 92% | SURFACE | 4 providers with real translation, fallback, metrics | Initial |
+| SemanticRouter | agentic-flow | 291 | 65% | SURFACE | Real cosine similarity. Admits brute-force in comments | Initial |
+| CircuitBreakerRouter | agentic-flow | 459 | 90% | SURFACE | Full state machine (CLOSED/OPEN/HALF_OPEN) | Initial |
+| attention-coordinator.js | agentic-flow | 361 | 50% | SURFACE | Attention consensus, MoE. Requires external service | Initial |
+
+### MCP & Tool Layer
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| claudeFlowSdkServer.js | agentic-flow | ~300 | 25% | SURFACE | 9 tools via execSync to npx claude-flow@alpha | Initial |
+| stdio-full.js | agentic-flow | ~400 | 25% | SURFACE | 11 tools, same execSync pattern | Initial |
+| pii-scrubber.js | agentic-flow | ~100 | 80% | SURFACE | 12 regex patterns for credentials/PII | Initial |
+
+### Agent Runners
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| claudeAgent.js | agentic-flow | 335 | 85% | SURFACE | Claude Agent SDK query() wrapper | Initial |
+| claudeAgentDirect.js | agentic-flow | ~200 | 90% | SURFACE | Raw Anthropic SDK with streaming, no tools | Initial |
+| directApiAgent.js | agentic-flow | ~250 | 80% | SURFACE | Anthropic SDK with 7 custom tools (shell out) | Initial |
+| codeReviewAgent.js | agentic-flow | ~50 | 95% | SURFACE | Thin prompt wrapper | Initial |
+| webResearchAgent.js | agentic-flow | ~50 | 95% | SURFACE | Thin prompt wrapper | Initial |
+
+## 3. Findings Registry
+
+### 3a. CRITICAL Findings
+
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| C1 | **Three fragmented ReasoningBanks** — Zero code sharing between claude-flow, agentic-flow, agentdb | All 3 packages | Initial | Open |
+| C2 | **MCP tools are circular dependency** — Shell out to `npx claude-flow@alpha`, not in-process | claudeFlowSdkServer.js, stdio-full.js | Initial | Open |
+| C3 | **QUIC transport complete facade** — loadWasmModule() returns {}, all methods stubbed | quic.ts | R40 | Open |
+| C4 | **sendRequest hardcoded response** — Returns 200 + empty body regardless of input | quic.ts | R40 | Open |
+| C5 | **Hash-based embeddings systemic** — 4+ files silently degrade to character-frequency matching | optimized-embedder.ts, ruvector-integration.ts, edge-full.ts, agentdb-wrapper-enhanced.ts | R22 | Open |
+| C6 | **Shell injection via unsanitized execSync** — User input directly in shell command | standalone-stdio.ts | R22 | Open |
+| C7 | **Agent Booster directory doesn't exist** — dist/agent-booster/ missing from npm package | Package structure | Initial | Open |
+| C8 | **WASM ReasoningBank paths point to non-existent files** — Import references dead code | Multiple | Initial | Open |
+| C9 | **ONNX model download broken** — Falls back to hash embeddings without warning | EmbeddingService.ts | Initial | Open |
+
+### 3b. HIGH Findings
+
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| H1 | **Agentic-flow learning pipeline unused** — Claude-flow never calls judge/distill/consolidate | Multiple | Initial | Open |
+| H2 | **RuVectorIntelligence never imported** — Sophisticated SONA integration orphaned | RuVectorIntelligence.ts | R22 | Open |
+| H3 | **AgentDB controllers zero usage** — No imports found in claude-flow | All 23 controllers | Initial | Open |
+| H4 | **QUIC placeholder never connected to quinn** — Real Rust crate exists but WASM bridge incomplete | quic.ts | R40 | Open |
+| H5 | **Worker-agent integration advisory only** — No IPC, process spawning, or lifecycle management | worker-agent-integration.ts | R40 | Open |
+| H6 | **Performance profiles in-memory only** — Self-learning never persists across restarts | worker-agent-integration.ts | R40 | Open |
+| H7 | **SQL injection in incrementStat** — String interpolation for column name | IntelligenceStore.ts | R22 | Open |
+| H8 | **API key prefix leaked in logs** — Sensitive data exposure | anthropic-to-requesty.ts | R22 | Open |
+| H9 | **Missing request timeout** — Can hang indefinitely | anthropic-to-openrouter.ts | R22 | Open |
+| H10 | **HNSW speed claims misleading** — "150x-12,500x" is theoretical vs brute-force | Documentation | Initial | Open |
+| H11 | **"213 MCP tools" counts external packages** — Only 9-11 actual tools in agentic-flow | MCP layer | Initial | Open |
+| H12 | **Silent dependency failure** — Without optional deps, all learning features become no-ops | Package dependencies | Initial | Open |
+| H13 | **Federation Hub returns empty arrays** — sendSyncMessage() is stub | Multiple | Initial | Open |
+| H14 | **HTTP/3 proxy returns empty Uint8Array** — encodeHttp3Request() unimplemented | Multiple | Initial | Open |
+| H15 | **"66 specialized agents" are markdown prompts** — Not programmatic implementations | .claude/agents/ | Initial | Open |
+| H16 | **"9 RL algorithms" are Q-value updates** — All share identical implementation with different names | LearningSystem | Initial | Open |
+| H17 | **SemanticRouter admits brute-force** — Code comments contradict HNSW marketing | SemanticRouter | Initial | Open |
+| H18 | **sql.js async init race condition** — Synchronous constructor calls async init | worker-registry.ts | R40 | Open |
+| H19 | **sql.js writeFileSync on every mutation** — Performance issue for high-frequency writes | worker-registry.ts | R40 | Open |
+| H20 | **Workers are database rows, not processes** — Misleading "worker" terminology | worker-registry.ts | R40 | Open |
+| H21 | **p95 latency is high-water mark** — Not real percentile calculation | worker-agent-integration.ts | R40 | Open |
+| H22 | **Incomplete benchmark compliance** — Only 3 of 6+ metrics checked | worker-agent-integration.ts | R40 | Open |
+| H23 | **All QUIC config stored but never read** — Dead configuration code | quic.ts | R40 | Open |
+
+## 4. Positives Registry
+
+| Description | File(s) | Session |
+|-------------|---------|---------|
+| **hooks.ts is 100% real** — Pure CLI delegation layer with clean Commander.js subcommands | hooks.ts | R22 |
+| **cli-proxy.ts excellent multi-provider routing** — Real OpenRouter/Gemini/ONNX/Requesty integration (95%) | cli-proxy.ts | R22 |
+| **agentic-jujutsu is genuinely functional** — Real Jujutsu VCS operations with embedded binary (90-98%) | 3 Rust files | R22 |
+| **Proxy layer is production-quality** — Real HTTP proxies with streaming support (91-93%) | anthropic-to-requesty.ts, anthropic-to-openrouter.ts | R22 |
+| **EmbeddingCache well-architected** — 3-tier cache with cross-platform support (90%) | EmbeddingCache.ts | R22 |
+| **IntelligenceStore clean dual backend** — SQLite with debounced saves (90%) | IntelligenceStore.ts | R22 |
+| **neural-substrate.ts real neuroscience models** — SemanticDriftDetector, hippocampal MemoryPhysics (92%) | neural-substrate.ts | R22 |
+| **worker-registry.ts production SQLite** — WAL mode, ULID IDs, 3-tier backend (80%) | worker-registry.ts | R40 |
+| **Multi-provider routing is unique value** — Best feature in agentic-flow, well-implemented | router.js + proxies | Initial |
+| **AgentDB controllers are substantive** — 18/23 implement real paper-referenced algorithms | 23 files | Initial |
+| **ReasoningBank retrieve is genuine** — MMR algorithm with 4-factor scoring (95%) | retrieve.js | Initial |
+| **CircuitBreakerRouter complete state machine** — Proper CLOSED/OPEN/HALF_OPEN transitions (90%) | CircuitBreakerRouter | Initial |
+| **PII scrubber is real** — 12 regex patterns for credentials/PII (80%) | pii-scrubber.js | Initial |
+| **RuVectorBackend production-ready** — Excellent security, adaptive HNSW, semaphore (90%) | RuVectorBackend | Initial |
+| **82 agent prompt templates** — Well-crafted system prompts for various roles | .claude/agents/ | Initial |
+| **EMA-based performance tracking** — Good pattern in worker-agent-integration (alpha=0.2) | worker-agent-integration.ts | R40 |
 
-```yaml
----
-name: security-architect
-type: specialized
-capabilities: [threat-modeling, security-review, CVE-detection]
-hooks:
-  pre: "claude-flow hooks pre-task"
-  post: "claude-flow hooks post-task"
----
-You are a security architecture specialist...
-```
+## 5. Subsystem Sections
 
-**7 JavaScript agent runners** that load these templates:
+### 5a. Three ReasoningBank Fragmentation
 
-| Runner | Lines | What It Does |
-|--------|-------|-------------|
-| `claudeAgent.js` | 335 | Main runner via Claude Agent SDK `query()` |
-| `claudeAgentDirect.js` | ~200 | Raw Anthropic SDK with streaming, no tools |
-| `directApiAgent.js` | ~250 | Anthropic SDK with 7 custom tools that shell out to `npx claude-flow@alpha` |
-| `codeReviewAgent.js` | ~50 | System prompt: "You review diffs and point out risks" |
-| `webResearchAgent.js` | ~50 | System prompt: "You perform fast web-style reconnaissance" |
-| `dataAgent.js` | ~50 | System prompt: "You analyze tabular data and produce a short brief" |
-| `claudeFlowAgent.js` | ~100 | Agent using claude-flow MCP tools |
+Four completely independent ReasoningBank implementations exist (discovered 4th in ruvllm R37, memory-and-learning domain). Agentic-flow vs claude-flow vs agentdb:
 
-**Assessment**: Agents are entirely prompt-driven. The "self-learning" and
-"GNN-enhanced" references in system prompts are aspirational documentation,
-not executed code. The 77-82 markdown files are useful as well-crafted system
-prompts, but they are not programmatic agent implementations.
+| Implementation | Package | Storage | Algorithms | Status |
+|---|---|---|---|---|
+| agentic-flow | agentic-flow | SQLite (memory.db) | 5 (Retrieve, Judge, Distill, Consolidate, MaTTS) | **Sophisticated, unused** |
+| agentdb | agentdb | SQLite + VectorBackend | Pattern store with optional GNN | Never imported by claude-flow |
+| claude-flow | claude-flow | JSON (patterns.json) | In-memory Map, O(n) scan | **Only one that runs** |
+| ruvllm | ruvllm | Rust (K-means + EWC++) | Best math, separate repo | Fourth implementation (R37) |
 
----
+**Agentic-flow ReasoningBank** implements arXiv:2509.25140 (Google DeepMind) with real MMR retrieval (4-factor scoring: similarity, recency, reliability, diversity), LLM-as-Judge via ModelRouter (falls back to heuristic confidence=0.5 without API key), LLM-based distill with PII scrubbing (returns [] without API key), consolidate dedup (cosine ≥0.95) + contradiction detection + pruning (180 days), and MaTTS test-time scaling (Initial).
 
-## 3. Orchestration Logic
+**Critical limitation**: Without OPENROUTER_API_KEY/ANTHROPIC_API_KEY/GEMINI_API_KEY, Judge and Distill are non-functional. The sophisticated learning pipeline exists but requires API access and explicit integration to unlock (Initial).
 
-### RuvLLMOrchestrator (`dist/llm/RuvLLMOrchestrator.js`)
+**Claude-flow uses LocalReasoningBank** — in-memory Map + Array with JSON file persistence. O(1) store, O(n) linear scan search. No SQLite, no LLM calls, no consolidation. This is what `claude-flow hooks intelligence *` invokes. The 50 patterns in MEMORY.md are from this system (Initial).
 
-The most sophisticated orchestration code:
-- `selectAgent()`: Embeds task, searches ReasoningBank, applies SONA weighting,
-  routes via "FastGRNN"
-- `decomposeTask()`: Estimates complexity, splits by sentences/conjunctions
-- `recordOutcome()`: Updates performance metrics
+### 5b. Embedding Fallback Chain & Hash Problem
 
-**Reality check**:
-- "TRM" (Tiny Recursive Models) = word count + keyword heuristics
-- "SONA adaptation" = `weights[i] += 0.01` (uniform across 384 dimensions)
-- "FastGRNN" = sort-by-score-and-pick-top
-- Task decomposition splits by periods and "and/then/after" keywords
-- No LLM-based decomposition, no result synthesis between agents
+The intended embedding pipeline (Initial):
 
-### Main Entry (`dist/index.js`)
+1. `@ruvector/core` (Rust NAPI) → Usually missing
+2. ONNX via `@xenova/transformers` → downloadModel fails
+3. **Hash-based embeddings** → THIS IS WHAT RUNS
 
-`runParallelMode()` runs 3 agents via `Promise.all()` then concatenates outputs
-with section headers. No synthesis, reconciliation, or feedback loops.
+Confirmed systemic across 4+ files in agentic-flow (R22):
 
----
+| File | Mechanism |
+|------|-----------|
+| optimized-embedder.ts | simpleTokenize: hash-to-token-ID, not real wordpiece |
+| ruvector-integration.ts | simpleEmbedding: hash vectors as final fallback |
+| edge-full.ts | simpleEmbed: charCode mapping |
+| agentdb-wrapper-enhanced.ts | Inherits degradation through dependencies |
 
-## 4. Multi-Provider Routing (REAL)
+In practice, all "semantic search" using defaults is character-frequency matching. HNSW indices are structurally valid but search results are meaningless without plugging in a real embedding provider (R22).
 
-The `ModelRouter` at `dist/router/router.js` with 4+ providers:
+EmbeddingService.ts (1,810 LOC, 80%) has real ONNX embedding, K-means clustering, pretrain system, but simpleEmbed = hash fallback (R22).
 
-| Provider | File | Real? | Tool Support |
-|----------|------|-------|-------------|
-| Anthropic | `providers/anthropic.js` | YES | YES |
-| OpenRouter | `providers/openrouter.js` | YES (converts Anthropic→OpenAI format) | YES |
-| Gemini | `providers/gemini.js` | YES (via @google/genai) | NO |
-| ONNX Local | Referenced | Partial | N/A |
-| Requesty | `proxy/requesty-proxy.js` | YES (proxy) | Via proxy |
+### 5c. Multi-Provider Routing — The Genuine Value
 
-**Routing modes**: manual, rule-based, cost-optimized, performance-optimized.
-Fallback chain with automatic retry. Metrics tracking per provider.
+**router.js** (~600 LOC, 92%) implements 4+ providers with real API translation (Initial):
 
-**Assessment**: This is real, functional code. The Anthropic-to-OpenAI format
-translation for OpenRouter is properly implemented with streaming support.
-This is the most unique capability agentic-flow provides.
+| Provider | File | Real? | Tool Support | Key Features |
+|----------|------|-------|-------------|--------------|
+| Anthropic | providers/anthropic.js | YES | YES | Native integration |
+| OpenRouter | providers/openrouter.js | YES | YES | Anthropic→OpenAI format conversion |
+| Gemini | providers/gemini.js | YES | NO | Via @google/genai |
+| ONNX Local | Referenced | Partial | N/A | Local inference |
+| Requesty | proxy/requesty-proxy.js | YES | Via proxy | HTTP proxy layer |
 
----
+**Routing modes**: manual, rule-based, cost-optimized, performance-optimized. Fallback chain with automatic retry. Metrics tracking per provider (Initial).
 
-## 5. MCP Tools
+**Proxy layer** (R22): anthropic-to-requesty.ts (880 LOC, 93%) and anthropic-to-openrouter.ts (775 LOC, 90%) are genuine HTTP proxies with streaming support. ~95% identical implementations. API key prefix leaked in logs (HIGH). Missing request timeout (HIGH).
 
-### What's Advertised
-- "213 MCP tools"
+**Assessment**: This is the most unique capability agentic-flow provides. The Anthropic-to-OpenAI format translation for OpenRouter is properly implemented with streaming support (Initial).
 
-### What the Code Shows
+### 5d. Agent System — Prompt Templates, Not Code
 
-**In-SDK MCP server** (`dist/mcp/claudeFlowSdkServer.js`): 9 tools, ALL of
-which shell out to `npx claude-flow@alpha` via `execSync`:
-- memory_store, memory_retrieve, memory_search
-- swarm_init, agent_spawn, task_orchestrate, swarm_status
-- agent_booster_edit_file, agent_booster_batch_edit (stubs)
+**82 agent markdown files** in `.claude/agents/` organized across 20 categories (Initial). Each file has YAML frontmatter with name, description, capabilities, hooks, followed by system prompt body.
 
-**FastMCP stdio server** (`dist/mcp/fastmcp/servers/stdio-full.js`): 11 tools,
-same `execSync` pattern.
+**7 JavaScript agent runners** load these templates (Initial):
 
-The "213 tools" count comes from combining tools from external packages
-(`claude-flow@alpha` provides 170+, `flow-nexus@latest` adds more). Agentic-flow
-itself defines 9-11 tools, all of which are CLI command wrappers.
+| Runner | Lines | Implementation |
+|--------|-------|----------------|
+| claudeAgent.js | 335 | Claude Agent SDK query() wrapper (85%) |
+| claudeAgentDirect.js | ~200 | Raw Anthropic SDK with streaming (90%) |
+| directApiAgent.js | ~250 | Anthropic SDK + 7 tools that shell out (80%) |
+| codeReviewAgent.js | ~50 | System prompt: "review diffs" (95%) |
+| webResearchAgent.js | ~50 | System prompt: "web reconnaissance" (95%) |
+| dataAgent.js | ~50 | System prompt: "analyze tabular data" (95%) |
+| claudeFlowAgent.js | ~100 | Uses claude-flow MCP tools |
 
----
+**RuvLLMOrchestrator** (Initial): selectAgent() embeds task, searches ReasoningBank, applies SONA weighting, routes via "FastGRNN". Reality: "TRM" = word count + keyword heuristics, "SONA adaptation" = uniform weights[i] += 0.01, "FastGRNN" = sort-by-score-and-pick-top, task decomposition splits by periods and "and/then/after" keywords (60%).
 
-## 6. Three ReasoningBanks (That Share Zero Code)
+**Assessment**: Agents are entirely prompt-driven. "Self-learning" and "GNN-enhanced" references in system prompts are aspirational documentation, not executed code. 77-82 markdown files are useful as well-crafted system prompts but not programmatic agent implementations (Initial).
 
-This is the most important architectural finding.
+### 5e. Worker System — Functional Single-Node Task Runner
 
-### A. agentic-flow's ReasoningBank (`dist/reasoningbank/`)
+**worker-registry.ts** (662 LOC, 80%, R40): Production SQLite WAL persistence with ULID IDs, 3-tier DB backend (better-sqlite3 > sql.js > in-memory Map). json_insert() for atomic result appending. Issues: sql.js async init race in synchronous constructor (data loss window), writeFileSync on every mutation (performance), workers are database rows NOT real processes.
 
-**Based on**: arXiv:2509.25140 (Google DeepMind)
+**worker-agent-integration.ts** (613 LOC, 68%, R40): Advisory agent selection only — 6 hardcoded agent types, 12 trigger-to-agent mappings, EMA performance tracking (alpha=0.2), multi-factor scoring `quality * success_rate * (1/latency_factor)`. Issues: no process spawning/IPC/lifecycle management, performance data in-memory only (lost on restart), p95 latency is decaying high-water mark not real percentile.
 
-Implements 5 algorithms from the paper:
+**dispatch-service.ts** (1,212 LOC, 80%, R22): 12 worker types with real file analysis — secret detection, dependency scanning. Workers execute real analysis in-process (same Node.js event loop).
 
-| Algorithm | File | What It Does | Fallback Without API Key |
-|-----------|------|-------------|------------------------|
-| **Retrieve** | `core/retrieve.js` | MMR diversity-aware retrieval with 4-factor scoring (similarity, recency, reliability, diversity) | Still works (local SQLite) |
-| **Judge** | `core/judge.js` | LLM-as-Judge trajectory evaluation via ModelRouter | Returns heuristic confidence=0.5 |
-| **Distill** | `core/distill.js` | LLM-based memory extraction from trajectories, PII scrubbing | Returns empty array `[]` |
-| **Consolidate** | `core/consolidate.js` | Dedup (cosine >= 0.95), contradiction detection, pruning (180 days) | Works (pure computation) |
-| **MaTTS** | `core/matts.js` | Memory-aware Test-Time Scaling (parallel rollouts or sequential refinement) | Requires LLM |
+**Architecture** (R40): Workers are functional single-node task runner with real SQLite persistence and genuine file I/O. Distributed coordination is structurally defined but non-functional (QUIC stub). Agent integration is advisory-only, not executable.
 
-**Database**: SQLite at `.swarm/memory.db`. Tables: `patterns`, `pattern_embeddings`,
-`pattern_links`, `task_trajectories`, `matts_runs`.
+### 5f. QUIC Transport — Complete Facade
 
-**Key limitation**: Without an API key (OPENROUTER, ANTHROPIC, or GEMINI), Judge
-falls back to heuristic and Distill returns nothing. Real learning requires LLM access.
+**quic.ts** (599 LOC, 24%, R40): Zero QUIC protocol implementation. loadWasmModule() returns {} (L288), send() writes nothing (L189-193), receive() returns empty Uint8Array (L194-198), sendRequest() returns hardcoded 200 + empty body (L315-319), getStats() returns all zeros (L274-278).
 
-### B. agentdb's ReasoningBank (`agentdb/dist/src/controllers/ReasoningBank.js`)
+**Critical context**: Real QUIC exists in Rust crate `agentic-flow-quic` using quinn 0.11 (production QUIC library) with rustls 0.23 (real TLS 1.3). WASM bindings exist (wasm.rs) but are never connected to TypeScript. The TypeScript → WASM → Rust/quinn bridge was never completed (R40).
 
-**Completely different design**:
-- v1: SQLite `reasoning_patterns` table (different schema from agentic-flow)
-- v2: Uses abstract `VectorBackend` for 8x faster search
-- Optional GNN enhancement via `LearningBackend`
-- Stores task type, approach text, success rate, average reward
-- `trainGNN()` triggers actual GNN training
+**Impact**: All swarm coordination (quic-coordinator.ts, p2p-swarm-v2.js) is architecturally sophisticated but non-functional without transport. SyncCoordinator (553 LOC, 40%) has real logic built on stub QUIC (Initial).
 
-**Not used by claude-flow** (grep for agentdb imports returned zero matches).
+### 5g. AgentDB Controllers — Substantive but Unused
 
-### C. claude-flow's LocalReasoningBank (`intelligence.js`)
+**Database schema** (Initial): 12 tables, 5 views, 4 triggers implementing 5 memory patterns — Reflexion episodic replay (episodes, episode_embeddings), Skill Library (skills, skill_links, skill_embeddings), Structured mixed memory (facts SPO triples, notes, note_embeddings), Episodic segmentation (events, consolidated_memories), Graph-aware recall (exp_nodes, exp_edges, exp_node_embeddings).
 
-**The simplest and the one actually used**:
-- In-memory Map + Array with JSON file persistence at `~/.claude-flow/neural/patterns.json`
-- O(1) store, O(n) linear scan search
-- No SQLite, no LLM calls, no consolidation, no judge, no distill
-- Achieves "<0.05ms" because it barely does anything
-- This is what `claude-flow hooks intelligence *` commands invoke
-- The 50 patterns in MEMORY.md are from THIS system
+**Top controllers** (Initial):
 
----
+| Controller | LOC | Based On | Real% | Key Features |
+|------------|-----|----------|-------|--------------|
+| ReflexionMemory | 815 | arXiv 2303.11366 | 82% | Episodic replay, 4 retrieval strategies, GNN enhancement |
+| SkillLibrary | 697 | arXiv 2305.16291 (Voyager) | 82% | Pattern extraction, learning trends, composite scoring |
+| CausalMemoryGraph | 602 | Pearl's do-calculus | 82% | Uplift modeling, A/B experiments, t-stats, recursive CTEs |
+| RuVectorBackend | 776 | — | 90% | Semaphore concurrency, BufferPool, security, adaptive HNSW |
+| AttentionService | 517 | Transformer | 70% | JS fallback works; Flash/MoE require @ruvector/attention |
+| HNSWIndex | 437 | HNSW | 88% | Wrapper around hnswlib-node (C++) |
 
-## 7. Learning and Intelligence Systems
+**Critical finding**: Zero imports found in claude-flow. AgentDB controllers are genuinely sophisticated but completely orphaned (H3, Initial).
 
-### agentdb's "9 RL Algorithms"
+**Browser build** (Initial): Real but minimal — agentdb.browser.js (48 KB) and .min.js (23 KB) with sql.js WASM SQLite fallback.
 
-| Claimed Algorithm | Actual Implementation |
-|-------------------|----------------------|
-| Q-Learning | Real: standard Q(s,a) with alpha, gamma |
-| SARSA | Simplified: uses current Q-value as next-state |
-| DQN | Fake: just reads Q-values, no neural network |
-| Policy Gradient | Average reward tracking |
-| Actor-Critic | Same as Policy Gradient |
-| PPO | Same as Policy Gradient |
-| Decision Transformer | Returns avg_reward (no transformer) |
-| MCTS | UCB1 formula only (no tree search) |
-| Model-Based | Returns avg_reward (no model) |
+### 5h. Intelligence Layer Architecture
 
-All use TD-error Q-value updates regardless of name. The algorithm names are cosmetic.
+**RuVectorIntelligence.ts** (1,200 LOC, 80%, R22): Core integration of @ruvector/sona (MicroLoRA, BaseLoRA, EWC++), @ruvector/attention (MultiHead, Flash, Hyperbolic, MoE, GraphRoPE), ruvector core HNSW retrieval, LRU eviction (10K trajectories). Background learning via setInterval(sona.tick, 60000). Quality-gated adaptations: microLora always, baseLora ≥0.7, EWC++ ≥0.8.
 
-### RuVectorIntelligence (`dist/intelligence/RuVectorIntelligence.js`)
+**intelligence-bridge.ts** (1,371 LOC, 70%, R22): Bridge to RuVectorIntelligence. 9 RL algorithms config-only (DQN/PPO/SARSA/etc. all reduce to Q-value updates). Math.random()*0.1 fabricated activations.
 
-The most sophisticated implementation, integrating real Rust/WASM packages:
-- @ruvector/sona SonaEngine (MicroLoRA, BaseLoRA, EWC++)
-- @ruvector/attention (MultiHead, Flash, Hyperbolic, MoE, GraphRoPE)
-- ruvector core (HNSW)
-- Background learning: `setInterval(sona.tick, 60000)`
-- Quality-gated adaptations: microLora always, baseLora >= 0.7, EWC++ >= 0.8
+**Critical gap**: Claude-flow never imports RuVectorIntelligence. The sophisticated SONA/attention integration is orphaned (H2, R22).
 
-**BUT claude-flow never imports this module.** It only lives in agentic-flow.
+### 5i. MCP Tool Layer — Circular Dependency
 
-### Embedding Fallback Chain
+**claudeFlowSdkServer.js** (~300 LOC, 25%, Initial): 9 tools ALL shell out to `npx claude-flow@alpha` via execSync — memory_store, memory_retrieve, memory_search, swarm_init, agent_spawn, task_orchestrate, swarm_status, agent_booster_edit_file, agent_booster_batch_edit (stubs).
 
-Four separate embedding implementations:
+**stdio-full.js** (~400 LOC, 25%, Initial): 11 tools, same execSync pattern. FastMCP stdio server.
 
-| System | Model | Dimensions | Used When |
-|--------|-------|------------|-----------|
-| ONNX via @xenova/transformers | MiniLM-L6-v2 | 384 | First choice (broken: "downloadModel is not a function") |
-| agentic-flow via ruvector ONNX | Various | 384-768 | Second choice |
-| Hash-based (sin/cos) | N/A | 128-384 | **What actually runs** |
-| Simple hash (different algo) | N/A | 256 | EmbeddingService fallback |
+**standalone-stdio.ts** (813 LOC, 85%, R22): Real FastMCP server with 15 tools. **SHELL INJECTION** via unsanitized execSync (C6).
 
-**In practice**: ONNX model download fails, so hash-based embeddings run.
-These produce vectors in the right dimension but with **no semantic meaning** --
-similar text will NOT have similar embeddings.
+**Assessment**: The "213 tools" count combines external packages (claude-flow@alpha 170+, flow-nexus@latest). Agentic-flow itself defines 9-11 tools that are CLI command wrappers, creating circular dependency (C2, Initial).
 
----
+### 5k. Security Findings
 
-## 8. Swarm Coordination
+| Severity | Issue | File | Session |
+|----------|-------|------|---------|
+| CRITICAL | Shell injection via unsanitized execSync | standalone-stdio.ts | R22 |
+| HIGH | SQL injection in incrementStat (string interpolation for column name) | IntelligenceStore.ts | R22 |
+| HIGH | API key prefix leaked in logs | anthropic-to-requesty.ts | R22 |
+| HIGH | Missing request timeout (can hang indefinitely) | anthropic-to-openrouter.ts | R22 |
 
-### QUIC Coordinator (`dist/swarm/quic-coordinator.js`) — 460 lines
+### 5l. Package Metadata
 
-Real coordination logic with topology-aware routing (mesh/hierarchical/ring/star),
-agent registration, message queuing, heartbeat. **BUT** depends on QUIC transport
-that is a complete stub.
+| Metric | Value |
+|--------|-------|
+| Total size | 574 MB installed (2.2 MB unpacked) |
+| node_modules (bundled) | 553 MB (96.3%) |
+| — onnxruntime-node | 513 MB (89.4%) |
+| — better-sqlite3 | 27 MB (4.7%) |
+| — fastmcp | 11 MB (1.9%) |
+| dist/ (application code) | 13 MB (2.3%) |
+| Agent markdown files | ~2 MB (0.3%) |
+| Monthly downloads | 84,541 (agentic-flow), 111,686 (agentdb) |
 
-### P2P Swarm v2 (`dist/swarm/p2p-swarm-v2.js`) — 1786 lines
-
-The largest file. Includes Ed25519 identity, X25519 session keys, message replay
-protection, Gun-based WebRTC signaling, IPFS CID pointers. Sophisticated
-cryptographic code. **Requires Gun/WebRTC infrastructure not available locally.**
-
-### Attention Coordinator (`dist/coordination/attention-coordinator.js`) — 361 lines
-
-Attention-based agent consensus, MoE routing, topology-aware coordination.
-**Requires external attentionService** for actual computation.
-
-### Assessment
-
-All three swarm implementations are architecturally sophisticated but
-non-functional in our environment due to missing dependencies (QUIC client,
-Gun/WebRTC, attention service).
-
----
-
-## 9. What's Stub vs Real
-
-### REAL and Functional
-
-| Component | Lines | Evidence |
-|-----------|-------|---------|
-| Multi-provider routing | ~800 | Real API translation, streaming, fallback |
-| Agent prompt templates | 82 files | Well-crafted system prompts |
-| Claude Agent SDK wrapper | 335 | Real integration with `query()` |
-| ReasoningBank (retrieve) | 87 | Genuine MMR algorithm |
-| CircuitBreakerRouter | 459 | Full state machine (CLOSED/OPEN/HALF_OPEN) |
-| SemanticRouter | 291 | Real cosine similarity (but brute-force, not HNSW as claimed) |
-| PII Scrubber | ~100 | 12 regex patterns for credentials/PII |
-| Proxy layer | 9 files | Real HTTP proxies for Anthropic→OpenRouter/Gemini |
-| Attention wrappers | 268 | Proper integration with @ruvector/attention |
-| SONA service | 447 | Real integration with @ruvector/sona |
-
-### STUB / PLACEHOLDER
-
-| Component | Evidence |
-|-----------|---------|
-| QUIC transport | `loadWasmModule()` returns `{}`; comment: "will be implemented" |
-| Federation Hub | `sendSyncMessage()` returns `[]`; connection is a boolean flag |
-| HTTP/3 proxy | `encodeHttp3Request()` returns empty `Uint8Array` |
-| Agent Booster | `dist/agent-booster/` directory doesn't exist |
-| WASM ReasoningBank | Import path points to non-existent files |
-| Billing system | Always uses in-memory storage; no real payment integration |
-
-### MISLEADING
-
-| Claim | Reality |
-|-------|---------|
-| "213 MCP tools" | 9-11 tools that shell out to `npx claude-flow@alpha` |
-| "HNSW indexing" | SemanticRouter admits brute-force in code comments |
-| "66 specialized agents" | 82 markdown prompt templates |
-| "Self-learning agents" | Learning code exists but claude-flow doesn't call it |
-| "GNN-Enhanced" | `RuvectorLayer` is a single-layer perceptron, not GNN |
-| "9 RL algorithms" | All are tabular Q-value updates with different names |
-| "Byzantine fault-tolerant consensus" | No Raft/PBFT found in agentic-flow dist |
-
----
-
-## 10. AgentDB Deep-Dive
-
-AgentDB is the most genuinely substantive component of the agentic-flow ecosystem.
-
-### Database Schema
-
-12 tables, 5 views, 4 triggers implementing 5 memory patterns:
-1. **Reflexion Episodic Replay**: `episodes`, `episode_embeddings`
-2. **Skill Library**: `skills`, `skill_links`, `skill_embeddings`
-3. **Structured Mixed Memory**: `facts` (SPO triples), `notes`, `note_embeddings`
-4. **Episodic Segmentation**: `events`, `consolidated_memories`
-5. **Graph-Aware Recall**: `exp_nodes`, `exp_edges`, `exp_node_embeddings`
-
-### Controllers (23 total)
-
-| Controller | Lines | Based On | Assessment |
-|------------|-------|----------|------------|
-| **ReflexionMemory** | 815 | arxiv 2303.11366 | **GENUINE** -- episodic replay, 4 retrieval strategies, GNN enhancement, graph node creation |
-| **SkillLibrary** | 697 | arxiv 2305.16291 (Voyager) | **GENUINE** -- pattern extraction, learning trends, composite scoring |
-| **CausalMemoryGraph** | 602 | Pearl's do-calculus | **GENUINE** -- uplift modeling, A/B experiments, t-stats, p-values, recursive CTE chains |
-| **AttentionService** | 517 | Transformer attention | PARTIAL -- JS fallback works; Flash/MoE require @ruvector/attention NAPI |
-| **HNSWIndex** | 437 | HNSW | Real wrapper around hnswlib-node (C++) |
-| **QUICServer** | 383 | QUIC | **STUB** -- comment says "Actual QUIC would use a library" |
-| **QUICClient** | 489 | QUIC | **STUB** -- `sendRequest()` does `sleep(100)` and returns `{success: true}` |
-| **SyncCoordinator** | 553 | — | PARTIAL -- real logic, but built on stub QUIC transport |
-| ReasoningBank | ~400 | — | Real pattern store with optional GNN (see Section 6) |
-| Other (14) | Varies | — | Mix of real and partial implementations |
-
-### Vector Backend
-
-Priority chain: RuVector (Rust NAPI) > RuVector (WASM) > hnswlib-node (C++) > None
-
-**RuVectorBackend** (776 lines): Real implementation with semaphore concurrency,
-BufferPool memory reuse, adaptive HNSW parameters, mmap support, path traversal
-security, prototype pollution protection.
-
-### Browser Build
-
-Real but minimal: `agentdb.browser.js` (48 KB) and `.min.js` (23 KB) with
-sql.js WASM SQLite fallback.
-
----
-
-## 11. What Claude-Flow Actually Uses
+### 5m. What Claude-Flow Actually Uses
 
 | Component | Used? | How? |
 |-----------|-------|------|
-| agentic-flow ReasoningBank (retrieve) | Partially | `hooks.js` imports for `retrieveMemories()` in token-optimize hook |
-| agentic-flow ReasoningBank (judge/distill/consolidate) | **NO** | Never called by claude-flow |
+| agentic-flow ReasoningBank (retrieve) | Partially | hooks.js imports for retrieveMemories() in token-optimize hook |
+| agentic-flow ReasoningBank (judge/distill/consolidate) | **NO** | Never called |
 | agentdb (any controller) | **NO** | Zero imports found |
 | RuVectorIntelligence | **NO** | Never imported |
-| LocalReasoningBank (intelligence.js) | **YES** | What `claude-flow hooks intelligence *` uses |
-| EmbeddingService | Indirectly | memory-initializer falls back to agentic-flow embeddings |
+| LocalReasoningBank (intelligence.js) | **YES** | What claude-flow hooks intelligence * uses |
+| EmbeddingService | Indirectly | memory-initializer fallback to agentic-flow embeddings |
 | Multi-provider routing | **NO** | claude-flow routes haiku/sonnet/opus only |
-| Claude Agent SDK integration | **NO** | claude-flow uses its own Task tool |
-| PII scrubber | Only if distill runs | Requires API key + explicit call |
-| WASM ruvector-edge | At import time | Falls back to JS |
-| @ruvector/core HNSW | Via memory system | memory-initializer uses VectorDb |
-| @ruvector/attention | Via training service | ruvector-training.js uses FlashAttention, MoE |
-| @ruvector/sona | Via training service | ruvector-training.js uses SonaEngine |
-
-**Bottom line**: Claude-flow uses agentic-flow primarily for:
-1. Embedding model access (fallback chain)
-2. ReasoningBank `retrieveMemories()` (partial, read-only)
-3. The @ruvector native binaries that come as transitive dependencies
-
-It does NOT use the sophisticated learning pipeline, multi-provider routing,
-Claude Agent SDK integration, or any AgentDB controllers.
-
----
-
-## 12. Comparison: agentic-flow vs claude-flow
-
-| Capability | claude-flow (CLI) | agentic-flow (npm) |
-|---|---|---|
-| Agent execution | Task tool → Claude Code subprocess | Claude Agent SDK `query()` |
-| Agent definitions | 60+ CLI templates | 82 markdown prompt templates |
-| Model routing | 3-tier (haiku/sonnet/opus) | 4+ providers (Anthropic/OpenRouter/Gemini/ONNX) |
-| MCP tools | 170+ native in-process | 9-11 that shell out to claude-flow |
-| Memory | SQLite + HNSW, persistent | Shells out to claude-flow memory |
-| Learning | LocalReasoningBank (patterns.json) | Full pipeline (unused by claude-flow) |
-| Swarm | In-process swarm init/lifecycle | QUIC/P2P/Attention (non-functional) |
-| Unique value | Working CLI + hooks + tools | Multi-provider routing + @ruvector binaries |
-
----
-
-## 13. PII Scrubbing
-
-Located at `dist/reasoningbank/utils/pii-scrubber.js`. Regex-based with 12 patterns:
-
-| Category | Replacement |
-|----------|-------------|
-| Email addresses | `[EMAIL]` |
-| SSN | `[SSN]` |
-| Anthropic/GitHub/Slack API keys | `[API_KEY]` |
-| AWS keys | `[AWS_KEY]` |
-| Credit card numbers | `[CREDIT_CARD]` |
-| US phone numbers | `[PHONE]` |
-| IP addresses | `[IP]` |
-| URL tokens/keys | `[REDACTED]` |
-| JWT tokens | `[JWT]` |
-
-**Limitations**: SSN pattern `\d{9}` matches any 9-digit number. Phone pattern
-can match arbitrary number sequences. No NER or contextual analysis.
-
----
-
-## 14. Performance Claims vs Reality
-
-| Claim | Reality |
-|-------|---------|
-| "Flash Attention 2.49x-7.47x speedup" | Refers to JS implementation vs its own naive path, not Rust native |
-| "HNSW 150x-12,500x faster" | Theoretical HNSW vs brute-force; SemanticRouter admits using brute-force |
-| "SONA <0.05ms adaptation" | LocalReasoningBank circular buffer, not real SONA |
-| "GNN +12.4% recall" | No GNN actually runs in claude-flow context |
-| "52x faster Agent Booster" | Package directory doesn't exist |
-| "2,211 ops/sec SIMD" | From @ruvector native, not agentic-flow JS |
-
----
-
-## 15. Recommendations
-
-### What to Actually Use from agentic-flow
-
-1. **Multi-provider routing** -- If you need OpenRouter/Gemini access, this is
-   real working code. Currently unused by claude-flow.
-2. **Agent prompt templates** -- 82 well-crafted system prompts for various roles.
-3. **@ruvector native binaries** (transitive deps) -- The real performance value.
-
-### What to Skip
-
-1. **MCP tools** -- They just shell out to claude-flow, adding latency.
-2. **Swarm coordination** -- Non-functional without QUIC/WebRTC infrastructure.
-3. **The "213 tools" claim** -- It's 9-11 actual tools.
-4. **RL algorithms in agentdb** -- Mostly cosmetic names over Q-value updates.
-
-### What Could Be Unlocked
-
-1. **agentic-flow ReasoningBank learning pipeline** -- Would need an API key
-   (OPENROUTER_API_KEY) and explicit integration to call `runTask()`, `judge()`,
-   `distill()`, `consolidate()`.
-2. **RuVectorIntelligence** -- Has real SONA/attention integration but needs
-   explicit import from claude-flow.
-3. **AgentDB controllers** -- ReflexionMemory, SkillLibrary, CausalMemoryGraph
-   are genuinely sophisticated but completely unused.
-4. **Real embeddings** -- Fix ONNX model download to replace hash-based fallback
-   with actual semantic embeddings (MiniLM-L6-v2 384-dim).
-
----
-
-## R22: TypeScript Source Deep-Read (Session 27 — agentic-flow-rust)
-
-> 54 files read, ~59K LOC, 150 findings across 5 agent clusters. Weighted average 83% real — highest quality batch analyzed.
-
-### Intelligence Layer Architecture (10 files, 12,100 LOC) — 82% REAL
-
-The agentic-flow intelligence subsystem has a well-layered architecture:
-
-```
-cli-proxy.ts (95%) ──> agent-booster-enhanced.ts (75%) ──> EmbeddingService.ts (80%) ──> EmbeddingCache.ts (90%)
-                                                                ^
-dispatch-service.ts (80%) ──> intelligence-bridge.ts (70%) ──> RuVectorIntelligence.ts (80%) ──> IntelligenceStore.ts (90%)
-```
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **p2p-swarm-v2.ts** | 2,280 | 85% | Production Ed25519/X25519/AES-256-GCM crypto. Task execution STUB. Fake IPFS CIDs. |
-| **EmbeddingService.ts** | 1,810 | 80% | Real ONNX embedding, K-means clustering, pretrain system. Hash-based simpleEmbed fallback. |
-| **cli-proxy.ts** | 1,432 | 95% | Main CLI entry. Multi-provider proxy (OpenRouter, Gemini, ONNX, Requesty). QUIC transport. |
-| **agent-booster-enhanced.ts** | 1,428 | 75% | Pattern caching (exact+fuzzy), 5-tier compression, co-edit graph. External npx dep. |
-| **intelligence-bridge.ts** | 1,371 | 70% | Bridge to RuVectorIntelligence. 9 RL algorithms config-only. Math.random()*0.1 fabricated activations. |
-| **RuVectorIntelligence.ts** | 1,200 | 80% | Core: SONA Micro-LoRA, 6 attention types, HNSW retrieval, LRU eviction (10K trajectories). |
-| **dispatch-service.ts** | 1,212 | 80% | 12 worker types with real file analysis. Secret detection, dependency scanning. |
-| **edge-full.ts** | 943 | 75% | WASM integration for 6 ruvector sub-modules. JS fallback for 5/6. Cypher throws without WASM. |
-| **EmbeddingCache.ts** | 726 | 90% | 3-tier cache (native SQLite > WASM SQLite > Memory). SHA-256 keys, LRU eviction. |
-| **IntelligenceStore.ts** | 698 | 90% | SQLite dual backend (sql.js > better-sqlite3 > no-op). **SQL injection risk** in incrementStat. |
-
-### Proxy Layer (2 files, 1,655 LOC) — 91% REAL
-
-Both proxy files are genuine HTTP proxies with streaming:
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **anthropic-to-requesty.ts** | 880 | 93% | Real Anthropic→OpenAI→Requesty proxy. API key prefix leaked in logs. |
-| **anthropic-to-openrouter.ts** | 775 | 90% | ~95% identical to Requesty. Missing sanitizeJsonSchema(). No request timeout. |
-
-### Agentic-Jujutsu Crate (10 files, ~11,300 LOC) — GENUINELY FUNCTIONAL
-
-The agentic-jujutsu Rust crate is one of the most genuine packages in the ecosystem:
-
-- **wrapper.rs** (1,300 LOC, 90%): `include_bytes!` embeds real jj binary at compile time. Build system downloads actual Jujutsu binary. All 15 JJ operations are real subprocess invocations.
-- **operations.rs** (1,449 LOC, 95%): 30 genuine JJ operation variants with 15 real unit tests.
-- **reasoning_bank.rs** (731 LOC, 85%): EMA-based pattern extraction, trajectory tracking with reward scoring. Same concept as claude-flow ReasoningBank, adapted for VCS operations.
-- **types.rs** (816 LOC, 98%): Clean type definitions with napi(object) and builder patterns.
-- **pkg/{web,node,bundler,deno}/*.js**: ALL wasm-bindgen auto-generated. Should never be manually edited.
-
-**Supply chain risk**: Build system downloads jj binary from internet at compile time.
-
-### CLI, Workers, MCP (12 files, ~10,500 LOC) — 88% REAL
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **hooks.ts** | 1,149 | 100% | Pure CLI delegation layer. 10+ hook tools as Commander.js subcommands. |
-| **workers.ts** | 1,082 | 95% | 15+ subcommands. `dispatch-prompt` silently swallows ALL errors. |
-| **optimized-embedder.ts** | 917 | 90% | Real O(1) LRU + FNV-1a hash. `simpleTokenize` is hash-to-ID, not real wordpiece. |
-| **agentdb-cli.ts** | 862 | 95% | CONFIRMS R18: standalone CLI DOES initialize EmbeddingService with ONNX WASM. |
-| **standalone-stdio.ts** | 813 | 85% | Real FastMCP server, 15 tools. **SHELL INJECTION** via unsanitized execSync. |
-| **sona-tools.ts** | 676 | 90% | 15 tool definitions delegating to sonaService singletons. Real LoRA/trajectory handlers. |
-| **agentdb-wrapper-enhanced.ts** | 899 | 80% | Does NOT fix R18. AttentionService falls back to stub. `calculateRecall` returns wrong metric. |
-| **neural-substrate.ts** | 817 | 92% | REAL: SemanticDriftDetector, MemoryPhysics (hippocampal model), EmbeddingStateMachine. |
-| **ruvector-integration.ts** | 718 | 75% | 5-priority embedding fallback chain. `generateActivations` is hash-based placeholder. |
-
-### Systemic Pattern: Hash-Based Embedding Fallback
-
-4+ files silently degrade semantic search to character-frequency matching when ONNX unavailable:
-- `optimized-embedder.ts` — simpleTokenize uses hash-to-token-ID
-- `ruvector-integration.ts` — simpleEmbedding produces hash vectors as final fallback
-- `edge-full.ts` — simpleEmbed uses charCode mapping
-- `agentdb-wrapper-enhanced.ts` — inherits the problem through dependencies
-
-### Security Findings (R22)
-
-| Issue | File | Severity |
-|-------|------|----------|
-| Shell injection via unsanitized execSync | standalone-stdio.ts | CRITICAL |
-| SQL injection in incrementStat (string interpolation for column name) | IntelligenceStore.ts | HIGH |
-| API key prefix leaked in logs | anthropic-to-requesty.ts | HIGH |
-| Missing request timeout (can hang indefinitely) | anthropic-to-openrouter.ts | HIGH |
-
-### Updated Summary Statistics
-
-| Metric | Before R22 | After R22 |
-|--------|-----------|-----------|
-| DEEP files (agentic-flow-rust) | 4 | 57 |
-| NOT_TOUCHED (agentic-flow-rust) | 3,685 | 3,632 |
-
-## R40: Worker System & QUIC Transport Deep-Read (Session 40)
-
-### Overview
-
-3 files from agentic-flow's worker and transport layers. Key question: Are workers the real execution layer beneath the "demonstration framework" CLI (R31)? **Weighted average: 56% real.**
-
-### File Analysis
-
-| File | LOC | Real% | Verdict | Execution Model |
-|------|-----|-------|---------|-----------------|
-| **worker-registry.ts** (10941) | 662 | 80% | REAL persistence | In-memory objects + SQLite |
-| **worker-agent-integration.ts** (10939) | 613 | 68% | PARTIAL — advisory only | Configuration + selection |
-| **quic.ts** (10893) | 599 | 24% | COMPLETE FACADE | All stubs |
-
-### R31 Extension: "Functional Single-Node Task Runner"
-
-R31 characterized the CLI as a "demonstration framework." R40 refines this to a more nuanced picture:
-
-| Aspect | Assessment |
-|--------|------------|
-| Worker execution | **REAL** — dispatch-service performs genuine file I/O, pattern extraction, analysis |
-| Worker persistence | **REAL** — SQLite-backed with WAL mode, ULID IDs, 3-tier DB backend |
-| Agent selection | **REAL logic, advisory-only** — EMA performance tracking, multi-factor scoring, but no actual bridging |
-| Transport | **FACADE** — QUIC layer is pure scaffolding. Real QUIC exists only in Rust crate |
-
-**Corrected characterization**: agentic-flow is a **functional single-node task runner** with aspirational distributed transport. Workers execute real analysis in-process (same Node.js event loop). Distributed coordination is structurally defined but non-functional.
-
-### worker-registry.ts — Real SQLite Persistence (80%)
-
-Production-quality worker metadata store:
-- **Three-tier DB backend**: better-sqlite3 > sql.js > in-memory Map (cross-platform)
-- **WAL mode** + NORMAL synchronous (correct high-performance SQLite config)
-- **ULID-based** worker IDs (8-char truncated)
-- **Worker lifecycle**: create, updateStatus (with started_at/completed_at timestamps), cleanup
-- **json_insert()** for atomic result key appending
-
-**Issues**:
-- Race condition: sql.js async init in synchronous constructor — data loss window (lines 159-186)
-- Performance: sql.js wrapper calls writeFileSync on every mutation (lines 53-58)
-- Workers are database rows, NOT real processes or threads
-
-### worker-agent-integration.ts — Advisory Selection Only (68%)
-
-Provides recommendation logic for WHICH agent should handle a trigger, but does NOT actually bridge to agents:
-- 6 hardcoded agent types (researcher, coder, tester, security-analyst, performance-analyzer, documenter)
-- 12 trigger-to-agent mappings with fallback chains
-- EMA-based performance tracking (alpha=0.2) — good pattern
-- Multi-factor agent scoring: `quality * success_rate * (1/latency_factor)`
-
-**Issues**:
-- No process spawning, IPC, or agent lifecycle management — the "integration" is purely declarative
-- Performance data stored in-memory Maps — lost on restart
-- p95 latency is decaying high-water mark, not real percentile
-- `getWorkerRegistry` imported but never used
-
-### quic.ts — Complete Facade (24%)
-
-Zero QUIC protocol implementation:
-- `loadWasmModule()` returns `{}` (line 288)
-- `send()` writes nothing (lines 189-193)
-- `receive()` returns empty `Uint8Array` (lines 194-198)
-- `sendRequest()` returns hardcoded 200 with empty body (lines 315-319)
-- `getStats()` returns all zeros (lines 274-278)
-
-**Critical context**: Real QUIC exists in Rust crate `agentic-flow-quic` using **quinn 0.11** (production QUIC library) with **rustls 0.23** (real TLS 1.3). WASM bindings exist (`wasm.rs`) but are never connected to this TypeScript file. The TypeScript → WASM → Rust/quinn bridge was never completed.
-
-### Worker-Transport Architecture Gap
-
-```
-Transport Layer (QUIC) ────[FACADE]──── swarm/quic-coordinator.ts
-                                              │
-                                              ▼
-                                    SwarmAgent coordination
-                                    (depends on stub transport)
-                                              │
-                                              ▼
-Agent Integration ────[ADVISORY ONLY]─── dispatch-service.ts
-  (recommends agent)                    (executes in-process)
-        │                                      │
-        ▼                                      ▼
-  AgentCapabilities                    worker-registry.ts (SQLite)
-  (static config)                      (real persistence)
-```
-
-The critical gap is between the middle (agent selection) and top (transport) layers. Workers work locally, but distributed transport is absent.
-
-### Findings
-
-**CRITICAL** (2):
-- quic.ts has zero implementation — all stubs, `loadWasmModule()` returns `{}` (quic.ts:284-320)
-- `sendRequest()` returns hardcoded 200 with empty body regardless of input (quic.ts:213-235)
-
-**HIGH** (4):
-- Placeholder never connected to real quinn-based QUIC in Rust crate (quic.ts)
-- `getStats()` returns zeros with "From WASM" comments — misleading (quic.ts:274-278)
-- worker-agent-integration does NOT bridge agents to workers — advisory only, no IPC (worker-agent-integration.ts)
-- Performance profiles in-memory only — self-learning never persists (worker-agent-integration.ts:221-264)
-
-**MEDIUM** (6):
-- sql.js async init race condition in synchronous constructor (worker-registry.ts:159-186)
-- sql.js wrapper calls writeFileSync on every mutation (worker-registry.ts:53-58)
-- Workers are NOT real processes — database rows only (worker-registry.ts)
-- p95 latency is decaying high-water mark, not real percentile (worker-agent-integration.ts:239)
-- Incomplete benchmark compliance — only 3 of 6+ metrics checked (worker-agent-integration.ts:500-511)
-- All QUIC config options stored but never read (quic.ts:69-89)
-
-### Updated Summary
-
-| Metric | Before R40 | After R40 |
-|--------|-----------|-----------|
-| DEEP files (agentic-flow) | 57 | 60 |
-| Worker system verdict | Unknown | Functional single-node task runner |
-| QUIC transport verdict | Suspected stub (R22b) | Confirmed complete facade |
-| Real QUIC location | Unknown | Rust crate agentic-flow-quic (quinn 0.11) |
+| Claude Agent SDK integration | **NO** | claude-flow uses Task tool |
+| PII scrubber | Conditional | Only if distill runs (requires API key) |
+| @ruvector native binaries | Via transitive deps | memory-initializer, ruvector-training.js |
+
+**Bottom line**: Claude-flow uses agentic-flow for (1) embedding model access (fallback chain), (2) ReasoningBank retrieveMemories() (partial, read-only), (3) @ruvector native binaries as transitive dependencies. Does NOT use sophisticated learning pipeline, multi-provider routing, Claude Agent SDK integration, or any AgentDB controllers (Initial).
+
+## 6. Cross-Domain Dependencies
+
+- **memory-and-learning domain**: ReasoningBank (4 implementations), embeddings (hash-based fallback), AgentDB controllers, LearningSystem RL
+- **claude-flow-cli domain**: LocalReasoningBank (only one that runs), hooks.js imports
+- **ruvector domain**: @ruvector/core, @ruvector/sona, @ruvector/attention (transitive deps)
+- **agentdb-integration domain**: AgentDB controllers overlap
+
+## 7. Knowledge Gaps
+
+- ~650+ files still NOT_TOUCHED (mostly dist/ JavaScript, node_modules, tests)
+- Main entry dist/index.js orchestration logic
+- Agent markdown prompt templates (82 files) content analysis
+- MCP tool implementations beyond stdio servers
+- P2P swarm crypto implementation details
+- Federation Hub architecture
+- HTTP/3 proxy layer
+- Billing system implementation
+- Browser build internals
+- Rust agentic-flow-quic crate internals
+- Full agentic-jujutsu WASM bindings
+- Remaining TypeScript sources in src/
+
+## 8. Session Log
+
+### Initial (2026-02-08): Repository analysis
+Package structure, agent system, MCP tools, ReasoningBank fragmentation, multi-provider routing, swarm coordination, AgentDB deep-dive, comparison with claude-flow. 714 total files discovered.
+
+### R22 (2026-02-08): TypeScript source deep-read
+54 files, ~59K LOC, 150 findings. Intelligence layer architecture, proxy layer, agentic-jujutsu crate, CLI/workers/MCP, hash-based embedding fallback confirmed systemic, security findings (shell injection, SQL injection).
+
+### R40 (2026-02-08): Worker system & QUIC transport
+3 files, 1,874 LOC, 12 findings. Characterized as functional single-node task runner. QUIC confirmed complete facade (24%). Worker-registry real SQLite persistence, worker-agent-integration advisory-only.

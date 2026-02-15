@@ -1,247 +1,344 @@
 # AgentDB Integration Domain Analysis
 
-> **Priority**: MEDIUM | **Coverage**: 15.3% (79/517 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R41 — AgentDB latent-space simulation deep-read)
+> **Priority**: MEDIUM | **Coverage**: ~15.3% (79/517 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-15 (Session R41)
 
-## Overview
+## 1. Current State Summary
 
-AgentDB is a vector database with agent learning capabilities. 507 files / 153K LOC. 52 files DEEP-read. **Claude-flow lists agentdb as optional dependency but never calls any of its 23 controllers.** 140K+ LOC of genuinely sophisticated code sits unused.
+AgentDB is a 507-file / 153K LOC vector database with agent learning capabilities. Despite claude-flow listing it as an optional dependency, **none of its 23 controllers are called** — 140K+ LOC of genuinely sophisticated code sits unused. The codebase is **~90% authentic** with production-grade search algorithms, real security implementation, and working neural attention mechanisms.
 
-## The Big Picture (Updated R16)
+**Top-level verdicts:**
 
-R8 established that AgentDB is unused by claude-flow but contains production-grade code. R16 reveals the **full surface area** and confirms AgentDB is **far more real than initially assessed** — ~90% authentic code with genuine algorithms, real security, and working neural attention.
+- **Best-in-ecosystem search implementation**: HybridSearch (BM25 + HNSW + fusion strategies) is production-ready and surpasses all other ruvnet search code.
+- **Production-grade quantization**: K-means++ PQ with 8/4-bit scalar quantization rivals standalone vector databases.
+- **Genuine neural attention**: MultiHead and CrossAttention controllers implement real transformer-style attention from scratch (inference-only, random weights).
+- **Solid security model**: Argon2id hashing, SQL injection whitelists, JWT tokens, brute-force protection — comprehensive and correct.
+- **Complete facade in MCP tools layer**: Goalie subsystem (856 LOC) imports GoapPlanner and reasoning engines but calls NONE of them.
+- **Systemic embedding degradation**: Hash-based embedding fallback silently breaks all semantic search features.
+- **Critical bugs in core controllers**: LearningSystem RL is cosmetic (9 algorithms → 1 implementation), CausalMemoryGraph statistics are mathematically wrong.
+- **Three parallel AgentDB systems**: Native standalone MCP server, agentic-flow wrapper, claude-flow patched bridge — only native works correctly.
 
-### Quality Spectrum (R8 + R16)
+The integration gap is organizational, not technical. AgentDB quality exceeds the rest of the ruvnet ecosystem across search, quantization, security, and attention.
 
-| Layer | Components | % Real | Assessment |
-|-------|-----------|--------|------------|
-| **CLI** | agentdb-cli.ts (3,422 LOC) | 98% | 35+ commands, fully implemented |
-| **MCP Server** | agentdb-mcp-server.ts (2,368 LOC) | 85% | 34 tools registered, real handlers |
-| **Search** | HybridSearch (1,062), Quantization (996) | 96% | BM25, K-means++ PQ — production-grade |
-| **Controllers** | ReasoningBank, HNSW, Skills, Memory (3,519) | 92% | Canonical implementations |
-| **Security** | validation, auth, JWT (2,311) | 95% | Argon2id, SQL injection prevention, proper JWT |
-| **Attention** | MultiHead + Cross (961) | 98% | GENUINE neural attention, not stubs |
-| **Infrastructure** | Telemetry, Batch, Benchmark (2,715) | 87% | Real framework, some stubs |
-| **Problematic** | CausalMemoryGraph, LearningSystem, WASM | 40-65% | Broken stats, cosmetic RL, missing WASM |
+## 2. File Registry
 
-## R16: CLI Command Surface (3,422 LOC)
+### AgentDB CLI & MCP Server
 
-### Complete Command Map
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| agentdb-cli.js | agentdb | 3,039 | 95% | DEEP | 14 commands + 60+ subcommands, EmbeddingService initialized | R32 |
+| agentdb-mcp-server.js | agentdb | 2,368 | 98% | DEEP | 27+ tools fully implemented, correct EmbeddingService | R32 |
+| agentdb-cli.ts | agentdb | 3,422 | 98% | DEEP | Complete command surface, 35+ subcommands | R16 |
 
-| Group | Subcommands | Status |
-|-------|-------------|--------|
-| **Setup** | init, status, doctor, install-embeddings, migrate | Fully implemented |
-| **MCP** | mcp start | Spawns MCP subprocess |
-| **Vector** | vector-search | Direct k-NN without text embeddings |
-| **Import/Export** | export, import | JSON/gzip backup of all data |
-| **Statistics** | stats | Database metrics |
-| **Causal** | add-edge, experiment create/add-observation/calculate, query | Full A/B testing |
-| **Recall** | with-certificate | Provenance-backed retrieval |
-| **Learner** | run, prune | Pattern discovery and cleanup |
-| **Reflexion** | store, retrieve, critique-summary, prune | Episode lifecycle |
-| **Skills** | create, search, consolidate, prune | Skill library management |
-| **QUIC Sync** | start-server, connect, push, pull, status | Multi-agent sync |
-| **Simulate** | list, run, init | Dynamic import with fallback |
+### Core Controllers
 
-Controller initialization chain (L199-219): CausalMemoryGraph → CausalRecall → ExplainableRecall → NightlyLearner → ReflexionMemory → SkillLibrary → QUICServer/Client → SyncCoordinator.
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| ReasoningBank.ts | agentdb | 676 | 98% | DEEP | Canonical implementation, v1/v2 dual-mode | R16 |
+| HNSWIndex.ts | agentdb | 582 | 96% | DEEP | Wraps hnswlib-node C++ library, lazy-loading | R16, R40 |
+| SkillLibrary.ts | agentdb | 925 | 90% | DEEP | Composite scoring, pattern extraction is TF word counting | R16 |
+| ExplainableRecall.ts | agentdb | 747 | 88% | DEEP | Merkle tree provenance, greedy set cover | R16, R22 |
+| NightlyLearner.ts | agentdb | 665 | 80% | DEEP | SQL path works, attention path broken by R20 | R16, R40 |
+| LearningSystem.ts | agentdb | 1,288 | 55% | DEEP | 9 RL algorithms = 1 Q-value dict, no neural nets | R8, R22 |
+| CausalMemoryGraph.ts | agentdb | 876 | 65% | DEEP | Wrong t-CDF formula, fake correlation via session count | R8, R22 |
+| MemoryController.ts | agentdb | 462 | 95% | DEEP | Attention orchestration, temporal decay weighting | R16 |
+| ReflexionMemory.ts | agentdb | 1,115 | 65% | DEEP | Storage works, missing judge function (breaks arXiv paper) | R8 |
 
-Database: better-sqlite3 with WAL mode, synchronous=NORMAL, 64MB cache.
+### Search & Optimization
 
-## R16: MCP Tool Surface (2,368 LOC)
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| HybridSearch.ts | agentdb | 1,062 | 95% | DEEP | BEST SEARCH CODE. Correct BM25, 3 fusion strategies | R16 |
+| Quantization.ts | agentdb | 996 | 98% | DEEP | Per-dimension min/max, O(1) swap-removal | R16, R22 |
+| vector-quantization.ts | agentdb | 1,529 | 95% | DEEP | Global min/max, async K-means++. Duplicates Quantization.ts | R8, R22 |
+| BatchOperations.ts | agentdb | 809 | 92% | DEEP | SQL injection prevention, transaction management | R16, R22 |
+| WASMVectorSearch.ts | agentdb | 458 | 70% | DEEP | WASM module missing, JS fallback is correct | R16 |
+| CausalRecall.ts | agentdb | 506 | 75% | DEEP | Reranking formula sound, depends on broken CausalMemoryGraph | R16 |
+| BenchmarkSuite.ts | agentdb | 1,361 | 95% | DEEP | Production framework, quantization benchmark crashes | R16, R22 |
+| BenchmarkSuite.js | agentdb | 984 | 100% | DEEP | performance.now ×28, zero fakes | R32 |
 
-### 34 MCP Tools (Complete Map)
+### Security & Infrastructure
 
-**Core Vector DB (5 tools)**:
-`agentdb_init`, `agentdb_insert`, `agentdb_insert_batch`, `agentdb_search`, `agentdb_delete`
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| validation.ts | agentdb | 557 | 95% | DEEP | Path traversal blocking, 13 sensitive field regexes | R16 |
+| input-validation.ts | agentdb | 544 | 98% | DEEP | Whitelist SQL injection prevention, parameterized builders | R16 |
+| auth.service.ts | agentdb | 668 | 92% | DEEP | Argon2id, 5-attempt lockout. In-memory storage only | R16, R22 |
+| token.service.ts | agentdb | 492 | 96% | DEEP | JWT HS256, 15min/7d TTL. In-memory revocation list | R16 |
+| telemetry.ts | agentdb | 545 | 85% | DEEP | OTel framework, SDK init stubbed, no exporters | R16 |
 
-**Frontier Memory (8 tools)**:
-`reflexion_store`, `reflexion_retrieve`, `skill_create`, `skill_search`, `causal_add_edge`, `causal_query`, `recall_with_certificate`, `learner_discover`, `db_stats`
+### Attention Mechanisms
 
-**Learning System (10 tools)**:
-`learning_start_session`, `learning_end_session`, `learning_predict`, `learning_feedback`, `learning_train`, `learning_metrics`, `learning_transfer`, `learning_explain`, `experience_record`, `reward_signal`
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| MultiHeadAttentionController.ts | agentdb | 494 | 98% | DEEP | Real scaled dot-product, Xavier init, 4 aggregation strategies | R16 |
+| CrossAttentionController.ts | agentdb | 467 | 98% | DEEP | Multi-context attention, namespace-based stores | R16 |
+| AttentionService.ts | agentdb | 771 | 80% | DEEP | NAPI→WASM→JS fallback. JS MHA is single-head | R22 |
+| attention-fallbacks.ts | agentdb | 1,953 | 92% | DEEP | HyperbolicAttention correct Poincaré distance (TS source) | R22 |
+| attention-tools-handlers.ts | agentdb | 587 | 40% | DEEP | ALL metrics Math.random(), handlers are template strings | R40 |
 
-**AgentDB Core (5 tools)**:
-`agentdb_stats`, `agentdb_pattern_store`, `agentdb_pattern_search`, `agentdb_pattern_stats`, `agentdb_clear_cache`
+### Embeddings & Vectors
 
-**Batch Operations (3 tools)**:
-`skill_create_batch`, `reflexion_store_batch`, `agentdb_pattern_store_batch`
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| enhanced-embeddings.ts | agentdb | 1,436 | 90% | DEEP | O(1) LRU, multi-provider. Falls back to hash mock at L1109 | R8, R22 |
+| RuVectorBackend.ts | agentdb | 971 | 90% | DEEP | Production-ready, correct distance conversion | R8 |
+| simd-vector-ops.ts | agentdb | 1,287 | 0% SIMD | DEEP | NOT SIMD — scalar 8x loop unrolling. WASM detected but unused | R8, R22 |
 
-**Attention (4 tools)**:
-`agentdb_attention_compute`, `agentdb_attention_benchmark`, `agentdb_attention_configure`, `agentdb_attention_metrics`
+### LLM & Intelligence
 
-All tools use @modelcontextprotocol/sdk with StdioServerTransport. Input validation on all handlers.
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| LLMRouter.ts | agentdb | 660 | 78% | DEEP | Priority-based lookup, NOT ML. No connection to ADR-008 | R40 |
 
-## R16: Core Controllers (3,519 LOC)
+### Tests
 
-### ReasoningBank.ts (676 LOC) — 98% REAL, CANONICAL
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| specification-tools.test.ts | agentdb | 2,222 | 90% | DEEP | 105-test vitest suite, real better-sqlite3 + Xenova | R22 |
+| ruvector-integration.test.ts | agentdb | 1,590 | 95% | DEEP | BEST test file in ecosystem | R22 |
 
-The canonical ReasoningBank implementation for AgentDB (the "three separate ReasoningBanks" finding refers to three PACKAGES with independent implementations — this is the agentdb one).
+### Synchronization & CRDT
 
-- v1/v2 dual-mode: v1 stores embeddings in SQLite, v2 delegates to VectorBackend
-- Standard cosine similarity (L657-674)
-- SQLite schema with proper indices (L128-155)
-- Search pipeline: Query → Embed → VectorBackend.search() → Hydrate from SQLite
-- GNN enhancement optional via learningBackend.enhance() interface
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| QUICClient.ts | agentdb | 668 | 25% | DEEP | ENTIRELY STUB. sendRequest returns hardcoded success after 100ms | R22 |
+| SyncCoordinator.ts | agentdb | 717 | 55% | DEEP | Real orchestration, routes through stub QUICClient | R22 |
+| quic.ts | agentdb | 773 | 95% | DEEP | Textbook CRDTs: GCounter, LWWRegister, ORSet | R22 |
 
-### HNSWIndex.ts (582 LOC) — 96% REAL
+### Analysis & Clustering
 
-Real HNSW wrapping **hnswlib-node C++ library** (not reimplemented from scratch):
-- L213: `this.index = new HierarchicalNSW(...)` with M and efConstruction
-- Label mapping for integer-only HNSW labels
-- Distance-to-similarity conversion correct (cosine=1-distance, L2=exp(-distance))
-- **Delete is a stub**: hnswlib doesn't support deletion. Code tracks but never rebuilds.
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| clustering-analysis.ts | agentdb | 797 | 85% | DEEP | Production Louvain, Label Propagation. Agent metrics facades | R22, R41 |
+| traversal-optimization.ts | agentdb | 783 | 82% | DEEP | Beam search real, recall values HARDCODED | R22, R41 |
+| self-organizing-hnsw.ts | agentdb | 681 | 80% | DEEP | MPC adaptation production-grade, recall Math.random | R22, R41 |
+| hypergraph-exploration.ts | agentdb | 707 | 78% | DEEP | Real hypergraph, 5 collaboration patterns, structural metrics faked | R41 |
 
-### SkillLibrary.ts (925 LOC) — 90% REAL
+### Agentic-Flow Wrappers
 
-- Skill CRUD, VectorBackend search, QueryCache integration
-- Composite scoring: similarity*0.4 + success_rate*0.3 + (uses/1000)*0.1 + avg_reward*0.2
-- **Pattern extraction claims "ML-inspired" but is basic TF word counting** (L590-661)
-- Weights hardcoded, not learned
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| agentdb-wrapper-enhanced.ts | agentic-flow | 899 | 85% | DEEP | FIXES R18 — proper embedder chain for agentic-flow | R32 |
+| enhanced-booster-tools.ts | agentic-flow | 533 | 90% | DEEP | 6-strategy selection, tiered compression | R32 |
+| standalone-stdio.ts | agentic-flow | 813 | 95% | DEEP | Thin npx delegation (15 tools). Cache clear is STUB | R32 |
+| edge-full.ts | agentic-flow | 943 | 75% | DEEP | 6-module WASM toolkit. JS fallback is CHARACTER HASHING | R32 |
+| reasoningbank_wasm_bg.js | agentic-flow | 556 | 100% | DEEP | wasm-bindgen auto-generated, 5 async methods | R32 |
 
-### Other Controllers
+## 3. Findings Registry
 
-- **ExplainableRecall.ts** (747 LOC, 85% real) — Genuine greedy set cover algorithm, Merkle tree provenance with SHA-256. GraphRoPE advertised but delegates to AttentionService.
-- **NightlyLearner.ts** (665 LOC, 80% real) — Doubly-robust causal inference formula quoted correctly but implementation is INCOMPLETE (missing control group adjustment term). FlashAttention consolidation delegates externally.
-- **MemoryController.ts** (462 LOC, 95% real) — Attention orchestration wrapper. Combines self-attention + multi-head attention with temporal decay weighting.
+### 3a. CRITICAL Findings
 
-## R16: Search & Optimization (5,192 LOC)
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| C1 | **Completely unused** — 140K+ LOC dead weight. claude-flow never calls any of 23 AgentDB controllers | All AgentDB | R8 | Open |
+| C2 | **Missing WASM module** — reasoningbank_wasm.js doesn't exist, brute-force JS fallback | WASMVectorSearch.ts | R8 | Open |
+| C3 | **Broken native deps** — 1,484 lines of JS fallback for broken @ruvector APIs | Multiple | R8 | Open |
+| C4 | **CausalMemoryGraph statistics broken** — Wrong t-CDF formula, hardcoded tInverse=1.96. All p-values unreliable | CausalMemoryGraph.ts | R8 | Open. Confirmed R22 in TS source |
+| C5 | **LearningSystem RL is cosmetic** — DQN without neural network; all 9 algorithms reduce to identical Q-value dict | LearningSystem.ts | R8 | Open. Confirmed R22 in TS source |
+| C6 | **Attention MCP metrics 100% fabricated** — Math.random() for totalCalls, latencies, memory, success rates | attention-tools-handlers.ts | R16, R40 | Open |
+| C7 | **Quantization benchmark crashes** — BenchmarkSuite.ts L809 interface mismatch causes runtime error | BenchmarkSuite.ts | R16 | Open |
+| C8 | **QUICClient is entirely stub** — sendRequest returns hardcoded success after 100ms sleep, no QUIC protocol | QUICClient.ts | R22 | Open |
+| C9 | **Traversal recall values hardcoded** — beam=0.948, dynamic-k=0.941, greedy=0.882 are constants not computed | traversal-optimization.ts | R22, R41 | Open |
+| C10 | **Leiden clustering is no-op** — refinementPhase() does nothing beyond Louvain | clustering-analysis.ts | R22 | Open |
+| C11 | **Latent-space HNSW metrics simulated** — recall=0.92+random*0.05, adaptationSpeed hardcoded to 5.5 | self-organizing-hnsw.ts | R22, R41 | Open |
+| C12 | **agentdb_clear_cache tool is STUB** — Returns mock JSON message, no actual clearing | standalone-stdio.ts | R32 | Open |
+| C13 | **edge-full.ts JS embedding fallback is CHARACTER HASHING** — charCodeAt-based, NOT semantic. WASM/ONNX required | edge-full.ts | R32 | Open |
+| C14 | **NightlyLearner discover() returns empty** — Public API creates edges internally but always returns [] | NightlyLearner.ts | R40 | Open |
+| C15 | **MCP attention encoding is hash-based** — encodeQueryVector() uses charCodeAt, not semantic embeddings | attention-tools-handlers.ts | R40 | Open |
+| C16 | **Self-organizing HNSW recall fabricated** — 0.92 + Math.random()*0.05. MPC adaptation genuine but outcomes simulated | self-organizing-hnsw.ts | R41 | Open |
 
-### HybridSearch.ts (1,062 LOC) — 95% REAL, PRODUCTION-GRADE
+### 3b. HIGH Findings
 
-The best search code in the entire ruvnet universe:
-- **BM25 ranking** (L316-356): IDF formula correct, k1=1.2, b=0.75 standard, document length normalization
-- **Three fusion strategies**: RRF (1/(k+rank)), Linear (α*vector + β*keyword), Max (element-wise)
-- All mathematically sound, O(n*m) complexity
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| H1 | **QUIC is TCP** — Names are misleading | QUICClient/Server | R8 | Open |
+| H2 | **SIMD is fake** — Functions use only scalar 8x loop unrolling, WASM detected but unused | simd-vector-ops.ts | R8, R22 | Open |
+| H3 | **ReflexionMemory breaks its paper** — Missing judge/feedback loop per arXiv:2303.11366 | ReflexionMemory.ts | R8 | Open |
+| H4 | **enhanced-embeddings silent degradation** — Falls back to hash mock without warning | enhanced-embeddings.ts | R8, R22 | Open |
+| H5 | **CLI is 98% real** — 35+ subcommands, 60+ methods, all fully implemented | agentdb-cli.ts | R16 | Open (Positive) |
+| H6 | **34 MCP tools registered** — Complete vector DB + frontier + learning + attention surface | agentdb-mcp-server.ts | R16 | Open (Positive) |
+| H7 | **ReasoningBank is canonical** — v1/v2 dual-mode, cosine similarity, SQLite + VectorBackend | ReasoningBank.ts | R16 | Open (Positive) |
+| H8 | **HNSWIndex wraps real hnswlib-node** — C++ HNSW library, not reimplemented | HNSWIndex.ts | R16 | Open (Positive) |
+| H9 | **HybridSearch is production-grade** — Correct BM25, three fusion strategies | HybridSearch.ts | R16 | Open (Positive) |
+| H10 | **Quantization K-means++ is correct** — ADC with precomputed lookup tables | Quantization.ts | R16 | Open (Positive) |
+| H11 | **Security model is solid** — Argon2id, SQL injection prevention, JWT, brute force protection | validation.ts +3 | R16 | Open (Positive) |
+| H12 | **Attention mechanisms are GENUINE** — Real scaled dot-product, Xavier init, stable softmax | MultiHeadAttentionController +1 | R16 | Open (Positive) |
+| H13 | **NightlyLearner DR formula incomplete** — Missing control group adjustment term | NightlyLearner.ts | R16 | Open |
+| H14 | **SkillLibrary "ML" is keyword counting** — Claims ML-inspired but uses TF word counting | SkillLibrary.ts | R16 | Open |
+| H15 | **Auth/token use in-memory storage** — Users, sessions, API keys, revocation all in Maps | auth.service.ts, token.service.ts | R16, R22 | Open |
+| H16 | **Telemetry OTel framework not wired** — SDK init stubbed, no exporters connected | telemetry.ts | R16 | Open |
+| H17 | **SyncCoordinator real but routes through stub** — Real orchestration depends on non-functional QUICClient | SyncCoordinator.ts | R22 | Open |
+| H18 | **ReasoningBank O(N*M) scan** — getEmbeddingsForVectorIds uses map scan instead of reverse index | ReasoningBank.ts | R22 | Open |
+| H19 | **Spectral clustering wrong** — Uses raw embeddings instead of graph Laplacian eigenvectors | clustering-analysis.ts | R22 | Open |
+| H20 | **Duplicate quantization modules** — vector-quantization.ts and Quantization.ts with different approaches | agentdb | R22 | Open |
+| H21 | **All 8 native controllers require EmbeddingService** — Without it, ~90% of AgentDB features non-functional | agentdb-mcp-server.js | R32 | Open |
+| H22 | **BenchmarkSuite uses REAL timing** — performance.now ×28, zero fake benchmarks | BenchmarkSuite.js | R32 | Open (Positive) |
+| H23 | **Cypher queries REQUIRE WASM** — edge-full.ts JS mode throws on any Cypher/SPARQL, no parser fallback | edge-full.ts | R32 | Open |
+| H24 | **EnhancedAgentDBWrapper fixes R18** — Properly chains reflexionController→embedder→vectorBackend | agentdb-wrapper-enhanced.ts | R32 | Open (Positive) |
+| H25 | **MultiDatabaseCoordinator sync is simulated** — Health checks hardcoded, no transactional guarantees, last-write-wins | persistence-pooled.js | R33 | Open |
+| H26 | **LLMRouter has NO connection to ADR-008** — Separate priority-based system from claude-flow's 3-tier routing | LLMRouter.ts | R40 | Open |
+| H27 | **NightlyLearner dead dependencies** — ReflexionMemory and SkillLibrary constructed but never called | NightlyLearner.ts | R40 | Open |
+| H28 | **LLMRouter constructor timing bug** — RuvLLM can never be default provider due to async init race | LLMRouter.ts | R40 | Open |
+| H29 | **Simulations NOT connected to production HNSWIndex** — All 4 latent-space files build own HNSW in TypeScript | clustering-analysis +3 | R41 | Open |
+| H30 | **14 Math.random facade metrics** — Secondary metrics across latent-space simulations use baselines + noise | clustering-analysis +3 | R41 | Open |
+| H31 | **Hypergraph path query trivial** — Returns [start, midpoint, end] instead of real graph traversal | hypergraph-exploration.ts | R41 | Open |
 
-### Quantization.ts (996 LOC) — 98% REAL
+## 4. Positives Registry
 
-Confirmed production-grade (consistent with R8 findings on vector-quantization.ts):
-- 8-bit scalar quantization with correct min/max normalization
-- K-means++ initialization (probability proportional to D(x)²)
-- Asymmetric Distance Computation with precomputed lookup tables
+| Description | File(s) | Session |
+|-------------|---------|---------|
+| **HybridSearch** is the best search implementation across entire ruvnet codebase | HybridSearch.ts | R16 |
+| **Quantization** (K-means++ PQ, 8/4-bit scalar) is production-ready | Quantization.ts, vector-quantization.ts | R8, R16 |
+| **ReasoningBank** is well-architected canonical implementation | ReasoningBank.ts | R16 |
+| **HNSWIndex** wraps real C++ hnswlib for genuine ANN search | HNSWIndex.ts | R16, R40 |
+| **Security** model is comprehensive and correct | validation.ts, input-validation.ts, auth.service.ts, token.service.ts | R16 |
+| **Attention** controllers implement real transformer-style neural attention from scratch | MultiHeadAttentionController, CrossAttentionController | R16 |
+| **CLI** exposes 35+ working commands covering full AgentDB feature set | agentdb-cli.ts | R16 |
+| **MCP Server** registers 27+ tools with proper input validation | agentdb-mcp-server.js | R16, R32 |
+| **ExplainableRecall** has genuine Merkle tree provenance and greedy set cover | ExplainableRecall.ts | R16 |
+| **BenchmarkSuite.ts** is best-quality file in AgentDB (95%) — production benchmarking | BenchmarkSuite.ts | R22 |
+| **ruvector-integration.test.ts** is best test file in entire ecosystem (95%) | ruvector-integration.test.ts | R22 |
+| **quic.ts types** contain textbook-correct CRDT implementations | quic.ts | R22 |
+| **HyperbolicAttention TS source** uses CORRECT Poincaré distance (compilation degraded it) | attention-fallbacks.ts | R22 |
+| **BenchmarkSuite.js** (compiled): 100% real, zero fakes | BenchmarkSuite.js | R32 |
+| **agentdb-wrapper-enhanced.ts** resolves R18 for agentic-flow with proper initialization | agentdb-wrapper-enhanced.ts | R32 |
+| **enhanced-booster-tools.ts** has genuine 6-strategy learning with tiered compression | enhanced-booster-tools.ts | R32 |
+| **NightlyLearner SQL path** discovers causal edges independently of embeddings | NightlyLearner.ts | R40 |
+| **Louvain implementation** is production-grade with correct Newman modularity Q formula | clustering-analysis.ts | R41 |
+| **MPC adaptation** is cutting-edge: state-space prediction, 97.9% degradation prevention | self-organizing-hnsw.ts | R41 |
+| **Beam search** is genuine multi-layer traversal with empirically optimized width | traversal-optimization.ts | R41 |
+| **Hypergraph construction** with 5 collaboration patterns is well-designed research | hypergraph-exploration.ts | R41 |
 
-### Other Search/Optimization Files
+## 5. Subsystem Sections
 
-- **BatchOperations.ts** (809 LOC, 92% real) — Transaction management, parallel batch insert, SQL injection prevention. Benchmark numbers estimated but plausible.
-- **WASMVectorSearch.ts** (458 LOC, 70% real) — WASM module `reasoningbank_wasm.js` does NOT exist. JS fallback with loop-unrolled cosine similarity is correct.
-- **CausalRecall.ts** (506 LOC, 75% real) — Reranking formula is sound (U = 0.7*sim + 0.2*uplift - 0.1*latency). But depends on CausalMemoryGraph's broken statistics.
-- **BenchmarkSuite.ts** (1,361 LOC, 85% real) — Real benchmark framework. Quantization benchmark would CRASH due to interface mismatch (L809).
+### 5a. Architecture Overview
 
-## R16: Security & Infrastructure (3,767 LOC)
+AgentDB consists of three parallel implementations:
 
-### Security Model — SOLID
+| Implementation | Package | Storage | Components | Status |
+|---------------|---------|---------|------------|--------|
+| **Native MCP Server** | agentdb | SQLite + EmbeddingService | 27+ tools, all controllers initialized | FUNCTIONAL |
+| **Agentic-Flow Wrapper** | agentic-flow | Delegates to native | 15 tools via npx, enhanced wrapper | FUNCTIONAL (via R32 fix) |
+| **Claude-Flow Bridge** | claude-flow | agentdb-service-fallback | 6 tools, NO EmbeddingService | BROKEN (R18) |
 
-| Component | LOC | Assessment |
-|-----------|-----|------------|
-| **validation.ts** | 557 | 95% real. NaN/Infinity prevention, path traversal blocking, 13 sensitive field regexes, Cypher injection prevention, 21 security limits |
-| **input-validation.ts** | 544 | 98% real. Whitelist SQL injection prevention (13 tables, per-table columns, 11 pragmas). Parameterized query builders. |
-| **auth.service.ts** | 668 | 92% real. Argon2id hashing, 5-attempt lockout, username enumeration prevention, API key rotation. **In-memory storage** (flagged for production DB). |
-| **token.service.ts** | 492 | 96% real. JWT HS256 via jsonwebtoken. 15min access / 7d refresh. 32-char secret minimum. Revocation list with auto-cleanup. **In-memory** (flagged for Redis). |
+The native standalone MCP server is the canonical architecture. R18 deep-read revealed why claude-flow bridge fails: agentdb-mcp-server.ts is designed as a standalone process that initializes `@xenova/transformers` for real embeddings on startup. The bridge layer (agentdb-tools.js) bypasses EmbeddingService, causing writes to succeed but reads to return empty (R18).
 
-### Attention Mechanisms — GENUINE NEURAL COMPUTATION
+### 5b. Search Architecture
 
-This is the most surprising R16 finding: **the attention controllers are real**.
+**HybridSearch.ts is the best search code in the ruvnet universe** (R16). Implements three-stage retrieval:
 
-| Controller | LOC | Key Algorithm |
-|-----------|-----|---------------|
-| **MultiHeadAttentionController** | 494 | Xavier init, scaled dot-product attention (1/sqrt(d_k)), numerically stable softmax, 4 aggregation strategies |
-| **CrossAttentionController** | 467 | Multi-context attention, weighted sum output, namespace-based context stores |
+1. **BM25 keyword search** via in-memory TypeScript inverted index (KeywordIndex class) — NOT SQLite FTS. IDF formula correct, k1=1.2, b=0.75 standard, document length normalization (L316-356).
+2. **Vector search** via HNSW or VectorBackend with cosine similarity.
+3. **Fusion strategies** (R16): RRF (1/(k+rank)), Linear (α*vector + β*keyword), Max (element-wise).
 
-Both implement transformer-style attention from scratch (no external neural libraries). Projection matrices are random (not learned) — inference-only, not trainable.
+All mathematically sound, O(n*m) complexity. The in-memory BM25 index explains why search fails through claude-flow bridge — index requires explicit `keywordIndex.add(id, text)` calls that never happen in bridge mode (R18).
 
-### Telemetry — Framework Without Wiring
+**HNSWIndex.ts** (R16, R40) wraps `hnswlib-node` (C++ library) with lazy-loading, persistence, and filter support. Distance-to-similarity conversion correct (cosine=1-distance, L2=exp(-distance)). Delete is a stub — hnswlib doesn't support deletion, code tracks but never rebuilds. Directly affected by R20 broken EmbeddingService: if `pattern_embeddings` contains hash-based garbage, HNSW faithfully indexes garbage (R40).
 
-telemetry.ts (545 LOC, 85% real): OpenTelemetry integration with proper metric instruments (histogram, counters, gauge), @traced decorator. BUT: SDK initialization is stubbed (empty instrumentations array), no OTLP exporter connected.
+**Quantization** has two production-grade implementations (R16, R22):
+- **Quantization.ts** (996 LOC): Per-dimension min/max (more accurate), O(1) swap-removal, auto-reindex at 20% deletion threshold.
+- **vector-quantization.ts** (1,529 LOC): Global min/max normalization, async K-means++, PQ with precomputed lookup tables.
 
-## CRITICAL Findings (7, +2 from R16)
+Both are best-in-ecosystem code. Creates maintenance burden (H20).
 
-1. **Completely unused** — 140K+ LOC dead weight in the dependency tree.
-2. **Missing WASM module** — `reasoningbank_wasm.js` doesn't exist.
-3. **Broken native deps** — 1,484 lines of JS fallback for broken @ruvector APIs.
-4. **CausalMemoryGraph statistics broken** — t-CDF formula wrong, critical value hardcoded to 1.96. All p-values unreliable.
-5. **LearningSystem RL is cosmetic** — DQN without neural network; all algorithms reduce to Q-value dict.
-6. **Attention MCP metrics 100% fabricated** (R16) — Math.random() for totalCalls, latencies, memory, success rates (attention-tools-handlers.ts L293-299).
-7. **Quantization benchmark crashes** (R16) — BenchmarkSuite.ts L809 creates QuantizedVectorStore with wrong field names; interface mismatch causes runtime error.
+### 5c. Security Model
 
-## HIGH Findings (16, +12 from R16)
+**Solid and comprehensive** (R16). Four-layer defense:
 
-1. **QUIC is TCP** — Names are misleading.
-2. **SIMD is fake** — Functions use only scalar 8x loop unrolling.
-3. **ReflexionMemory breaks its paper** — Missing judge/feedback loop.
-4. **enhanced-embeddings silent degradation** — Falls back to hash mock.
-5. **CLI is 98% real** (R16) — 35+ subcommands, 60+ methods, all fully implemented.
-6. **34 MCP tools registered** (R16) — Complete vector DB + frontier + learning + attention surface.
-7. **ReasoningBank is canonical** (R16) — v1/v2 dual-mode, cosine similarity, SQLite + VectorBackend.
-8. **HNSWIndex wraps real hnswlib-node** (R16) — C++ HNSW library, not reimplemented.
-9. **HybridSearch is production-grade** (R16) — Correct BM25, three fusion strategies.
-10. **Quantization K-means++ is correct** (R16) — ADC with precomputed lookup tables.
-11. **Security model is solid** (R16) — Argon2id, SQL injection prevention, JWT, brute force protection.
-12. **Attention mechanisms are GENUINE** (R16) — Real scaled dot-product, Xavier init, stable softmax.
-13. **NightlyLearner DR formula incomplete** (R16) — Missing control group adjustment.
-14. **SkillLibrary "ML" is keyword counting** (R16) — Claims ML-inspired but uses TF word counting.
-15. **Auth/token use in-memory storage** (R16) — Users, sessions, API keys, revocation all in Maps.
-16. **Telemetry OTel framework not wired** (R16) — SDK init stubbed, no exporters connected.
+1. **validation.ts** (557 LOC, 95%): NaN/Infinity prevention, path traversal blocking via regex, 13 sensitive field regexes (API_KEY, password, token, etc.), Cypher injection prevention, 21 security limits.
+2. **input-validation.ts** (544 LOC, 98%): Whitelist SQL injection prevention (13 tables, per-table columns, 11 pragmas), parameterized query builders.
+3. **auth.service.ts** (668 LOC, 92%): Argon2id hashing, 5-attempt lockout, username enumeration prevention, API key rotation. **In-memory storage** — users/sessions lost on restart (R16, R22, H15).
+4. **token.service.ts** (492 LOC, 96%): JWT HS256 via jsonwebtoken, 15min access / 7d refresh tokens, 32-char secret minimum, revocation list with auto-cleanup. **In-memory** — flagged for Redis (R16, H15).
 
-## MEDIUM Findings (6, +4 from R16)
+Security is architecturally sound but operationally limited by in-memory storage.
 
-1. HNSWIndex delete is stub — tracks but never rebuilds.
-2. ExplainableRecall GraphRoPE — feature flag exists but implementation delegates externally.
-3. CausalRecall depends on broken CausalMemoryGraph confidence values.
-4. BenchmarkSuite insert/search benchmarks work but quantization benchmark crashes.
-5. SkillLibrary composite scoring weights are hardcoded (0.4/0.3/0.1/0.2), not learned.
-6. Auth minimum password length is 8 chars with no complexity requirements.
+### 5d. Attention Mechanisms
 
-## Positive
+**Genuine neural computation** — the most surprising R16 finding (confirmed R22 in TypeScript source):
 
-- **HybridSearch** is the best search implementation across the entire ruvnet codebase
-- **Quantization** (K-means++ PQ, 8/4-bit scalar) is production-ready
-- **ReasoningBank** is a well-architected canonical implementation
-- **HNSWIndex** wraps real C++ hnswlib for genuine approximate nearest neighbor search
-- **Security** model is comprehensive: SQL injection whitelists, Argon2id, JWT, brute force protection
-- **Attention** controllers implement real transformer-style neural attention from scratch
-- **CLI** exposes 35+ working commands covering the full AgentDB feature set
-- **MCP Server** registers 34 tools with proper input validation
-- **ExplainableRecall** has genuine Merkle tree provenance and greedy set cover
+**MultiHeadAttentionController.ts** (494 LOC, 98%): Xavier init, scaled dot-product attention (1/sqrt(d_k)), numerically stable softmax, 4 aggregation strategies (mean/max/concat/first). Implements transformer-style attention from scratch without external neural libraries.
 
-## The Integration Question
+**CrossAttentionController.ts** (467 LOC, 98%): Multi-context attention, weighted sum output, namespace-based context stores.
 
-AgentDB is **far more production-ready than the rest of the ruvnet ecosystem**:
+Both are inference-only with random weights (not trainable). AttentionService.ts (771 LOC, 80%) provides NAPI→WASM→JS fallback chain. JS MHA is single-head; Hyperbolic/MoE fallbacks reduce to standard MHA (R22).
 
-| Capability | AgentDB Quality | claude-flow Equivalent |
-|-----------|----------------|----------------------|
-| Vector search | Production (BM25 + HNSW + fusion) | None |
-| Quantization | Production (K-means++ PQ) | None |
-| Security | Solid (Argon2id, JWT, SQL injection) | JWT TODO, key in URL |
-| Attention | Real neural attention | Empty weights `[[]]` |
-| Pattern learning | Real ReasoningBank + SkillLibrary | Fabricated metrics |
-| Benchmarking | Mostly working framework | Simulated competitors |
+**attention-fallbacks.ts** (1,953 LOC, 92%) contains correct Poincaré ball distance in HyperbolicAttention TypeScript source — compilation degraded it to Euclidean approximation (R22). Flash backward pass is correct.
 
-SYNTHESIS.md recommendation #4 ("Integrate AgentDB") is reinforced by R16 findings. The gap is organizational, not technical.
+**attention-tools-handlers.ts** (587 LOC, 40%) is a complete facade: ALL metrics are Math.random() (totalCalls, latencies, memory, success rates at L293-299). Handlers are exported as template literal strings, not functions — defeats TypeScript's type system (R40, C6, C15).
 
-## R18: Native vs Patched Architecture (Session 20)
+### 5e. Core Controller Quality Spectrum
 
-### The Root Cause of Broken Search
+| Quality Tier | Components | Real% | Notes |
+|--------------|------------|-------|-------|
+| **Production** | ReasoningBank, HNSWIndex, Quantization, HybridSearch, Security | 95-98% | Best code in ruvnet |
+| **Solid** | ExplainableRecall, BatchOperations, MemoryController | 85-95% | Production-ready with gaps |
+| **Partial** | NightlyLearner, CausalRecall, SkillLibrary | 75-90% | Real core, incomplete features |
+| **Broken** | LearningSystem, CausalMemoryGraph | 55-65% | Critical bugs, cosmetic implementations |
+| **Stub** | QUICClient, WASMVectorSearch | 0-70% | Missing dependencies |
 
-Deep-read of native source reveals exactly WHY the user's patched AgentDB search returns empty:
+**LearningSystem.ts** (R8, R22) claims 9 RL algorithms (Q-learning, SARSA, DQN, PPO, Actor-Critic, Policy Gradient, Decision Transformer, Model-Based, MCTS) but ALL reduce to identical tabular Q-value dictionary updates. DQN has no neural network. PPO/Actor-Critic are running averages. Bug confirmed in TypeScript source — not a compilation artifact (R22, C5).
 
-**Native architecture (standalone MCP server)**:
+**CausalMemoryGraph.ts** (R8, R22) claims Pearl's do-calculus but implements none. t-distribution CDF is wrong (L851), tInverse hardcoded to 1.96 ignoring degrees of freedom. calculateCorrelation() is fake — uses session count instead of real correlation. All p-values and confidence intervals unreliable. Bug confirmed in TypeScript source (R22, C4).
+
+**ReflexionMemory.ts** (R8) storage works but breaks arXiv:2303.11366 — missing judge function that synthesizes critique from trajectories. Core paper loop (RETRIEVE → JUDGE → DISTILL → CONSOLIDATE) is broken (H3).
+
+### 5f. Latent-Space Research Simulations
+
+Four standalone research simulations (R41) — NOT connected to production HNSWIndex.ts (H29). All build HNSW-like graphs in pure TypeScript for algorithm validation and parameter tuning.
+
+**Weighted average: 81% real** (R41). Core algorithms are textbook-correct:
+
+| File | Algorithm | Quality | Validation |
+|------|-----------|---------|------------|
+| clustering-analysis.ts | Louvain community detection | Production | Resolution=1.2 → Q=0.758, purity=89.1% |
+| traversal-optimization.ts | Beam search, DynamicKSearch | Real | Beam-width=5 optimal, 94.8% recall |
+| self-organizing-hnsw.ts | MPC adaptation | Cutting-edge | Control horizon=5, 97.9% degradation prevention |
+| hypergraph-exploration.ts | Hypergraph construction | Well-designed | 5 collaboration patterns, 3.7x compression |
+
+**Empirically validated configurations** (R41): Louvain optimal resolution, beam search width, MPC parameters, hypergraph compression ratio are publishable findings. MPC-based HNSW adaptation is cutting-edge research.
+
+**14 Math.random facade metrics** (R41, H30) — secondary metrics use `baseline + Math.random()*range`. CRITICAL: recall values in traversal-optimization.ts are HARDCODED constants (beam:94.8%, dynamic-k:94.1%, greedy:88.2%) not computed from ground truth (C9). self-organizing-hnsw.ts recall is `0.92 + Math.random()*0.05` (C16).
+
+### 5g. LLM Routing & Intelligence Layer
+
+**LLMRouter.ts** (660 LOC, 78%) is NOT intelligent routing (R40). Uses priority-based lookup table (quality→balanced→cost→speed→privacy mapping to providers), not ML-based. **Has NO connection to claude-flow's ADR-008 3-tier model routing** — completely parallel systems (H26). Constructor timing bug: selectDefaultProvider() checks ruvllmAvailable which is always false at construction due to async init race (H28).
+
+**NightlyLearner.ts** (665 LOC, 75-80%) has two independent paths (R16, R40):
+1. **SQL path** (L340-417): discoverCausalEdges() works independently of embeddings — functional regardless of R20 broken EmbeddingService.
+2. **Attention path** (L243): consolidateEpisodes() calls embedder.embed() — DIRECTLY AFFECTED by R20. Attention-based causal discovery is meaningless with hash embeddings (R40).
+
+Dead dependencies: ReflexionMemory and SkillLibrary constructed at L84-85 but NEVER used in any method (R40, H27). Public API discover() creates edges internally but always returns empty array (R40, C14).
+
+**Doubly-robust estimator** (L385) only processes treated observations — not truly doubly robust, missing control group adjustment term (R16, H13).
+
+### 5h. Synchronization & CRDT
+
+**QUICClient.ts** (668 LOC, 25%) is ENTIRELY STUB (R22). sendRequest() returns hardcoded `{success:true}` after 100ms sleep. No QUIC protocol implementation. QUIC is TCP — names are misleading (H1).
+
+**SyncCoordinator.ts** (717 LOC, 55%) has real orchestration logic (change detection, sync state, auto-sync intervals) but routes through stub QUICClient, making it non-functional (R22, H17).
+
+**quic.ts** (773 LOC, 95%) contains textbook-correct CRDT implementations: GCounter, LWWRegister, ORSet, VectorClock helpers (R22). Types are production-quality but unused due to broken client/server.
+
+**MultiDatabaseCoordinator** in persistence-pooled.js (42%, R33) claims cross-database sync but health checks return hardcoded healthy, conflict resolution uses last-write-wins without vector clocks, no transactional guarantees (H25).
+
+### 5g. R18 Native vs Patched Architecture
+
+R18 deep-read revealed the root cause of broken claude-flow integration:
+
+**Native architecture** (FUNCTIONAL):
 ```
 agentdb-mcp-server.ts  ← #!/usr/bin/env node (STANDALONE process)
-  ├── EmbeddingService(Xenova/all-MiniLM-L6-v2, 384d)  ← INITIALIZED at startup
-  ├── ReflexionMemory(db, embedder, undefined, undefined, undefined)
+  ├── EmbeddingService(Xenova/all-MiniLM-L6-v2, 384d)  ← INITIALIZED at startup (L219-224)
+  ├── ReflexionMemory(db, embedder, ...)
   ├── SkillLibrary(db, embedder)
-  ├── CausalMemoryGraph(db)
-  ├── CausalRecall(db, embedder)
-  ├── NightlyLearner(db, embedder)
-  ├── LearningSystem(db, embedder)
-  ├── BatchOperations(db, embedder)
-  └── ReasoningBank(db, embedder)
+  └── All 27+ tools with proper embeddings
 ```
 
-**Patched architecture (claude-flow MCP bridge)**:
+**Patched architecture** (BROKEN):
 ```
 claude-flow mcp-server.js
-  ├── agentdb-tools.js (598 LOC)  ← bridges to DDD services via createRequire()
+  ├── agentdb-tools.js (598 LOC)  ← bridges via createRequire()
   │     └── agentdb-service-fallback  ← silent degradation path
   └── 6 tools exposed (vs 27 native)
       → NO EmbeddingService initialized
@@ -251,466 +348,55 @@ claude-flow mcp-server.js
       → Search returns empty array
 ```
 
-### Key Architectural Mismatch
+Tool coverage gap: User exposes 6/27 native tools, 2 work (stats), 3 are broken (search/retrieve/suggest), 1 is custom (R18).
 
-The native AgentDB MCP server was designed as a **standalone process** that manages its own lifecycle:
-1. Initializes `@xenova/transformers` for real embeddings (~90MB model download)
-2. Creates all controllers with proper dependency injection
-3. Stores embeddings alongside every episode
-4. Retrieval works because `episode_embeddings` is populated
+**agentic-flow resolution** (R32): agentdb-wrapper-enhanced.ts properly chains reflexionController→embedder→vectorBackend. EnhancedAgentDBWrapper fixes R18 for agentic-flow users (H24).
 
-The user's patches tried to **embed 6 tools into claude-flow's MCP server** through a bridge layer (`agentdb-tools.js`) that:
-1. Uses `createRequire(import.meta.url)` to load CJS DDD services
-2. Services silently degrade to `agentdb-service-fallback` when ESM→CJS bridge fails
-3. Fallback bypasses EmbeddingService entirely
-4. Writes work (raw SQL INSERT) but reads fail (empty JOIN)
+### 5h. Infrastructure & Telemetry
 
-### Native Tool Coverage Gap
+**telemetry.ts** (545 LOC, 85%, R16): OpenTelemetry integration with proper metric instruments (histogram, counters, gauge), @traced decorator. BUT: SDK initialization is stubbed (empty instrumentations array), no OTLP exporter connected (H16).
 
-| Tool | Native MCP | User Patched | Gap |
-|------|-----------|-------------|-----|
-| agentdb_init | Yes | No | Missing |
-| agentdb_insert | Yes | No | Missing |
-| agentdb_insert_batch | Yes | No | Missing |
-| agentdb_search | Yes | search_hybrid (broken) | Broken |
-| agentdb_delete | Yes | No | Missing |
-| reflexion_store | Yes | Yes (dual-write bug) | Degraded |
-| reflexion_retrieve | Yes | Yes (returns empty) | Broken |
-| skill_create | Yes | No | Missing |
-| skill_search | Yes | skill_suggest (broken) | Broken |
-| causal_add_edge | Yes | No | Missing |
-| causal_query | Yes | No | Missing |
-| recall_with_certificate | Yes | No | Missing |
-| learner_discover | Yes | No | Missing |
-| db_stats | Yes | stats (works) | OK |
-| 5x learning_* | Yes | No | Missing |
-| experience_record | Yes | No | Missing |
-| reward_signal | Yes | No | Missing |
-| agentdb_stats | Yes | stats (works) | OK |
-| 3x pattern_* | Yes | No | Missing |
-| agentdb_clear_cache | Yes | No | Missing |
-| 3x batch ops | Yes | No | Missing |
-| 4x attention_* | Yes | No | Missing |
-| skill_extract | No | Yes (custom) | Added |
+**BenchmarkSuite** has two implementations:
+- **BenchmarkSuite.ts** (1,361 LOC, 95%, R16, R22): Best-quality file in AgentDB. Complete framework with percentile latency, 5% regression threshold. Quantization benchmark would crash due to interface mismatch at L809 (C7).
+- **BenchmarkSuite.js** (984 LOC, 100%, R32): Compiled version with performance.now ×28, zero fake benchmarks across all 5 classes (H22).
 
-**Score**: User exposes 6/27 native tools, 2 work (stats), 3 are broken (search/retrieve/suggest), 1 is custom.
+## 6. Cross-Domain Dependencies
 
-### HybridSearch Architecture (Not What We Expected)
+- **memory-and-learning domain**: LearningSystem, ReasoningBank, ReflexionMemory overlap heavily
+- **ruvector domain**: RuVectorBackend, HNSW indices, quantization modules
+- **agentic-flow domain**: Wrapper implementations (enhanced-booster-tools, agentdb-wrapper-enhanced, edge-full)
+- **claude-flow-cli domain**: Patched bridge layer (agentdb-tools.js), broken integration
 
-BM25 keyword search is implemented as an **in-memory TypeScript inverted index** (KeywordIndex class), NOT as SQLite FTS virtual tables. This explains why:
-- No FTS tables exist in the DB
-- The BM25 index requires explicit `keywordIndex.add(id, text)` calls
-- When running through claude-flow bridge, the in-memory index is never populated
+## 7. Knowledge Gaps
 
-### The Fix Path
-
-To make AgentDB search work through claude-flow:
-1. **Minimal fix**: Initialize EmbeddingService in the claude-flow MCP server startup, store embeddings when episodes are inserted
-2. **Better fix**: Run native agentdb-mcp-server as a SEPARATE MCP server alongside claude-flow
-3. **Best fix**: Implement ADR-038 fixes (C1-C5) to properly connect the DDD service layer
-
-### Native Controllers Not Exposed Through Patches
-
-| Controller | LOC | What It Does |
-|-----------|-----|-------------|
-| CausalMemoryGraph | ~600 | A/B experiment tracking, uplift calculation, causal edge graph |
-| CausalRecall | 506 | Causal-aware reranking: U = 0.7*sim + 0.2*uplift - 0.1*latency |
-| ExplainableRecall | 747 | Merkle tree provenance, greedy set cover for explanation |
-| NightlyLearner | 665 | Automatic pattern discovery from episode history |
-| LearningSystem | 1,288 | 9 RL algorithms (Q-learning, SARSA, DQN, PPO, MCTS, etc.) |
-| MMRDiversityRanker | ~300 | Maximal Marginal Relevance diversity reranking |
-| ContextSynthesizer | ~400 | Context window management for retrieval |
-| MetadataFilter | ~200 | Query-time metadata filtering |
-| QUICServer/Client | ~800 | Multi-database synchronization (actually TCP) |
-| SyncCoordinator | ~500 | Distributed sync coordination |
-
-## R22: Native TypeScript Source vs Compiled JS (Session 27)
-
-> 22 files deep-read in agentic-flow-rust packages/agentdb/src/. ~22K LOC. 65 findings.
-
-### Source-Level Bug Confirmation
-
-The most important R22 finding: **critical bugs exist in TypeScript source, not just compiled JS**.
-
-| Issue | JS (compiled) | TS (source) | Verdict |
-|-------|--------------|-------------|---------|
-| LearningSystem 9-identical-RL | CRITICAL (R8) | **CONFIRMED IDENTICAL** | Design flaw, not compilation artifact |
-| CausalMemoryGraph wrong tCDF | CRITICAL (R8) | **CONFIRMED IDENTICAL** | Source has same constant 1.96 |
-| CausalMemoryGraph fake correlation | CRITICAL (R8) | **CONFIRMED IDENTICAL** | calculateCorrelation uses session count |
-| HyperbolicAttention distance | WRONG (Euclidean approx) | **CORRECT (Poincaré)** | Compilation DEGRADED correctness |
-
-### AgentDB Native TS Source Analysis (10 files, 12,422 LOC)
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **attention-fallbacks.ts** | 1,953 | 92% | HyperbolicAttention CORRECT Poincaré distance (fixed vs JS). Flash backward pass correct. |
-| **vector-quantization.ts** | 1,529 | 95% | 8-bit/4-bit scalar + PQ with k-means++. Async training. Duplicates Quantization.ts. |
-| **enhanced-embeddings.ts** | 1,436 | 90% | O(1) LRU, multi-provider, security hardening. Semaphore deadlock risk. |
-| **BenchmarkSuite.ts** | 1,361 | 95% | Best-quality file. Complete framework with percentile latency. 5% regression threshold. |
-| **LearningSystem.ts** | 1,288 | 55% | **ALL 9 RL algorithms = identical Q-value update. SARSA wrong. PPO/AC = running average.** |
-| **simd-vector-ops.ts** | 1,287 | 93% | WASM SIMD detection real but NEVER used. "SIMD" ops are JS 8x loop unrolling. |
-| **Quantization.ts** | 996 | 92% | Per-dimension min/max. O(1) swap-removal. Auto-reindex at 20% deletion threshold. |
-| **SkillLibrary.ts** | 925 | 88% | Voyager-inspired. Dual path (GraphDB v2 / SQLite v1). Composite scoring. |
-| **CausalMemoryGraph.ts** | 876 | 65% | **Wrong tCDF, constant 1.96 tInverse, FAKE correlation.** Recursive CTE chains are real. |
-| **AttentionService.ts** | 771 | 80% | NAPI→WASM→JS fallback. JS MHA is single-head. Hyperbolic/MoE fallbacks = standard MHA. |
-
-### AgentDB Controllers & Tests (12 files, ~9,800 LOC)
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **specification-tools.test.ts** | 2,222 | 90% | 105-test vitest suite. Real better-sqlite3 + Xenova embeddings. |
-| **ruvector-integration.test.ts** | 1,590 | 95% | Best test file in ecosystem. SIMD, quantization, RuVectorBackend validation. |
-| **BatchOperations.ts** | 809 | 92% | SQL injection protection via whitelist. pruneData preserves causal edges. |
-| **ExplainableRecall.ts** | 747 | 88% | SHA-256 Merkle tree proofs, minimal hitting set. GraphRoPE v2 feature-flagged off. |
-| **ReasoningBank.ts** | 676 | 90% | Dual v1/v2 API. v2 uses VectorBackend (8x faster). GNN learning backend. |
-| **QUICClient.ts** | 668 | 25% | **ENTIRELY STUB.** sendRequest returns hardcoded `{success:true}` after 100ms sleep. |
-| **SyncCoordinator.ts** | 717 | 55% | Real orchestration (change detection, sync state, auto-sync). Routes through stub QUICClient. |
-| **auth.service.ts** | 668 | 85% | Argon2id, lockout, API key rotation. **ALL stores in-memory Maps — lost on restart.** |
-| **quic.ts** (types) | 773 | 95% | Textbook CRDTs: GCounter, LWWRegister, ORSet. VectorClock helpers. |
-| **clustering-analysis.ts** | 797 | 75% | Louvain genuine. Leiden = Louvain + no-op refinement. crossModalAlignment simulated. |
-| **traversal-optimization.ts** | 783 | 80% | Beam search genuine. **Recall values HARDCODED** (beam=0.948, dynamic-k=0.941). |
-| **self-organizing-hnsw.ts** | 681 | 70% | MPC with state-space prediction genuine. Metrics SIMULATED: recall=0.92+random*0.05. |
-
-### Duplicate Quantization Modules
-
-Two separate quantization implementations with different approaches:
-- **vector-quantization.ts** (1,529 LOC): Global min/max normalization, PQ with k-means++
-- **Quantization.ts** (996 LOC): Per-dimension min/max (more accurate), O(1) swap-removal
-
-Both are production-quality. Creates maintenance burden and confusion about which to use.
-
-### Updated CRITICAL Findings (+4 from R22 = 11 total)
-
-8. **QUICClient is entirely stub** — sendRequest returns hardcoded success after 100ms sleep. No QUIC protocol. (R22)
-9. **Traversal recall values hardcoded** — beam=0.948, dynamic-k=0.941, greedy=0.882. Not measured. (R22)
-10. **Leiden clustering is no-op** — refinementPhase() does nothing beyond what Louvain already did. (R22)
-11. **Latent-space HNSW metrics simulated** — recall=0.92+random*0.05, adaptationSpeed hardcoded to 5.5. (R22)
-
-### Updated HIGH Findings (+6 from R22 = 22 total)
-
-17. **SyncCoordinator real but routes through stub** — Real orchestration logic depends on non-functional QUICClient. (R22)
-18. **Auth stores in-memory only** — Users, sessions, API keys all in Maps. Data lost on restart. (R22)
-19. **ReasoningBank O(N*M) scan** — getEmbeddingsForVectorIds uses map scan instead of reverse index. (R22)
-20. **Spectral clustering wrong** — Uses raw embeddings instead of graph Laplacian eigenvectors. (R22)
-21. **simd-vector-ops WASM detection disconnected** — WASM SIMD128 detected but never connected to computation. (R22)
-22. **Duplicate quantization modules** — vector-quantization.ts and Quantization.ts with different approaches. (R22)
-
-### Updated Positive (+4 from R22)
-
-- **BenchmarkSuite.ts** is the best-quality file in this batch (95%). Production-grade benchmarking.
-- **ruvector-integration.test.ts** is the best test file in the entire ecosystem (95%).
-- **quic.ts types** contain textbook-correct CRDT implementations (GCounter, LWWRegister, ORSet).
-- **HyperbolicAttention TS source** uses CORRECT Poincaré distance (compilation degraded to Euclidean).
-
-## R32: Native CLI/MCP Compiled JS + Agentic-Flow Wrappers (Session 32)
-
-> 8 files deep-read. ~8,330 LOC. 13 findings.
-
-### Native AgentDB Compiled JS (3 files, 6,391 LOC)
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **agentdb-cli.js** | 3,039 | 95% | 14 top-level commands + 60+ subcommands. EmbeddingService PROPERLY initialized. QUIC sync server with TLS/rate-limiting. |
-| **agentdb-mcp-server.js** | 2,368 | 98% | **CONFIRMS R18**: EmbeddingService initialized at L219-224. All 27+ tools fully implemented. |
-| **BenchmarkSuite.js** | 984 | 100% | performance.now × 28. Zero fake benchmarks. 5 classes: Insert, Search, Memory, Concurrency, Quantization. |
-
-Key confirmation: Both CLI (L171-177) and MCP server (L219-224) use **identical** EmbeddingService initialization:
-```
-EmbeddingService({ model: 'Xenova/all-MiniLM-L6-v2', dimension: 384, provider: 'transformers' })
-```
-
-### Agentic-Flow AgentDB Wrappers (5 files, 3,744 LOC)
-
-| File | LOC | Real % | Key Finding |
-|------|-----|--------|-------------|
-| **standalone-stdio.ts** | 813 | 95% | Thin npx delegation layer (15 tools). NOT a duplicate of claude-flow MCP (213 tools). Cache clear tool is STUB. |
-| **enhanced-booster-tools.ts** | 533 | 90% | 6-strategy selection (cache→fuzzy→GNN→error_avoided→agent_booster→fallback). Real tiered compression (5 levels). |
-| **agentdb-wrapper-enhanced.ts** | 899 | 85% | **FIXES R18** for agentic-flow: properly initializes embeddings via reflexionController chain. GNN 3-stage query refinement. |
-| **reasoningbank_wasm_bg.js** | 556 | 100% | wasm-bindgen auto-generated. 5 async methods. Real WASM integration, not facade. |
-| **edge-full.ts** | 943 | 75% | 6-module WASM toolkit (HNSW, GraphDB, rvlite, SONA, DAG, ONNX). JS fallback embeddings are CHARACTER HASHING — not semantic. |
-
-### R18 Resolution: EmbeddingService Across Packages
-
-| Package | EmbeddingService Init | Search Works? |
-|---------|----------------------|---------------|
-| Native AgentDB CLI | Yes (L171-177) | Yes |
-| Native AgentDB MCP | Yes (L219-224) | Yes |
-| agentic-flow enhanced wrapper | Yes (reflexionController chain) | Yes |
-| agentic-flow standalone MCP | Delegates via npx | Yes (via CLI) |
-| **claude-flow patched bridge** | **NO — agentdb-service-fallback** | **BROKEN** |
-
-### Updated CRITICAL Findings (+2 from R32 = 13 total)
-
-12. **agentdb_clear_cache tool is STUB** — standalone-stdio.ts cache clear returns mock JSON message, no actual clearing. (R32)
-13. **edge-full.ts JS embedding fallback is CHARACTER HASHING** — charCodeAt-based, NOT semantic. WASM/ONNX required for production. (R32)
-
-### Updated HIGH Findings (+4 from R32 = 26 total)
-
-23. **All 8 native controllers require EmbeddingService** — Without it, ~90% of AgentDB features non-functional. Confirms R18. (R32)
-24. **BenchmarkSuite uses REAL timing** — performance.now × 28, zero fake benchmarks across all 5 benchmark classes. (R32)
-25. **Cypher queries REQUIRE WASM** — edge-full.ts JS mode throws on any Cypher/SPARQL query, no parser fallback. (R32)
-26. **EnhancedAgentDBWrapper fixes R18** — Properly chains reflexionController→embedder→vectorBackend for agentic-flow users. (R32)
-
-### Updated Positive (+3 from R32)
-
-- **BenchmarkSuite.js** (compiled): 100% real, zero fakes. Confirms BenchmarkSuite.ts findings from R22.
-- **agentdb-wrapper-enhanced.ts** resolves R18 for agentic-flow with proper initialization chain.
-- **enhanced-booster-tools.ts** has genuine 6-strategy learning with tiered compression matching ruvector-core.
-
-## R33: Swarm JS Infrastructure — MultiDatabaseCoordinator (Session 33)
-
-19 files read, ~17,927 LOC, 4 agents. One file directly relevant to AgentDB integration.
-
-### MultiDatabaseCoordinator (persistence-pooled.js) — 42% real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **MultiDatabaseCoordinator** (in persistence-pooled.js) | ~400 | **42%** | Simulated cross-database sync. Health checks return hardcoded `{ healthy: true }`. Conflict resolution picks last-write-wins without vector clocks. |
-
-**Key finding**: The `MultiDatabaseCoordinator` class claims to coordinate across AgentDB, SQLite, and external stores, but:
-- `syncDatabases()` copies records sequentially (not transactional)
-- Health checks never actually ping databases — always returns healthy
-- Conflict resolution uses timestamp comparison without considering clock drift
-- No retry logic or rollback on partial sync failure
-
-This contrasts with `persistence-pooled.js`'s connection pooling (92% real) — the pool management is production-quality but the cross-database coordination built on top is not.
-
-### Updated HIGH Findings (+1 from R33 = 27 total)
-
-27. **MultiDatabaseCoordinator sync is simulated** — Health checks return hardcoded healthy, no transactional guarantees, last-write-wins without vector clocks. (R33)
-
-## R37: Rust-Side AgentDB Integration — temporal-tensor (Session 37)
-
-### temporal-tensor/agentdb.rs (843 LOC) — 88-92% REAL
-
-R37 deep-read reveals a Rust-side AgentDB integration layer in the ruvector-temporal-tensor crate that provides pattern-aware data tiering:
-
-| Component | Lines | Quality | Notes |
-|-----------|-------|---------|-------|
-| **PatternVector** | 4-dim | **REAL** | [ema_rate, popcount/64, 1/(1+tier_age), log2(1+count)/32] — compact feature representation |
-| **AdaptiveTiering** | full | **REAL** | Weighted neighbor voting with cosine similarity, tie-break prefers hotter tier |
-| **HNSW-ready** | design | **REAL** | Interface designed for HNSW-backed pattern search, currently falls back to linear scan |
-| **Tests** | 36 | **REAL** | Comprehensive coverage of tiering decisions, pattern matching, edge cases |
-
-**Key insight**: This is the ONLY Rust-side integration point with AgentDB concepts. Unlike the TypeScript AgentDB (which has 34 MCP tools, 23 controllers, and a full CLI), the Rust integration is a single focused module that adapts data tiering based on access patterns.
-
-**Cross-domain dependency**: agentdb.rs → tiering.rs (uses TierConfig for adaptive tiering decisions)
-
-### Implications for AgentDB Architecture
-
-The temporal-tensor AgentDB integration represents a potential evolution path:
-1. **Current**: TypeScript AgentDB with in-memory BM25, SQLite storage, hash-based embeddings
-2. **Potential**: Rust-native pattern-aware tiering with HNSW backend, real quantization via ruvector-core
-
-The gap is the same as across the ecosystem: the Rust components are well-designed but NOT connected to the TypeScript AgentDB used by claude-flow.
-
-### R37 Updated HIGH Findings (+1 = 28 total)
-
-28. **Rust AgentDB integration isolated** — temporal-tensor/agentdb.rs provides pattern-aware tiering but is NOT connected to the TypeScript AgentDB used by claude-flow. Two parallel AgentDB ecosystems. (R37)
-
-### R37 Updated Positive (+1)
-
-- **temporal-tensor/agentdb.rs** provides genuine pattern-aware adaptive tiering with 4-dim feature vectors and HNSW-ready design (R37)
-
-## R40: AgentDB Intelligence Layer Deep-Read (Session 40)
-
-### Overview
-
-4 files from AgentDB's higher-level intelligence: HNSW indexing, nightly learning, LLM routing, attention MCP tools. **Weighted average: 67% real.** Key question: how far does the R20 broken EmbeddingService ripple?
-
-### File Analysis
-
-| File | LOC | Real% | Verdict | R20 Impact |
-|------|-----|-------|---------|------------|
-| **HNSWIndex.ts** (12868) | 582 | 85% | REAL wrapper | INDIRECT — indexes whatever vectors it's fed |
-| **NightlyLearner.ts** (12873) | 665 | 75% | PARTIAL | DIRECT — consolidateEpisodes() calls embedder.embed() |
-| **LLMRouter.ts** (12926) | 660 | 78% | REAL (not intelligent) | UNAFFECTED — separate system |
-| **attention-tools-handlers.ts** (12902) | 587 | 40% | FACADE | UNAFFECTED but independently broken |
-
-### R20 Ripple Effect Analysis
-
-The broken EmbeddingService propagates selectively:
-
-1. **HNSWIndex** — INDIRECTLY AFFECTED. Wraps `hnswlib-node` (C++) correctly. If vectors in `pattern_embeddings` are hash-based garbage, HNSW faithfully indexes garbage. The index itself works; the data may be compromised.
-
-2. **NightlyLearner** — DIRECTLY AFFECTED in `consolidateEpisodes()` path (line 243 calls `embedder.embed()`). However, the SQL-based `discoverCausalEdges()` path (lines 340-417) does NOT use embeddings — works independently of R20.
-
-3. **LLMRouter** — UNAFFECTED. Has its own embedding via RuvLLM, separate from EmbeddingService.
-
-4. **attention-tools-handlers** — UNAFFECTED but independently broken. Uses its own hash-based `encodeQueryVector()` (same anti-pattern, different instance).
-
-### Key Architectural Findings
-
-**LLMRouter is NOT intelligent routing**: Despite the name, it uses a priority-based lookup table (quality→balanced→cost→speed→privacy mapping to providers), not ML-based routing. Has NO connection to claude-flow's ADR-008 3-tier model routing. They are completely parallel systems.
-
-**attention-tools-handlers exports STRING TEMPLATES, not code**: All handlers are template literal strings intended for eval/interpolation into a switch/case block. This defeats TypeScript's type system entirely.
-
-### Findings
-
-**CRITICAL** (3):
-- `discover()` public API always returns empty array — internal edges created but never returned (NightlyLearner:176-193)
-- ALL metrics in `attentionMetricsHandler` are `Math.random()` — totalCalls, latency, successRate fabricated (attention-tools:293-299)
-- `encodeQueryVector()` uses char-code hashing — same systemic hash-based anti-pattern (attention-tools:338-346)
-
-**HIGH** (5):
-- R20 propagation: `consolidateEpisodes()` calls broken `embedder.embed()` — attention-based causal discovery meaningless (NightlyLearner:243)
-- Dead dependencies: `ReflexionMemory` and `SkillLibrary` constructed but NEVER used in any method (NightlyLearner:84-85)
-- Constructor timing bug: `selectDefaultProvider()` checks `ruvllmAvailable` which is always false at construction (LLMRouter:76-93)
-- String template anti-pattern: handlers exported as template literals, not functions (attention-tools:6-335)
-- Flash/linear/performer attention all compute identical dot product — undifferentiated (attention-tools:363-367)
-
-**MEDIUM** (7):
-- SQL key injection vector in `applyFilters()` — keys not parameterized (HNSWIndex:506-520)
-- Inner product distance-to-similarity returns unbounded values (HNSWIndex:487)
-- No dimension validation on persisted index load (HNSWIndex:435-468)
-- Doubly robust estimator only processes treated observations — not truly doubly robust (NightlyLearner:385)
-- Hardcoded dim=384 in consolidateEpisodes (NightlyLearner:248)
-- Stale Anthropic pricing ($3/$15 per MTok — Claude 3.5 Sonnet late 2024) (LLMRouter:554-555)
-- Config set action doesn't persist (attention-tools:247-257)
-
-### Intelligence Architecture Map
-
-```
-LLMRouter ──(generates)──> text/embeddings
-     │                           │
-     │ (SEPARATE SYSTEM)         ▼
-     │               EmbeddingService ──(BROKEN: R20)──> hash vectors
-     │                           │
-     │                           ▼
-     │                    HNSWIndex ──(indexes)──> pattern_embeddings
-     │                           │
-     │                           ▼
-     │                   NightlyLearner
-     │                    ├── SQL path (WORKS) ──> causal edges
-     │                    └── Attention path (BROKEN) ──> meaningless edges
-     │
-     └──(NO CONNECTION)──> claude-flow ADR-008 3-tier routing
-
-attention-tools-handlers ──(ISOLATED)──> MCP tools with fabricated metrics
-```
-
-### Updated CRITICAL Findings (+3 from R40 = 16 total)
-
-14. **NightlyLearner discover() returns empty** — Public API method creates edges internally but always returns `[]` to callers. (R40)
-15. **MCP attention metrics ALL Math.random()** — 7 metrics fabricated. Consumers get fictional data. (R40)
-16. **MCP attention encoding is hash-based** — `encodeQueryVector()` uses charCodeAt, not semantic embeddings. Another instance of systemic anti-pattern. (R40)
-
-### Updated HIGH Findings (+3 from R40 = 31 total)
-
-29. **LLMRouter has NO connection to ADR-008** — Completely separate priority-based system from claude-flow's 3-tier model routing. Parallel implementations. (R40)
-30. **NightlyLearner dead dependencies** — ReflexionMemory and SkillLibrary constructed but never called. Dead resource consumption. (R40)
-31. **LLMRouter constructor timing bug** — RuvLLM can never be default provider due to async init race. (R40)
-
-### Updated Positive (+2 from R40)
-
-- **HNSWIndex.ts** wraps hnswlib-node (C++) with lazy-loading, persistence, and filter support — production-grade wrapper (R40)
-- **NightlyLearner SQL path** discovers causal edges independently of embeddings — functional regardless of R20 (R40)
-
-## R41: AgentDB Latent-Space Simulations (Session 41)
-
-4 files read, 2,968 LOC, 55 findings (3 CRIT, 13 HIGH, 24 MED, 15 INFO). Covers the untouched latent-space simulation scenarios in AgentDB.
-
-### Overview — 81% weighted REAL
-
-**Key question**: Are these genuine research simulations with real vector operations and HNSW manipulation, or demo/visualization code?
-
-**Answer**: **GENUINE RESEARCH SIMULATIONS with production-grade algorithms and empirically validated configurations.** Core algorithms (Louvain, beam search, MPC adaptation, hypergraph construction) are textbook-correct. However, performance metrics (recall, precision, structural properties) are hardcoded or Math.random facades instead of computed from ground truth. NOT connected to production HNSWIndex.ts — standalone research testbeds.
-
-### File Analysis
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **clustering-analysis.ts** (300) | 797 | **85%** | Production Louvain (Newman Q formula, resolution=1.2 → Q=0.758), Label Propagation (random-order neighbor majority), k-means. Agent collaboration metrics are facades. |
-| **traversal-optimization.ts** (307) | 783 | **82%** | DynamicKSearch (adaptive k via query complexity + graph density), beam search (top-k candidates per layer, width=5 optimal), greedy search. CRITICAL: recall values HARDCODED (beam:94.8%, dynamic-k:94.1%, greedy:88.2%). |
-| **self-organizing-hnsw.ts** (306) | 681 | **80%** | MPC adaptation PRODUCTION-GRADE (state-space prediction, control horizon=5, 97.9% degradation prevention). Online learning (gradient-based). Self-healing (fragmentation detection + reconnection). CRITICAL: recall `0.92 + Math.random()*0.05`. |
-| **hypergraph-exploration.ts** (302) | 707 | **78%** | Real hypergraph construction (size distribution: 50%/30%/20%), 5 collaboration patterns (hierarchical, peer-to-peer, pipeline, fan-out, convergent). Cypher query simulation functional. 3.7x compression ratio validated. Clustering coefficient/small-worldness = Math.random facades. |
-
-### Genuine Algorithm Implementations
-
-1. **Louvain community detection** (clustering-analysis L291-354): Greedy modularity optimization with convergence threshold 0.0001, Phase 1 (greedy) + Phase 2 (aggregation). Standard Newman Q formula correctly implemented at L543-566.
-
-2. **Beam search** (traversal-optimization L130-189): Multi-layer traversal with top-k candidate selection per layer. Empirically validated: beam-5 optimal width.
-
-3. **MPC adaptation** (self-organizing-hnsw L391-416): State-space prediction model, control horizon=5, parameter optimization over candidates [M-2, M, M+2, M+4]. Validated: 97.9% degradation prevention.
-
-4. **Hypergraph construction** (hypergraph-exploration L188-227): Size distribution (50% size-3, 30% size-4, 20% size-5+), node→hyperedges index for O(1) lookup.
-
-5. **DynamicKSearch** (traversal-optimization L83-190): Adaptive k selection based on query complexity (L2 norm + avg magnitude) and graph density (neighbors/M=16).
-
-### Empirically Validated Configurations
-
-| Finding | Source | Value |
-|---------|--------|-------|
-| Louvain optimal resolution | clustering-analysis L81-87 | 1.2 → Q=0.758, purity=89.1% |
-| Beam search optimal width | traversal-optimization L24-37 | 5 → 94.8% recall, 112μs |
-| Dynamic-k latency reduction | traversal-optimization L24-37 | -18.4% vs baseline |
-| MPC degradation prevention | self-organizing-hnsw L89-96 | 97.9%, M=34 optimal |
-| Hypergraph compression ratio | hypergraph-exploration L580-595 | 3.7x vs standard graph |
-
-### Connection to Production HNSWIndex.ts
-
-**Disconnect confirmed**: These simulations do NOT use R40's HNSWIndex.ts wrapper (which wraps hnswlib-node C++).
-
-- All 4 files build their own HNSW-like graph structures in pure TypeScript
-- No imports from `../core/HNSWIndex` detected
-- Graph construction is educational/research quality, not production (no C++ SIMD optimizations)
-- All 4 files share a single dependency: `simulation/types.ts` (hub-and-spoke pattern)
-
-**Verdict**: Standalone research simulations for algorithm validation and parameter tuning, NOT integration tests for production HNSWIndex.ts.
-
-### Math.random Facades (14 instances total)
-
-Despite genuine core algorithms, many secondary metrics are fabricated:
-
-| File | Metric | Formula | Lines |
-|------|--------|---------|-------|
-| clustering-analysis | crossModalAlignment | `0.85 + Math.random()*0.1` | L479 |
-| clustering-analysis | embeddingClusterOverlap (NMI) | `0.75 + Math.random()*0.2` | L658 |
-| clustering-analysis | dendrogramBalance | `0.8 + Math.random()*0.15` | L662-663 |
-| clustering-analysis | taskSpecialization | Math.random facade | L506-507 |
-| traversal-optimization | recall (beam/dynamic/greedy) | HARDCODED constants | L543-545 |
-| traversal-optimization | precision | `recall + 0.02` | L547 |
-| traversal-optimization | recallAt100 | `Math.min(recall+0.05, 1.0)` | L567-569 |
-| traversal-optimization | attention guidance | HARDCODED (0.85, 0.28) | L714-719 |
-| self-organizing-hnsw | recall | `0.92 + Math.random()*0.05` | L251 |
-| self-organizing-hnsw | avgHops | `18 + Math.random()*5` | L259 |
-| self-organizing-hnsw | adaptationSpeed | HARDCODED 5.5 | L602 |
-| self-organizing-hnsw | stability | `0.88 + Math.random()*0.1` | L622 |
-| hypergraph-exploration | clusteringCoefficient | `0.65 + Math.random()*0.2` | L344 |
-| hypergraph-exploration | smallWorldness | `0.75 + Math.random()*0.15` | L345 |
-
-### Research Value Assessment
-
-**HIGH VALUE**: Empirically validated configurations (Louvain resolution, beam width, MPC parameters) are publishable findings. MPC-based HNSW adaptation is cutting-edge.
-
-**MEDIUM VALUE**: Coherence validation system, 5 hypergraph collaboration patterns, self-healing fragmentation detection.
-
-**LOW VALUE**: Agent collaboration metrics, structural metrics (clustering coefficient, small-worldness) — all Math.random facades.
-
-### Updated CRITICAL Findings (+2 from R41 = 18 total)
-
-17. **Traversal recall values HARDCODED** — beam:94.8%, dynamic-k:94.1%, greedy:88.2% are constants, not computed from ground truth. Results are presented as "empirical" but are predetermined. (R41)
-18. **Self-organizing HNSW recall fabricated** — `0.92 + Math.random()*0.05` at L251. MPC adaptation is genuine but its measured outcomes are simulated. (R41)
-
-### Updated HIGH Findings (+3 from R41 = 34 total)
-
-32. **Simulations NOT connected to production HNSWIndex** — All 4 files build own HNSW in pure TypeScript. No imports from core/HNSWIndex. Research testbeds, not integration tests. (R41)
-33. **14 Math.random facade metrics** — Secondary metrics across all 4 files use `baseline + Math.random()*range` instead of real measurement. (R41)
-34. **Hypergraph path query trivial** — Returns [start, midpoint, end] instead of real graph traversal. (R41)
-
-### Updated Positive (+4 from R41)
-
-- **Louvain implementation** is production-grade with correct Newman modularity Q formula (R41)
-- **MPC adaptation** is cutting-edge: state-space prediction, control horizon, 97.9% degradation prevention (R41)
-- **Beam search** is genuine multi-layer traversal with empirically optimized width (R41)
-- **Hypergraph construction** with 5 collaboration patterns is well-designed research code (R41)
-
-## Remaining Gaps
-
-~429 files still NOT_TOUCHED, including:
-- dist/ compiled output (~200 files, mirrors src/)
-- Test files (~30 files)
-- ~~Simulation scenarios (latent-space exploration, ~10 files)~~ — 4 DEEP (R41)
-- Additional CLI commands and lib helpers (~20 files)
-- Browser bundle and schema files
+- ~429 files still NOT_TOUCHED (mostly dist/ compiled mirrors, additional test files, CLI helpers)
 - Remaining controller source files not yet deep-read
+- Browser bundle and schema files
+- Additional simulation scenarios beyond latent-space (if any exist)
+- Integration between temporal-tensor/agentdb.rs (Rust-side) and TypeScript AgentDB
+
+## 8. Session Log
+
+### R8 (2026-02-09): Initial AgentDB deep-read
+7 files, 8,594 LOC. Established HybridSearch as best-in-ecosystem, identified broken LearningSystem/CausalMemoryGraph, discovered AgentDB is completely unused by claude-flow despite being dependency.
+
+### R16 (2026-02-14): CLI & MCP surface area
+52 files analyzed. Revealed complete CLI command surface (35+ subcommands), 34 MCP tools, genuine neural attention, production-grade security model, canonical ReasoningBank implementation.
+
+### R18 (2026-02-14): Native architecture deep-read
+Identified root cause of broken claude-flow integration: missing EmbeddingService initialization. Native MCP server is functional standalone; bridge layer silently degrades to fallback.
+
+### R22 (2026-02-15): TypeScript source confirmation
+22 files, ~22K LOC. Confirmed LearningSystem and CausalMemoryGraph bugs exist in TS source. HyperbolicAttention correct in source (compilation degraded it). QUICClient entirely stub. Duplicate quantization modules.
+
+### R32 (2026-02-15): Compiled JS + agentic-flow wrappers
+8 files, ~8,330 LOC. Confirmed native CLI/MCP have correct EmbeddingService init. agentic-flow wrapper fixes R18 issue. edge-full.ts JS fallback is character hashing.
+
+### R33 (2026-02-15): Swarm infrastructure
+MultiDatabaseCoordinator sync simulation discovered (42% real) — health checks hardcoded, no transactional guarantees.
+
+### R40 (2026-02-15): Intelligence layer
+4 files. LLMRouter has NO connection to ADR-008. NightlyLearner SQL path works independently of embeddings. Attention MCP tools metrics all Math.random().
+
+### R41 (2026-02-15): Latent-space simulations
+4 files, 2,968 LOC. Genuine research algorithms (Louvain, beam search, MPC adaptation) with empirically validated configurations. 14 Math.random facade metrics. NOT connected to production HNSWIndex.

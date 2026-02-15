@@ -133,148 +133,87 @@ db.close();
 "
 ```
 
-### 7. Write Analysis Document
+### 7. Write or Update Analysis Document
 
-Create `domains/{domain-name}/analysis.md` with this structure:
+All synthesis documents follow the ADR-040 canonical structure. See `domains/memory-and-learning/analysis.md` for the reference example.
 
-```markdown
+#### Canonical Structure (ADR-040)
+
+```
 # {Domain Name} Domain Analysis
 
-**Last Updated**: {date}
-**Coverage**: {deep-count} DEEP, {medium-count} MEDIUM, {surface-count} SURFACE, {untouched-count} NOT_TOUCHED
-**Priority**: {1-10}
-**Total Files**: {count}
+> **Priority**: ... | **Coverage**: ... | **Status**: ...
+> **Last updated**: {date} (Session R{n})
 
-## Overview
+## 1. Current State Summary
+20-30 lines. What we know NOW. Key verdicts, top risks, overall realness %.
+Present tense. Rewritten in-place each session.
 
-{2-3 paragraph summary of domain purpose, scope, and role in overall system}
+## 2. File Registry
+ONE consolidated table (or grouped sub-tables by package).
+Columns: File | Package | LOC | Real% | Depth | Key Verdict | Session
+Sorted by package then path. Rows added/modified in-place.
 
-## Key Files
+## 3. Findings Registry
+### 3a. CRITICAL Findings
+### 3b. HIGH Findings
+Each finding: ID | description | file(s) | session | status (open/resolved/superseded).
+Sequential IDs within each severity. NEVER re-list.
 
-### Core Implementation
+## 4. Positives Registry
+One deduplicated list. Each: description | file(s) | session.
 
-{For each DEEP file, 2-3 sentences describing role and key responsibilities}
+## 5. Subsystem Sections
+Organized by TOPIC (not by session). Present tense.
+Inline session references for provenance: (R41), (confirmed R38, updated R41).
 
-**`{relative_path}`** ({lines} lines)
-- {responsibility 1}
-- {responsibility 2}
-- Key exports: {list}
+## 6. Cross-Domain Dependencies
 
-### Supporting Files
+## 7. Knowledge Gaps
 
-{For each MEDIUM file, 1-2 sentences}
-
-**`{relative_path}`** ({lines} lines)
-- {brief description}
-
-## Architecture
-
-### Component Structure
-
-{Describe how files are organized, layering, separation of concerns}
-
-### Data Flow
-
-{Describe how data moves through the domain - entry points, transformations, outputs}
-
-### Design Patterns
-
-{Identify patterns used: singleton, factory, observer, etc.}
-
-## Findings
-
-### Critical Issues ({count})
-
-{List CRITICAL findings with file references and line numbers}
-
-### High Priority ({count})
-
-{List HIGH findings}
-
-### Medium Priority ({count})
-
-{List MEDIUM findings}
-
-### Informational ({count})
-
-{List INFO findings - good patterns, documentation gaps}
-
-## Cross-Domain Interactions
-
-### Dependencies on Other Domains
-
-{List domains this domain depends on, with specific file references}
-
-**{target-domain}**: {description}
-- `{source-file}` -> `{target-file}` ({relationship})
-
-### Consumers from Other Domains
-
-{List domains that depend on this domain}
-
-**{source-domain}**: {description}
-- {reference examples}
-
-## Knowledge Gaps
-
-### Files Needing Deeper Analysis
-
-{List high-value files still at SURFACE or NOT_TOUCHED}
-
-1. `{file-path}` ({lines} lines, relevance {score}) - {why important}
-2. ...
-
-### Unanswered Questions
-
-{List research questions that emerged during analysis}
-
-1. {question about architecture/design/behavior}
-2. {question about integration with other components}
-
-## Recommendations
-
-### Immediate Actions
-
-{Based on CRITICAL and HIGH findings}
-
-1. {action item with file reference}
-2. ...
-
-### Further Investigation
-
-{Areas needing DEEP analysis or cross-domain research}
-
-1. {investigation task}
-2. ...
-
-## Statistics
-
-- Total Files: {count}
-- Total Lines: {sum}
-- Coverage:
-  - DEEP: {count} files ({percentage}%)
-  - MEDIUM: {count} files ({percentage}%)
-  - SURFACE: {count} files ({percentage}%)
-  - NOT_TOUCHED: {count} files ({percentage}%)
-- Findings:
-  - CRITICAL: {count}
-  - HIGH: {count}
-  - MEDIUM: {count}
-  - INFO: {count}
-- Dependencies:
-  - Outbound: {count} to {n} domains
-  - Inbound: {count} from {n} domains
+## 8. Session Log (Appendix)
+### R{n} ({date}): {1-sentence focus}
+{file_count} files, {loc} LOC, {finding_count} findings.
+{1-sentence key discovery.}
 ```
 
-### 8. Update Existing Analysis
+#### In-Place Update Protocol (ADR-041)
 
-If analysis.md already exists:
-- Read current version
-- Merge new findings with existing content
-- Update statistics
-- Add new sections for newly analyzed files
-- Mark resolved findings
-- Update Last Updated date
+When updating an existing synthesis document, follow these rules:
+
+**Section 1 (Current State Summary)**:
+- REWRITE this section to reflect current state after all updates
+- This is the ONLY section fully rewritten each session
+
+**Section 2 (File Registry)**:
+- ADD new rows for newly deep-read files
+- UPDATE existing rows if re-read at deeper depth or revised Real%
+- Do NOT duplicate rows
+
+**Section 3 (Findings Registry)**:
+- ADD new findings with next sequential ID in appropriate severity subsection
+- MARK findings as `SUPERSEDED by R{n}: {reason}` if contradicted
+- MARK findings as `RESOLVED in R{n}` if fixed upstream
+- NEVER re-number existing findings
+
+**Section 4 (Positives Registry)**:
+- ADD new positives with session tag
+- NEVER re-list existing positives
+
+**Section 5 (Subsystem Sections)**:
+- UPDATE existing subsystem sections with new information
+- CREATE new subsystem sections for newly discovered subsystems
+- Write in present tense
+
+**Section 8 (Session Log)**:
+- APPEND a 2-5 line entry for the current session
+
+#### Anti-Patterns (NEVER do these)
+
+- NEVER create "Updated CRITICAL Findings (+N = M total)" sections
+- NEVER append a new chronological session block outside Section 8
+- NEVER re-list all findings at each session boundary
+- NEVER re-list all positives at each session boundary
 
 ### 9. Flag Cross-Domain Issues
 

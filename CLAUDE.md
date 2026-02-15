@@ -103,6 +103,9 @@ WHERE id = ?;
 ```sql
 INSERT INTO findings (file_id, session_id, severity, category, description, evidence, line_ref)
 VALUES (?, ?, ?, ?, ?, ?, ?);
+-- After inserting to DB, update the domain synthesis doc's
+-- Findings Registry (Section 3) with the new finding.
+-- Do NOT create cumulative finding lists.
 ```
 
 ### 10. Tag file with domain
@@ -146,13 +149,16 @@ db.close();
 - Insert file_reads records for session history
 
 ### 4. Write/Update Domain Synthesis
-Create or update `domains/{domain-name}/analysis.md` with:
-- Overview of domain purpose
-- Key files and their roles
-- Architecture patterns
-- Findings (grouped by severity)
-- Cross-domain dependencies
-- Knowledge gaps requiring deeper analysis
+Update `domains/{domain-name}/analysis.md` IN-PLACE following the
+canonical structure (ADR-040). See `domains/memory-and-learning/analysis.md` for the reference example.
+- Section 1: Rewrite Current State Summary (20-30 lines, present tense)
+- Section 2: Add/update rows in File Registry table
+- Section 3: Add new findings to Findings Registry (never re-list old ones)
+- Section 4: Add new positives (never re-list old ones)
+- Section 5: Update or create subsystem sections with new content
+- Section 8: Append 2-5 line session log entry
+NEVER create "Updated CRITICAL Findings (+N = M total)" sections.
+NEVER append a new chronological session block.
 
 ### 5. End Session
 ```bash

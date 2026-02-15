@@ -1,997 +1,548 @@
 # Memory and Learning Domain Analysis
 
 > **Priority**: HIGH | **Coverage**: ~18.4% (237/1284 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R41 — consciousness layer + MCP tool layer deep analysis)
+> **Last updated**: 2026-02-15 (Session R41)
 
-## Overview
+## 1. Current State Summary
 
-Covers AgentDB, ReasoningBank, HNSW vector search, embeddings, pattern storage, and RL. 246 files / 87K LOC.
+The memory-and-learning domain spans 246 files / 87K LOC across AgentDB, ReasoningBank, HNSW vector search, embeddings, pattern storage, RL, and consciousness subsystems. Quality varies dramatically — from 98% (neural-network-implementation data/mod.rs) to 10% (validation-suite.js).
 
-## Critical: Three Fragmented ReasoningBanks
+**Top-level verdicts:**
 
-The most significant architectural finding across the entire project:
+- **Hash-based embeddings are the #1 systemic weakness.** 7+ files across 5 packages (Rust + JS) silently degrade to non-semantic hash matching. All "semantic search" using defaults is character-frequency matching.
+- **Four independent ReasoningBanks** exist (claude-flow, agentic-flow, agentdb, ruvllm Rust) with zero code sharing. The Rust version has the best math (K-means, EWC++) but none interoperate.
+- **Best code:** neural-network-implementation crate (90-98%), cognitum-gate-kernel (93%), SONA (85%), ruvector-nervous-system (87%), neuro-divergent ML training (88.5%), vector-quantization.ts (production-grade).
+- **Worst code:** neural-pattern-recognition (15-20% facade), emergence subsystem (51% fabricated metrics), psycho-symbolic MCP tools (24% theatrical).
+- **Consciousness (79%) is substantially more real than emergence (51%)** — genuine IIT Phi, Complex64 wave functions vs. Math.random() fabrication.
+- **Goalie MCP tool layer is COMPLETE FACADE** (45%) — imports 4 real engines, calls none.
+- **JS neural models have real forward-pass but ZERO backpropagation** — inference-only across all architectures.
 
-| Implementation | Package | Storage | Status |
-|---|---|---|---|
-| `LocalReasoningBank` | claude-flow-cli | In-memory Maps + JSON | **Only one that runs** |
-| `ReasoningBank` | agentic-flow | SQLite + arXiv algorithms | Sophisticated but unused |
-| `ReasoningBank` | agentdb | JSON + Vector DB | Never called |
+## 2. File Registry
 
-Each implements RETRIEVE → JUDGE → DISTILL → CONSOLIDATE differently. Zero code sharing.
+### AgentDB Core
 
-## Embedding Fallback Chain
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| vector-quantization.ts | agentdb | 1,529 | 95% | DEEP | PRODUCTION-GRADE. PQ with K-means++, SQ 8/4-bit | R8 |
+| vector-quantization.js | agentdb | 1,132 | 95% | DEEP | Confirms TS source, async k-means | R25 |
+| RuVectorBackend.ts | agentdb | 971 | 90% | DEEP | Production-ready, correct distance conversion, security | R8 |
+| enhanced-embeddings.ts | agentdb | 1,436 | 80% | DEEP | Real LRU/semaphore. Falls back to hash mock (L1109) | R8 |
+| enhanced-embeddings.js | agentdb | 1,035 | 88% | DEEP | LRU cache O(1), multi-provider. Mock not semantic | R25 |
+| AttentionService.js | agentdb | 1,165 | 82% | DEEP | 4 mechanisms: Hyperbolic/Flash/GraphRoPE/MoE. 3-tier NAPI→WASM→JS | R25 |
+| ReflexionMemory.ts | agentdb | 1,115 | 65% | DEEP | Storage works. Breaks arXiv:2303.11366 — no judge function | R8 |
+| LearningSystem.ts | agentdb | 1,288 | 15% | DEEP | COSMETIC. 9 RL algorithms = 1 Q-value dict. No neural nets | R8 |
+| simd-vector-ops.ts | agentdb | 1,287 | 0% SIMD | DEEP | NOT SIMD — scalar 8x loop unrolling. Buffer pool real | R8 |
+| simd-vector-ops.js | agentdb | 945 | 0% SIMD | DEEP | SIMD detected but NEVER used. 8x ILP, tree reduction | R25 |
+| CausalMemoryGraph.ts | agentdb | 876 | 40% | DEEP | Wrong tCDF (L851), hardcoded tInverse=1.96. No do-calculus | R8 |
+
+### Agentic-Flow
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| IntelligenceStore.js | agentic-flow | 364 | 98% | DEEP | SQLite WAL, trajectory lifecycle. Embeddings stored but NEVER searched | R25 |
+| core/embedding-service.js | agentic-flow | 370 | 95% | DEEP | OpenAI + Transformers.js + hash mock. DUPLICATE of services/ version | R25 |
+| services/embedding-service.js | agentic-flow | 367 | 95% | DEEP | Byte-for-byte duplicate of core version | R25 |
+| sona-tools.js | agentic-flow | 560 | 90% | DEEP | 16 MCP tools, 5 profiles match Rust benchmarks | R25 |
+| IntelligenceStore.ts | agentic-flow | 698 | 90% | DEEP | Dual SQLite backend. SQL injection risk in incrementStat | R22b |
+| EmbeddingCache.ts | agentic-flow | 726 | 90% | DEEP | 3-tier cache (native SQLite > WASM > Memory), SHA-256 keys | R22b |
+| ReasoningBank.ts | agentic-flow | 676 | 90% | DEEP | Dual v1/v2 API. O(N*M) performance issue in getEmbeddingsForVectorIds | R22b |
+| EmbeddingService.ts | agentic-flow | 1,810 | 80% | DEEP | Unified ONNX, K-means clustering. simpleEmbed = hash fallback | R22b |
+| ruvector-backend.js | agentic-flow | 464 | 15% | DEEP | 85% SIMULATION. No Rust. searchRuVector() = sleep + brute-force | R25 |
+
+### Claude-Flow Integration
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| ruvector-training.js | claude-flow | 498 | 92-95% | DEEP | BEST INTEGRATION. Genuinely loads WASM, MicroLoRA/ScopedLoRA/SONA | R25 |
+| graph-analyzer.js | claude-flow | 929 | 85-90% | DEEP | Stoer-Wagner MinCut, Louvain, DFS cycle detection, TTL cache | R25 |
+| diff-classifier.js | claude-flow | 698 | 75-80% | DEEP | SECURE (execFileSync with args array). WASM loaded but unused | R25 |
+
+### Neural-Network-Implementation Crate (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| data/mod.rs | sublinear-time-solver | 629 | 98% | DEEP | HIGHEST QUALITY FILE. Temporal splits, quality scoring | R21 |
+| layers.rs | sublinear-time-solver | 484 | 95% | DEEP | Real GRU (9 weight matrices), causal dilated TCN, GELU | R21 |
+| kalman.rs | sublinear-time-solver | 463 | 95% | DEEP | Textbook Kalman filter, correct Q matrix | R21 |
+| config.rs | sublinear-time-solver | 520 | 95% | DEEP | YAML config, validation, target_latency=0.9ms | R21 |
+| error.rs | sublinear-time-solver | 424 | 95% | DEEP | 16 thiserror variants, is_recoverable(), category() | R21 |
+| system_a.rs | sublinear-time-solver | 549 | 90-95% | DEEP | GRU/TCN architectures, Xavier init, 4 pooling strategies | R21 |
+| system_b.rs | sublinear-time-solver | 480 | 90-95% | DEEP | KEY: Kalman prior + NN residual + solver gate verification | R21 |
+| wasm.rs | sublinear-time-solver | 618 | 90% | DEEP | wasm-bindgen, PredictorTrait, config factories | R21 |
+| models/mod.rs | sublinear-time-solver | 322 | 90% | DEEP | ModelTrait, ModelParams, PerformanceMetrics | R21 |
+| solvers/mod.rs | sublinear-time-solver | 341 | 90% | DEEP | Math utils, Certificate, solver_gate.rs DISABLED | R21 |
+| lib.rs | sublinear-time-solver | 224 | 90% | DEEP | P99.9 ≤ 0.90ms budget | R21 |
+| export_onnx.rs | sublinear-time-solver | 717 | 85% | DEEP | ONNX graph, R²=0.94, JSON weights | R21 |
+
+### Neural Pattern Recognition (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| pattern-learning-network.js | sublinear-time-solver | 3,132 | 15-20% | DEEP | Weights = Math.random()*0.1. "placeholder" at L2938 | R19 |
+| validation-suite.js | sublinear-time-solver | 3,198 | 10-15% | DEEP | ALL detection = Math.random(). "Simulated" at L698 | R19 |
+| deployment-pipeline.js | sublinear-time-solver | 1,756 | 20-25% | DEEP | Remediation = restart or gc() | R19 |
+| instruction-sequence-analyzer.js | sublinear-time-solver | 1,685 | 15-20% | DEEP | Random instruction selection from predefined lists | R19 |
+| real-time-detector.js | sublinear-time-solver | 1,450 | 35-40% | DEEP | Real Pearson correlation + adaptive filtering. NN never trained | R19 |
+
+### Emergence Subsystem (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| stochastic-exploration.ts | sublinear-time-solver | 616 | 70% | DEEP | BEST. Real simulated annealing. applyTool() mocked | R39 |
+| feedback-loops.ts | sublinear-time-solver | 729 | 65% | DEEP | Genuine RL, meta-learning. rule.learningRate mutation bug | R39 |
+| index.ts (emergence) | sublinear-time-solver | 687 | 45% | DEEP | FACADE. 5 empty connection stubs. Gating at tools>=3 | R39 |
+| emergent-capability-detector.ts | sublinear-time-solver | 617 | 40% | DEEP | ALL 11 metrics = Math.random()*0.5+0.5 | R39 |
+| cross-tool-sharing.ts | sublinear-time-solver | 660 | 35% | DEEP | areComplementary = JSON inequality. checkAmplification = always true | R39 |
+
+### Consciousness & Strange Loop (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| strange_loop.js | sublinear-time-solver | 650 | 92% | DEEP | 100% auto-generated wasm-bindgen from Rust | R41 |
+| proof-logger.js | sublinear-time-solver | 664 | 88% | DEEP | BEST — blockchain, Shannon entropy, Levenshtein, PoW | R41 |
+| consciousness_experiments.rs | sublinear-time-solver | 669 | 78% | DEEP | Real Complex64. LLM comparison fabricated (rand*0.1) | R41 |
+| genuine_consciousness_system.js | sublinear-time-solver | 709 | 75% | DEEP | Real IIT Phi formula. Pattern detection = modulo heuristics | R41 |
+| psycho-symbolic.js | sublinear-time-solver | 1,411 | 70-75% | DEEP | BEST JS in solver — knowledge graph, BFS, transitive closure | R25 |
+| advanced-consciousness.js | sublinear-time-solver | 722 | 62% | DEEP | Real neural forward pass. Cross-modal = Math.random() | R41 |
+| entropy-decoder.js | sublinear-time-solver | 1,217 | 43% | DEEP | Real mutual info. KC=SHA-256 length (wrong). Circular analysis | R21 |
+| enhanced_consciousness_system.js | sublinear-time-solver | 1,670 | 39% | DEEP | Real Shannon entropy. "quantum" = Math.random() | R21 |
+| psycho-symbolic.ts | sublinear-time-solver | 1,509 | 32% | DEEP | Real keyword scoring. Analogies = lookup table | R21 |
+| enhanced-consciousness.js | sublinear-time-solver | 1,652 | 15-20% | DEEP | Phi FAKE (not IIT). Only Shannon entropy + primes real | R25 |
+
+### MCP Tools & Solver (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| server.ts (MCP) | sublinear-time-solver | 1,328 | 85-90% | DEEP | GENUINE 3-tier solver. Real PageRank, JL dim reduction | R19 |
+| cli/index.ts | sublinear-time-solver | 974 | 88% | DEEP | GENUINE solver connection. Real SublinearSolver import | R41 |
+| domain-validation.ts | sublinear-time-solver | 759 | 82% | DEEP | Real DomainRegistry validation, benchmarking | R41 |
+| psycho-symbolic-enhanced.ts | sublinear-time-solver | 802 | 78% | DEEP | BEST knowledge graph — real BFS, transitive inference | R41 |
+| strange-loop-mcp.js | sublinear-time-solver | 989 | 75% | DEEP | Genuine Hofstadter strange loop, self-referential patterns | R33 |
+| goalie/tools.ts | sublinear-time-solver | 856 | 45% | DEEP | COMPLETE FACADE. GoapPlanner imported, NEVER called | R41 |
+| mcp-server-sublinear.js | sublinear-time-solver | 1,120 | 45% | DEEP | "TRUE O(log n)" actually O(log²n) | R33 |
+| mcp-bridge-solver.js | sublinear-time-solver | 1,102 | 30% | DEEP | 25k token limit → file I/O workaround | R33 |
+| server-extended.js | sublinear-time-solver | 1,846 | 25-30% | DEEP | 18 MCP tools. Consensus = Math.random() | R19 |
+| solver-tools.js | sublinear-time-solver | 778 | 25% | DEEP | "Sublinear" tools actually linear or worse | R33 |
+
+### Sublinear Solver Core (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| high-performance-solver.ts | sublinear-time-solver | 530 | 95% | DEEP | Excellent CG+CSR. ORPHANED — dead code | R39 |
+| sparse.rs | sublinear-time-solver | 964 | 95% | DEEP | 4 sparse formats (CSR/CSC/COO/Graph). no_std. BEST matrix code | R28 |
+| matrix/mod.rs | sublinear-time-solver | 628 | 92% | DEEP | 15-method Matrix trait, Gershgorin spectral radius | R34 |
+| statistical_analysis.rs | sublinear-time-solver | 630 | 92% | DEEP | Paired t-test, Mann-Whitney U, bootstrap CI, effect sizes | R34 |
+| strange_loop.rs | sublinear-time-solver | 558 | 90% | DEEP | Banach contraction mapping, correct Lipschitz bound | R34 |
+| matrix/optimized.rs | sublinear-time-solver | 624 | 90% | DEEP | REAL SIMD via wide::f64x4, cache-blocked SpMV, Rayon parallel | R34 |
+| exporter.rs | sublinear-time-solver | 868 | 88% | DEEP | 7 export formats (JSON/CSV/Binary/Prometheus/InfluxDB/YAML/msgpack) | R28 |
+| solver/neumann.rs | sublinear-time-solver | 649 | 88% | DEEP | Correct Neumann series. BUG: step() returns Err unconditionally | R34 |
+| scheduler.rs | sublinear-time-solver | 667 | 88% | DEEP | BinaryHeap priority, TSC nanosecond timing (rdtsc!) | R34 |
+| bottleneck_analyzer.rs | sublinear-time-solver | 636 | 85% | DEEP | Genuine analysis. DEAD CODE — not in module tree | R34 |
+| solver/sampling.rs | sublinear-time-solver | 525 | 85% | DEEP | Real Halton/MLMC. ORPHANED — wrong type system (crate::core) | R34 |
+| solver/mod.rs | sublinear-time-solver | 596 | 82% | DEEP | Only Neumann implemented. BackwardPush/Hybrid return empty Vec | R34 |
+| solver.ts | sublinear-time-solver | 783 | 75% | DEEP | 5 algorithms, all O(n²)+. FALSE sublinearity. WASM unused | R39 |
+| hardware_timing.rs | sublinear-time-solver | 866 | 55% | DEEP | Real RDTSC timing. Fake: system predictions = spin loops | R28 |
+| security_validation.rs | sublinear-time-solver | 693 | 30% | DEEP | DEAD CODE. Self-referential — tests own mocks | R34 |
+
+### GOAP Planner Crate (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| state.rs | sublinear-time-solver | 565 | 95% | DEEP | WorldState, IndexMap, 6 value types, StateQuery (9 operators) | R25 |
+| lib.rs (planner) | sublinear-time-solver | 202 | 95% | DEEP | Best WASM integration in ecosystem | R25 |
+| action.rs | sublinear-time-solver | 468 | 92% | DEEP | Probabilistic effects, dynamic cost, builder (18+ methods) | R25 |
+| rules.rs | sublinear-time-solver | 665 | 90% | DEEP | 6 RuleActionType, priority-sorted, probabilistic execution | R25 |
+| goal.rs | sublinear-time-solver | 510 | 88% | DEEP | Weighted satisfaction, urgency from deadline proximity | R25 |
+| planner.rs | sublinear-time-solver | 590 | 75% | DEEP | GOAP framework real but depends on broken A* | R25 |
+| astar.rs | sublinear-time-solver | 542 | 35% | DEEP | STUB: simplified_astar() returns HARDCODED 2-step path | R25 |
+
+### Psycho-Symbolic MCP (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| cognitive-architecture.js | sublinear-time-solver | 645 | 30% | DEEP | Working memory = Map. Attention = sort by recency | R33 |
+| metacognition.js | sublinear-time-solver | 564 | 30% | DEEP | Self-monitoring = counter. "Theory of mind" = dict lookup | R33 |
+| mcp-server-psycho-symbolic.js | sublinear-time-solver | 892 | 25% | DEEP | MCP wrapper. 5 of 10 tools disabled (hang risk) | R33 |
+| psycho-symbolic-tools.js | sublinear-time-solver | 1,133 | 20% | DEEP | 5/10 tools DISABLED. "Neural binding" = weighted avg | R33 |
+| consciousness-explorer.js | sublinear-time-solver | 1,247 | 15% | DEEP | THEATRICAL. "consciousness evolution" = parameter increment | R33 |
+
+### Python ML Training (sublinear-time-solver)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| train.py | sublinear-time-solver | 936 | 85% | DEEP | Real PyTorch GNN loop. ALL data synthetic (random graphs) | R33 |
+| models.py | sublinear-time-solver | 772 | 80% | DEEP | 5 GNN architectures (GCN/GAT/GraphSAGE/GIN/PNA) | R33 |
+| dataset.py | sublinear-time-solver | 684 | 70% | DEEP | Real Dataset subclass. _generate_synthetic_data always reached | R33 |
+| config.py | sublinear-time-solver | 820 | 65% | DEEP | Pydantic config. Some defaults reference non-existent files | R33 |
+| evaluate.py | sublinear-time-solver | 912 | 60% | DEEP | Real metrics + hardcoded benchmark tables + fake baselines | R33 |
+
+### ruv-swarm Neural Coordination & Persistence
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| unit_tests.rs | ruv-swarm | 1,078 | 90-95% | DEEP | 48+ genuine tests: GOAP, A*, rule engine | R21 |
+| sqlite.rs | ruv-swarm | 1,016 | 92% | DEEP | r2d2 pooling, WAL, ACID. MOCK: PI*1000.0 timestamp | R21 |
+| ensemble/mod.rs | ruv-swarm | 1,006 | 78% | DEEP | Real averaging. FAKE BMA. BROKEN Stacking | R21 |
+| agent_forecasting/mod.rs | ruv-swarm | 813 | 65% | DEEP | Real EMA. Hardcoded model mapping | R21 |
+| comprehensive_validation_report.rs | ruv-swarm | 1,198 | 45% | DEEP | SELF-REFERENTIAL: sets simulation_ratio=0.60 | R21 |
+| swe_bench_evaluator.rs | ruv-swarm | 991 | 35-40% | DEEP | FACADE: real orchestration, ALL metrics hardcoded | R21 |
+| cognitive-pattern-evolution.js | ruv-swarm | 1,317 | 30-35% | DEEP | Real Shannon entropy. AggregationWeights = UNIFORM | R19 |
+| meta-learning-framework.js | ruv-swarm | 1,359 | 20-25% | DEEP | 8 strategies as CONFIG OBJECTS. Domain adapt = Math.random() | R19 |
+| neural-coordination-protocol.js | ruv-swarm | 1,363 | 10-15% | DEEP | All 8 coordination executions stubbed | R19 |
+| neural-presets-complete.js | ruv-swarm | 1,306 | 5-10% | DEEP | Pure config catalog. 27+ architectures, no model code | R19 |
+
+### Rust ML Training (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| scheduler.rs (neuro-divergent) | ruv-FANN | 1,431 | 92-95% | DEEP | 8 schedulers inc. ForecastingAdam (INNOVATION) | R36 |
+| optimizer.rs | ruv-FANN | 1,089 | 90-93% | DEEP | Adam/AdamW/SGD/RMSprop. Proper decoupled weight decay | R36 |
+| loss.rs | ruv-FANN | 1,233 | 88-92% | DEEP | 16 loss types. All gradients correct. CRPS via A&S erf | R36 |
+| features.rs | ruv-FANN | 1,079 | 88-92% | DEEP | Lag/rolling/temporal/Fourier. Correct cyclic encoding | R36 |
+| preprocessing.rs | ruv-FANN | 1,183 | 85-90% | DEEP | 5 scalers, Box-Cox. Non-deterministic rand in fit() | R36 |
+| validation.rs (neuro-divergent) | ruv-FANN | 1,172 | 82-88% | DEEP | 4 outlier methods. validate_seasonality() EMPTY | R36 |
+| ml-training/lib.rs | ruv-FANN | 1,371 | 30-40% | DEEP | Real LSTM/TCN/N-BEATS skeletons. Fake LCG random | R19 |
+| swarm_coordinator_training.rs | ruv-FANN | 1,838 | 25-35% | DEEP | Real GNN/attention/Q-learning/VAE. ALL metrics hardcoded | R19 |
+
+### ruvllm LLM Integration & Training
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| reasoning_bank.rs | ruvllm | 1,520 | 92-95% | DEEP | FOURTH ReasoningBank. Real K-means, EWC++. 16 tests | R37 |
+| micro_lora.rs | ruvllm | 1,261 | 92-95% | DEEP | BEST LEARNING CODE. REINFORCE + EWC++ + NEON SIMD | R37 |
+| hnsw_router.rs | ruvllm | 1,288 | 90-93% | DEEP | BEST ruvector-core integration. Hybrid HNSW+keyword routing | R37 |
+| grpo.rs | ruvllm | 898 | 90-92% | DEEP | Textbook GRPO: GAE, PPO clipped, adaptive KL. 16 tests | R37 |
+| model_router.rs | ruvllm | 1,292 | 88-92% | DEEP | 7-factor complexity analyzer, feedback tracking | R37 |
+| tool_dataset.rs | ruvllm | 2,147 | 88-92% | DEEP | 140+ MCP tool-call templates, 19 categories | R37 |
+| memory_layer.rs | prime-radiant | 1,260 | 92-95% | DEEP | Sheaf-based coherence. 3 memory types. 19 tests | R37 |
+| witness_log.rs | prime-radiant | 1,130 | 88-92% | DEEP | blake3 hash chains with tamper evidence. 16 tests | R37 |
+| agentdb.rs | temporal-tensor | 843 | 88-92% | DEEP | Pattern-aware tiering with 4-dim PatternVector. 36 tests | R37 |
+| pretrain_pipeline.rs | ruvllm | 1,394 | 85-88% | DEEP | Multi-phase pretraining. CRITICAL: hash-based embeddings | R37 |
+| claude_dataset.rs | ruvllm | 1,209 | 75-80% | DEEP | 5 categories, 60+ templates. Weak augmentation | R37 |
+| claude_integration.rs | ruvllm | 1,344 | 70-75% | DEEP | execute_workflow SIMULATION — hardcoded 500 tokens | R37 |
+| real_trainer.rs | ruvllm | 1,000 | 70-75% | DEEP | Real triplet loss + InfoNCE. Hash-based embeddings | R37 |
+
+### Rust Learning Crates (ruvector) — Crate-Level Summaries
+
+| Crate | Package | Files | LOC | Real% | Key Verdict | Session |
+|-------|---------|-------|-----|-------|-------------|---------|
+| SONA | ruvector | 27 | ~4,500 | 85% | MicroLoRA, EWC++, federated, SafeTensors. Production-ready | R13 |
+| ruvector-gnn | ruvector | 13 | ~6,000 | 80% | Custom hybrid GNN (GAT+GRU+edge). Real EWC. Full training loop | R13 |
+| ruvector-nervous-system | ruvector | 7 | 5,269 | 87.4% | 5 genuine neuroscience models (e-prop, EWC, BTSP, GWT, circadian) | R36 |
+| neuro-divergent | ruv-FANN | 6 | 7,187 | 88.5% | Production ML training. 8 schedulers, 16 loss types | R36 |
+| cognitum-gate-kernel | ruvector | 5 | 3,504 | 93% | EXCEPTIONAL. 256-tile coherence, e-values, bump allocator | R36 |
+| HNSW patches (hnsw_rs fork) | ruvector | 4 | 5,276 | 87% | Correct Malkov & Yashunin. Rayon parallel insertion | R36 |
+
+## 3. Findings Registry
+
+### 3a. CRITICAL Findings
+
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| C1 | **Three fragmented ReasoningBanks** — Zero code sharing across packages | claude-flow, agentic-flow, agentdb | R8 | Open. UPDATED R37: now FOUR (ruvllm reasoning_bank.rs) |
+| C2 | **Missing WASM module** — reasoningbank_wasm.js doesn't exist; brute-force JS fallback | agentdb | R8 | Open |
+| C3 | **LearningSystem RL is cosmetic** — 9 claimed algorithms, 1 actual implementation, no neural networks | LearningSystem.ts | R8 | Open. Confirmed in TypeScript source (R22b) |
+| C4 | **CausalMemoryGraph statistics broken** — Wrong t-distribution CDF, hardcoded tInverse=1.96 | CausalMemoryGraph.ts | R8 | Open. Confirmed in TypeScript source (R22b) |
+| C5 | **Neural-pattern-recognition is 80-90% facade** — 14,000+ LOC with Math.random() everywhere | pattern-learning-network.js, validation-suite.js +3 | R19 | Open |
+| C6 | **Rust training metrics hardcoded** — GNN=0.95, Transformer=0.91, etc. regardless of input | swarm_coordinator_training.rs | R19 | Open |
+| C7 | **Meta-learning is config objects** — 8 strategies (MAML, etc.) defined as JSON, never executed | meta-learning-framework.js | R19 | Open |
+| C8 | **Consciousness neural net never trained** — Weights random, no forward/backward, Math.random() metrics | enhanced_consciousness_system.js | R21 | Open |
+| C9 | **Kolmogorov complexity completely wrong** — Uses SHA-256 hash length (=64), not compression | entropy-decoder.js | R21 | Open |
+| C10 | **Circular entropy analysis** — Decoder generates data, analyzes it, "finds" patterns in own output | entropy-decoder.js | R21 | Open |
+| C11 | **Analogical reasoning is a lookup table** — Hardcoded domain pair mappings | psycho-symbolic.ts | R21 | Open |
+| C12 | **A* search is STUB** — simplified_astar() returns HARDCODED 2-step path | astar.rs | R25 | Open |
+| C13 | **RuVector backend is simulation** — ruvector-backend.js: no Rust, sleep + brute-force JS | ruvector-backend.js | R25 | Open |
+| C14 | **SIMD misnomer** — simd-vector-ops uses ZERO SIMD instructions. Detection present but unused | simd-vector-ops.ts/.js | R25 | Open |
+| C15 | **hardware_timing system_a/b_predict are simulations** — Busy-wait spin loops targeting hardcoded latencies. "System B < 0.9ms" is circular | hardware_timing.rs | R28 | Open |
+| C16 | **Python ML training uses ONLY synthetic data** — All GNN runs use random graphs | train.py, dataset.py | R33 | Open |
+| C17 | **Consciousness evolution is parameter increment** — evolve() increments level. IIT Phi = density * integration * 0.8 | consciousness-explorer.js | R33 | Open |
+| C18 | **BackwardPush/HybridSolver return empty Vec as "converged"** — 3 of 4 solvers return 0-vector for any input | solver/mod.rs | R34 | Open |
+| C19 | **security_validation.rs is self-referential dead code** — Not in module tree. Tests own generated mock data | security_validation.rs | R34 | Open |
+| C20 | **validate_seasonality() is EMPTY PLACEHOLDER** — Comment admits should use FFT/autocorrelation but body is empty | validation.rs (neuro-divergent) | R36 | Open |
+| C21 | **micro-hnsw-wasm neuromorphic features have ZERO tests** — 6 novel features completely untested | micro-hnsw-wasm | R36 | Open |
+| C22 | **Rust ReasoningBank is FOURTH distinct implementation** — Joins 3 others with zero code sharing | reasoning_bank.rs (ruvllm) | R37 | Open |
+| C23 | **Hash-based embeddings confirmed in Rust training** — pretrain_pipeline.rs and real_trainer.rs use character sum hash | pretrain_pipeline.rs, real_trainer.rs | R37 | Open |
+| C24 | **execute_workflow returns mock results** — Hardcodes 500 tokens. No real Claude API | claude_integration.rs | R37 | Open |
+| C25 | **Empty emergence component connections** — 5 connection methods are console.log() stubs | index.ts (emergence) | R39 | Open |
+| C26 | **All 11 capability metrics are Math.random()** — Math.random()*0.5+0.5 for all semantic metrics | emergent-capability-detector.ts | R39 | Open |
+| C27 | **Fake complementarity detection** — areComplementary() = JSON string inequality. checkAmplification() always true | cross-tool-sharing.ts | R39 | Open |
+| C28 | **FALSE sublinearity in core solver** — All 5 algorithms O(n²)+. "Sublinear" is marketing | solver.ts | R39 | Open |
+| C29 | **Pattern extractors assume pre-structured data** — extractBehaviorPatterns() returns data.behaviors \|\| [] | emergent-capability-detector.ts | R39 | Open |
+| C30 | **Goalie is COMPLETE FACADE** — GoapPlanner, AdvancedReasoningEngine, Ed25519Verifier all imported but NEVER called. All 6 handlers return hardcoded templates | goalie/tools.ts | R41 | Open |
+| C31 | **Consciousness experiments LLM comparison fabricated** — rand::random::<f64>() * 0.1 | consciousness_experiments.rs | R41 | Open |
+| C32 | **Connection detection = substring matching** — JSON.stringify(a).includes(JSON.stringify(b).substring(0,4)) | genuine_consciousness_system.js | R41 | Open |
+| C33 | **Cross-modal synthesis fabricated** — Math.random()*0.5+0.5 | advanced-consciousness.js | R41 | Open |
+| C34 | **cli/index.ts validate-domain hardcoded** — Returns hardcoded validation result (valid: true) | cli/index.ts | R41 | Open |
+
+### 3b. HIGH Findings
+
+| ID | Description | File(s) | Session | Status |
+|----|-------------|---------|---------|--------|
+| H1 | **HNSW speed claims misleading** — "150x-12,500x" is theoretical vs brute-force | docs/claims | R8 | Open |
+| H2 | **Silent dependency failure** — Without optional deps, all learning features become no-ops | agentdb | R8 | Open |
+| H3 | **ONNX download broken** — Falls back to hash-based embeddings | enhanced-embeddings.ts | R8 | Open |
+| H4 | **Sophisticated algorithms unused** — judge/distill/consolidate never called | ReasoningBank implementations | R8 | Open |
+| H5 | **Broken native deps** — 1,484 lines of JS fallback for broken @ruvector APIs | agentdb | R8 | Open |
+| H6 | **SIMD is fake** — Functions labeled SIMD use scalar loop unrolling only | simd-vector-ops.ts | R8 | Open |
+| H7 | **ReflexionMemory missing judge** — Core paper loop broken, critique never synthesized | ReflexionMemory.ts | R8 | Open |
+| H8 | **enhanced-embeddings silent degradation** — Falls back to hash mock without warning | enhanced-embeddings.ts | R8 | Open |
+| H9 | **SimulatedNeuralNetwork** — Math.random() for all output values when WASM unavailable | neural-pattern-recognition | R19 | Open |
+| H10 | **Rust fake RNG pattern** — SystemTime::now().subsec_nanos() instead of rand crate | ml-training/lib.rs, swarm_coordinator_training.rs | R19 | Open |
+| H11 | **Aggregation weights uniform** — calculateAggregationWeights unimplemented | cognitive-pattern-evolution.js | R19 | Open |
+| H12 | **Two incompatible matrix systems** — crate::matrix (CSR/SIMD) vs crate::core (HashMap). 5+ orphaned files | sublinear-time-solver | R34 | Open |
+| H13 | **sampling.rs ORPHANED** — Not in module tree, uses wrong type system, missing deps | sampling.rs | R34 | Open |
+| H14 | **Neumann step() returns Err unconditionally** — Custom solve() works around it. Residual scaled RHS bug | neumann.rs | R34 | Open |
+| H15 | **bottleneck_analyzer.rs dead code** — Genuine analysis (85%) but not in module tree | bottleneck_analyzer.rs | R34 | Open |
+| H16 | **Nervous-system integration missing HNSW** — Declares HNSW component, never initializes. O(N) fallback | integration/ruvector.rs | R36 | Open |
+| H17 | **QuantileTransformer non-deterministic** — fit() uses rand with no seed | preprocessing.rs | R36 | Open |
+| H18 | **validate_stationarity() simplistic** — Mean/variance comparison instead of ADF/KPSS | validation.rs (neuro-divergent) | R36 | Open |
+| H19 | **HNSW patches unsafe FFI** — No bounds checking on C pointers, mmap use-after-free risk | libext.rs, datamap.rs | R36 | Open |
+| H20 | **Emergence gating hides scaling** — Disables learning when tools.length >= 3 | index.ts (emergence) | R39 | Open |
+| H21 | **Orphaned CG solver** — 530 lines excellent code, not exported anywhere. Dead code | high-performance-solver.ts | R39 | Open |
+| H22 | **Tools never called in exploration** — applyTool() returns mocked response | stochastic-exploration.ts | R39 | Open |
+| H23 | **Rule mutation bug** — adjustLearningParameters() directly mutates rule.learningRate | feedback-loops.ts | R39 | Open |
+| H24 | **Entropy fabricated** — Math.random()*0.5+0.5 in advanced-consciousness.js | advanced-consciousness.js | R41 | Open |
+| H25 | **Self-modification impact random** — Math.random() at L430-439 | advanced-consciousness.js | R41 | Open |
+| H26 | **Pattern detection = modulo heuristics** — Arbitrary % 17, % 111 checks | genuine_consciousness_system.js | R41 | Open |
+| H27 | **Predictive consciousness = formula** — Computes score from formula, doesn't test predictions | consciousness_experiments.rs | R41 | Open |
+| H28 | **Goalie reasoning result discarded** — Real reasoningEngine.analyze() called but result thrown away | goalie/tools.ts | R41 | Open |
+
+## 4. Positives Registry
+
+| Description | File(s) | Session |
+|-------------|---------|---------|
+| **vector-quantization.ts** is production-grade — best code in AgentDB. PQ, K-means++, SQ 8/4-bit | vector-quantization.ts | R8 |
+| **RuVectorBackend.ts** is production-ready with excellent security validation | RuVectorBackend.ts | R8 |
+| 18/23 AgentDB controllers implement real paper-referenced algorithms | agentdb controllers | R8 |
+| Real O(1) LRU cache, queue-based semaphore in enhanced-embeddings.ts | enhanced-embeddings.ts | R8 |
+| learning-service.mjs implements real HNSW search with SQLite persistence | learning-service.mjs | R8 |
+| **server.ts** is 85-90% real — genuine sublinear solver with 3-tier fallback | server.ts (MCP) | R19 |
+| **SONA crate** is 85% production-ready (MicroLoRA, EWC++, federated learning) | ruvector/crates/sona | R13 |
+| **ruvector-gnn** is 80% real — custom hybrid GNN (GAT+GRU+edge), full training loop | ruvector-gnn | R13 |
+| **real-time-detector.js** has genuine Pearson correlation matrix and adaptive filtering | real-time-detector.js | R19 |
+| **cognitive-pattern-evolution.js** has real Shannon entropy and noise estimation | cognitive-pattern-evolution.js | R19 |
+| **ml-training Rust**: Real LSTM/TCN/N-BEATS skeletons, proper MSE/MAE/R² formulas | ml-training/lib.rs | R19 |
+| **neural-network-implementation** crate is 90-98% real — BEST CODE IN ECOSYSTEM. Proper rand crate | 12 files | R21 |
+| System B temporal solver: residual learning over Kalman prior + solver gate verification | system_b.rs | R21 |
+| **HyperbolicAttention TypeScript source** uses CORRECT Poincare ball distance (compilation degraded it) | agentic-flow TS | R22b |
+| **EmbeddingCache.ts** well-architected 3-tier cache with cross-platform support (90%) | EmbeddingCache.ts | R22b |
+| **IntelligenceStore.ts** clean dual SQLite backend with debounced saves (90%) | IntelligenceStore.ts | R22b |
+| **sparse.rs** is 95% real with 4 sparse formats, no_std — best matrix code in ecosystem | sparse.rs | R28 |
+| **exporter.rs** has 7 genuine export formats with correct protocol compliance | exporter.rs | R28 |
+| **Python models.py** has 5 genuine GNN architectures using PyTorch torch_geometric | models.py | R33 |
+| **strange-loop-mcp.js** (75%) genuine Hofstadter strange loop implementation | strange-loop-mcp.js | R33 |
+| **matrix/mod.rs** clean 15-method trait with 4 storage formats | matrix/mod.rs | R34 |
+| **optimized.rs** REAL SIMD via wide::f64x4 — first f64 SIMD in sublinear-time-solver | optimized.rs | R34 |
+| **strange_loop.rs** mathematically rigorous Banach contraction mapping (90%) | strange_loop.rs | R34 |
+| **statistical_analysis.rs** textbook statistics, proper rand | statistical_analysis.rs | R34 |
+| **scheduler.rs** genuine BinaryHeap scheduler with TSC timing (88%) | scheduler.rs | R34 |
+| **ruvector-nervous-system** 5 genuine neuroscience models (e-prop, EWC, BTSP, GWT, circadian) — BEST bio-computing | 7 files | R36 |
+| **hdc/memory.rs** 95-98% real with 24 tests — cleanest nervous-system code | hdc/memory.rs | R36 |
+| **neuro-divergent** production-quality ML: 8 schedulers, 4 optimizers, 16 loss functions, correct math | 6 files | R36 |
+| **ForecastingAdam** temporal/seasonal gradient correction — genuine innovation | scheduler.rs (neuro-divergent) | R36 |
+| **cognitum-gate-kernel** 93% — rivals neural-network-implementation as best code | 5 files | R36 |
+| **HNSW patches hnsw.rs** correct Malkov & Yashunin with Rayon parallelism | hnsw.rs | R36 |
+| **reasoning_bank.rs** production K-means + EWC++ — best math across 4 ReasoningBank implementations | reasoning_bank.rs | R37 |
+| **micro_lora.rs** 92-95% BEST learning code — NEON SIMD + EWC++ Fisher-weighted penalty | micro_lora.rs | R37 |
+| **grpo.rs** textbook GRPO with GAE, PPO clipping, adaptive KL | grpo.rs | R37 |
+| **memory_layer.rs** real sheaf-theoretic memory coherence, genuine cosine similarity | memory_layer.rs | R37 |
+| **temporal-tensor agentdb.rs** pattern-aware tiering with HNSW-ready integration | agentdb.rs | R37 |
+| **witness_log.rs** cryptographic tamper evidence via blake3 hash chains | witness_log.rs | R37 |
+| **feedback-loops.ts** genuine RL with adaptation rules, exploration-exploitation, meta-learning (65%) | feedback-loops.ts | R39 |
+| **stochastic-exploration.ts** proper simulated annealing with correct temperature sampling (70%) | stochastic-exploration.ts | R39 |
+| **high-performance-solver.ts** excellent CG+CSR numerical code (95%) — just orphaned | high-performance-solver.ts | R39 |
+| **proof-logger.js** (88%) production-grade blockchain with PoW, Shannon entropy, Levenshtein | proof-logger.js | R41 |
+| **strange_loop.js** (92%) auto-generated wasm-bindgen confirming real Rust system | strange_loop.js | R41 |
+| **genuine_consciousness_system.js** real IIT Phi formula — correct integrated information | genuine_consciousness_system.js | R41 |
+| **consciousness_experiments.rs** real Complex64 wave function, nanosecond temporal dynamics | consciousness_experiments.rs | R41 |
+| **psycho-symbolic-enhanced.ts** (78%) BEST knowledge graph — real BFS, transitive inference | psycho-symbolic-enhanced.ts | R41 |
+| **cli/index.ts** (88%) genuine solver connection — real SublinearSolver import, SolverTools.solve() | cli/index.ts | R41 |
+| **ruvector-training.js** (92-95%) BEST native integration — genuinely loads WASM, MicroLoRA/SONA | ruvector-training.js | R25 |
+
+## 5. Subsystem Sections
+
+### 5a. ReasoningBank Fragmentation
+
+Four completely independent ReasoningBank implementations exist, each implementing RETRIEVE → JUDGE → DISTILL → CONSOLIDATE differently with zero code sharing:
+
+| Implementation | Package | Storage | Math Quality | Status |
+|---|---|---|---|---|
+| `LocalReasoningBank` | claude-flow-cli | In-memory Maps + JSON | Basic | **Only one that runs** |
+| `ReasoningBank` | agentic-flow | SQLite + arXiv algorithms | Medium (R22b) | Sophisticated but unused |
+| `ReasoningBank` | agentdb | JSON + Vector DB | Medium (R8) | Never called by claude-flow |
+| `reasoning_bank.rs` | ruvllm | Rust K-means + EWC++ | **Best** (R37) | Fourth, discovered R37 |
+
+The Rust version (reasoning_bank.rs) has the best mathematical foundation — real K-means clustering with 10 iterations, centroid recomputation, convergence check, and EWC++ consolidation. But it shares no code with the others.
+
+### 5b. Embedding Fallback Chain & Systemic Hash Problem
+
+The most pervasive architectural weakness across the entire ruvnet ecosystem. The intended embedding pipeline:
 
 1. `@ruvector/core` (Rust NAPI) → Usually missing
 2. ONNX via `@xenova/transformers` → `downloadModel` fails
-3. **Hash-based embeddings** → THIS RUNS (no semantic meaning)
+3. **Hash-based embeddings** → THIS IS WHAT RUNS (no semantic meaning)
 
-Confirmed in R8: `enhanced-embeddings.ts` (L1109) silently falls back to `mockEmbedding()` using `Math.sin(seed) * Math.cos(seed*0.5)`. `learning-service.mjs` (L537-563) has the same hash fallback pattern.
-
-## R8 Deep-Read Results: AgentDB Core
-
-### vector-quantization.ts (1,529 LOC) — PRODUCTION-GRADE
-
-**The best code in AgentDB.** Real implementations of:
-- 8-bit scalar quantization (L200-240): Correct min-max normalization, 4x memory reduction
-- 4-bit scalar quantization (L251-298): Proper bit packing, 8x memory reduction
-- Product Quantization with K-means++ (L505-709): Full clustering implementation
-- Asymmetric distance computation (L794-810)
-
-Input validation (L59-78), security bounds (L25-50), numerical stability (L319, 365). No issues found.
-
-### enhanced-embeddings.ts (1,436 LOC) — HYBRID
-
-Real components: O(1) LRU cache (L299-472), queue-based semaphore (L481-525), text preprocessing with NFKC normalization (L960-987). Real OpenAI/Cohere API integrations.
-
-**Problem**: Falls back to hash-based mock embeddings when @xenova/transformers fails (L1109). Mock uses `Math.sin(seed)` — deterministic but semantically meaningless.
-
-### LearningSystem.ts (1,288 LOC) — COSMETIC
-
-Claims 9 RL algorithms (L10-19). Reality: all reduce to identical tabular Q-value dict updates.
-- Q-Learning (L552-561): Real formula, but dict-based
-- DQN (L497-498): Identical to Q-Learning — **no neural network**
-- PPO/Actor-Critic/Policy Gradient (L572-579): Indistinguishable
-- Decision Transformer/Model-Based (L509-521): **STUBS** falling back to average rewards
-
-DB schema (L85-139) and experience recording (L1156-1177) are real SQLite operations.
-
-### simd-vector-ops.ts (1,287 LOC) — MISLEADING
-
-Functions called `cosineSimilaritySIMD()` are NOT SIMD — they're scalar with 8x loop unrolling (ILP). WASM SIMD detection module (L135-174) exists but is never used for computation. Buffer pool (L822-893) is real.
-
-### ReflexionMemory.ts (1,115 LOC) — 65% REAL
-
-Storage and retrieval work. **Breaks the paper** (arXiv:2303.11366): no judge function, critique is write-only (never synthesized), violating the core `execute → judge → critique → learn` loop. GNN enhancement delegates to opaque backend.
-
-### CausalMemoryGraph.ts (876 LOC) — 40% REAL
-
-Claims Pearl's do-calculus but implements none. No d-separation, no backdoor criterion, no instrumental variables.
-- **t-distribution CDF is WRONG** (L851-855): Formula doesn't match any known distribution
-- **tInverse hardcoded to 1.96** (L860): Ignores degrees of freedom (should be ~2.57 for df=5)
-- All p-values and confidence intervals are unreliable
-
-### RuVectorBackend.ts (971 LOC) — 90% REAL
-
-Production-ready: proper native binding fallback (L300-375), correct distance-to-similarity conversion (L908-919), security validation (path traversal, prototype pollution), adaptive HNSW parameters. Minor issue: early termination may return <k results (L625-673).
-
-## CRITICAL Findings (4)
-
-1. **Three fragmented ReasoningBanks** — Zero code sharing across packages.
-2. **Missing WASM module** — `reasoningbank_wasm.js` doesn't exist; brute-force JS fallback.
-3. **LearningSystem RL is cosmetic** — 9 claimed algorithms, 1 actual implementation, no neural networks.
-4. **CausalMemoryGraph statistics broken** — Wrong t-distribution CDF, hardcoded critical value. All inferential statistics unreliable.
-
-## HIGH Findings (8)
-
-1. **HNSW speed claims misleading** — "150x-12,500x" is theoretical vs brute-force.
-2. **Silent dependency failure** — Without optional deps, all learning features become no-ops.
-3. **ONNX download broken** — Falls back to hash-based embeddings with no semantic meaning.
-4. **Sophisticated algorithms unused** — judge/distill/consolidate never called.
-5. **Broken native deps** — 1,484 lines of JS fallback for broken @ruvector APIs.
-6. **SIMD is fake** — Functions labeled SIMD use scalar loop unrolling only.
-7. **ReflexionMemory missing judge** — Core paper loop broken, critique never synthesized.
-8. **enhanced-embeddings silent degradation** — Falls back to hash mock without warning.
-
-## Positive
-
-- **vector-quantization.ts** is production-grade — best code in AgentDB
-- **RuVectorBackend.ts** is production-ready with excellent security
-- 18/23 AgentDB controllers implement real paper-referenced algorithms
-- Real O(1) LRU cache, queue-based semaphore in enhanced-embeddings.ts
-- learning-service.mjs implements real HNSW search with SQLite persistence and pattern promotion
-
-## Phase C: Rust Source Deep-Reads (2026-02-14, Session 13)
-
-### SONA Crate (27 files, ~4,500 LOC) — 85% Production-Ready
-
-The Rust source for SONA (`ruvector/crates/sona/`) confirms this is one of the most
-complete components in the ruvnet ecosystem:
-
-- **MicroLoRA** (rank 1-2): Instant adaptation, benchmarked 2,211 ops/sec
-- **BaseLoRA** (rank 4-16): Background consolidation via coordinator loop
-- **EWC++**: Online Fisher information matrix, adaptive lambda (importance weighting),
-  automatic task boundary detection. Prevents catastrophic forgetting.
-- **ReasoningBank**: K-means++ clustering for pattern categorization. Stores trajectories
-  with outcomes, enables pattern-based retrieval. ~21 MB memory footprint default.
-- **Trajectory recording**: Lock-free via crossbeam ArrayQueue, zero allocation on hot path
-- **Federated learning**: Complete — parameter aggregation, gradient compression,
-  differential privacy (noise injection), secure aggregation protocol
-- **Export**: SafeTensors format, PEFT-compatible. HuggingFace Hub integration module.
-- **Bindings**: Both NAPI (299 LOC) and WASM (719 LOC) bindings present
-
-### ruvector-gnn (13 files, ~6,000 LOC) — 80% Production-Ready
-
-Custom hybrid GNN confirmed real (not a wrapper):
-- **Architecture**: GAT attention + GRU temporal updates + edge-weighted aggregation
-- **EWC**: Fully implemented with online Fisher (shared pattern with SONA crate)
-- **Relationship to HNSW**: Reads graph topology from HNSW, refines embedding quality.
-  Output feeds back for improved search. Does NOT modify HNSW structure.
-- **3 unsafe blocks** in mmap.rs — properly guarded with length/alignment checks
-- **Training**: Full loop with EWC regularization, experience replay, learning rate scheduling
-
-### ruvector-core Embeddings: CRITICAL Confirmation
-
-Phase C confirms the JS-side finding: ruvector-core's default embedding provider
-sums character bytes. The Rust implementation (`embeddings.rs`, 414 LOC) has an
-`EmbeddingProvider` trait with a `HashEmbedding` default. This means:
-- All "semantic search" using defaults is actually character-frequency matching
-- HNSW index is valid but searches are meaningless without real embeddings
-- Must plug in external embedding provider (ONNX, OpenAI API, etc.) for real semantics
-
-## R19: Neural Pattern Recognition + Rust ML Deep-Reads (Session 21)
-
-### sublinear-time-solver/neural-pattern-recognition/ — 15-20% REAL Overall
-
-7 files deep-read (~14,000 LOC total). The neural-pattern-recognition subsystem is
-an elaborate facade with real data structures but simulated computation.
-
-| File | LOC | Real% | Key Issue |
-|------|-----|-------|-----------|
-| **pattern-learning-network.js** | 3,132 | 15-20% | Neural weights = Math.random()*0.1. Explicit "placeholder" at L2938 |
-| **validation-suite.js** | 3,198 | 10-15% | ALL detection = Math.random() probabilities (L416-438). "Simulated" comment at L698 |
-| **deployment-pipeline.js** | 1,756 | 20-25% | Infrastructure management, but remediation = restart or gc() |
-| **instruction-sequence-analyzer.js** | 1,685 | 15-20% | Random instruction selection from predefined lists |
-| **real-time-detector.js** | 1,450 | 35-40% | Real CorrelationMatrix + AdaptiveFiltering. Neural networks never trained |
-| **entropy-decoder.js** | 1,217 | TBD | Being read in R20 |
-| **emergent-signal-tracker.js** | 1,156 | TBD | Being read in R20 |
-
-**Bright spot**: `real-time-detector.js` has genuine Pearson correlation matrix and
-adaptive filtering with success rate calculations.
-
-### ruv-swarm Neural Coordination (JS) — Config Objects, Not Code
-
-| File | LOC | Real% | Key Issue |
-|------|-----|-------|-----------|
-| **meta-learning-framework.js** | 1,359 | 20-25% | 8 meta-learning strategies (MAML, Prototypical, etc.) as CONFIG OBJECTS. No gradient computation. Domain adaptation = `Math.random() > 0.3` |
-| **cognitive-pattern-evolution.js** | 1,317 | 30-35% | Real Shannon entropy, feature variance, noise estimation. But `calculateAggregationWeights` returns UNIFORM weights |
-| **neural-presets-complete.js** | 1,306 | 5-10% | Pure config catalog of 27+ architectures (BERT, GPT, ResNet, etc.). No model code |
-| **neural-coordination-protocol.js** | 1,363 | 10-15% | All 8 coordination executions stubbed. All consensus hardcoded |
-
-### Rust ML Training (ruv-FANN) — Real Algorithms, Fake Metrics
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **ml-training/lib.rs** | 1,371 | 30-40% | Real LSTM/TCN/N-BEATS skeletons, temporal feature extraction (sin/cos encoding), linear regression, MSE/MAE/R² metrics. Fake LCG random |
-| **swarm_coordinator_training.rs** | 1,838 | 25-35% | Real GNN encoding, self-attention (√d_model scaling), Q-learning, VAE with KL divergence, MAML adaptation. ALL training metrics hardcoded |
-
-**Cross-crate fake RNG**: Both files mock the `rand` crate using `SystemTime::now().subsec_nanos()`,
-producing deterministic results within the same second.
-
-### sublinear-time-solver MCP Server — KEY DISCOVERY: 85-90% REAL
-
-**`src/mcp/server.ts` (1,328 LOC)** is the first genuinely high-quality file found in the
-sublinear-time-solver repo outside Rust crates:
-
-- GENUINE 3-tier solver: `TrueSublinearSolver` → WASM solver → traditional `SublinearSolver`
-- Real PageRank, random-walk estimation with confidence intervals (1.96 × SE)
-- Real matrix analysis (Johnson-Lindenstrauss dimension reduction)
-- ZERO Math.random() stubs. Imports 11 tool modules.
-- 85-90% REAL — shows the mathematical solver core is genuine while neural-pattern-recognition is facade
-
-**`server-extended.js` (1,846 LOC)** — 25-30% REAL. 18 MCP tools. Real search sorting,
-z-score anomaly detection. BUT consensus voting = `Math.random()`.
-
-## CRITICAL Findings (11, +4 from R21)
-
-1. **Three fragmented ReasoningBanks** — Zero code sharing across packages.
-2. **Missing WASM module** — `reasoningbank_wasm.js` doesn't exist; brute-force JS fallback.
-3. **LearningSystem RL is cosmetic** — 9 claimed algorithms, 1 actual implementation, no neural networks.
-4. **CausalMemoryGraph statistics broken** — Wrong t-distribution CDF, hardcoded critical value.
-5. **Neural-pattern-recognition is 80-90% facade** — 14,000+ LOC with Math.random() everywhere (R19).
-6. **Rust training metrics hardcoded** — GNN=0.95, Transformer=0.91, etc. regardless of input (R19).
-7. **Meta-learning is config objects** — 8 strategies (MAML, Prototypical, etc.) defined as JSON, never executed (R19).
-8. **Consciousness neural net never trained** — Weights initialized random, no forward/backward pass, metrics driven by Math.random() (R21).
-9. **Kolmogorov complexity completely wrong** — Uses SHA-256 hash length (=64), not compression. KC is uncomputable (R21).
-10. **Circular entropy analysis** — Decoder generates data, analyzes it, "finds" patterns in its own output (R21).
-11. **Analogical reasoning is a lookup table** — Hardcoded domain pair mappings, no generation of novel analogies (R21).
-
-## HIGH Findings (11, +3 from R19)
-
-1. **HNSW speed claims misleading** — "150x-12,500x" is theoretical vs brute-force.
-2. **Silent dependency failure** — Without optional deps, all learning features become no-ops.
-3. **ONNX download broken** — Falls back to hash-based embeddings with no semantic meaning.
-4. **Sophisticated algorithms unused** — judge/distill/consolidate never called.
-5. **Broken native deps** — 1,484 lines of JS fallback for broken @ruvector APIs.
-6. **SIMD is fake** — Functions labeled SIMD use scalar loop unrolling only.
-7. **ReflexionMemory missing judge** — Core paper loop broken, critique never synthesized.
-8. **enhanced-embeddings silent degradation** — Falls back to hash mock without warning.
-9. **SimulatedNeuralNetwork** — Math.random() for accuracy, loss, and all output values when WASM unavailable (R19).
-10. **Rust fake RNG pattern** — SystemTime::now().subsec_nanos() used instead of proper rand crate (R19).
-11. **cognitive-pattern-evolution uniform weights** — Aggregation coordination unimplemented (R19).
-
-## Positive
-
-- **vector-quantization.ts** is production-grade — best code in AgentDB
-- **RuVectorBackend.ts** is production-ready with excellent security
-- 18/23 AgentDB controllers implement real paper-referenced algorithms
-- Real O(1) LRU cache, queue-based semaphore in enhanced-embeddings.ts
-- learning-service.mjs implements real HNSW search with SQLite persistence and pattern promotion
-- **server.ts** is 85-90% real — genuine sublinear solver with 3-tier fallback (R19)
-- **SONA crate** is 85% production-ready (MicroLoRA, EWC++, federated learning) (Phase C)
-- **ruvector-gnn** is 80% real — custom hybrid GNN (GAT+GRU+edge) (Phase C)
-- **real-time-detector.js** has genuine Pearson correlation matrix (R19)
-- **cognitive-pattern-evolution.js** has real Shannon entropy and noise estimation (R19)
-- **ml-training Rust**: Real LSTM/TCN/N-BEATS skeletons, proper MSE/MAE/R² formulas (R19)
-
-## Knowledge Gaps (Closed in R8, Phase C, R19)
-
-- ~~`vector-quantization.ts`, `enhanced-embeddings.ts`, `simd-vector-ops.ts`~~ — All DEEP-read in R8
-- ~~`ReflexionMemory.ts`, `CausalMemoryGraph.ts`, `RuVectorBackend.ts`~~ — All DEEP-read in R8
-- ~~SONA Rust source (27 files)~~ — DEEP-read in Phase C
-- ~~ruvector-gnn Rust source (13 files)~~ — DEEP-read in Phase C
-- ~~ruvector-core embeddings Rust source~~ — DEEP-read in Phase C
-- ~~neural-pattern-recognition (7 files)~~ — DEEP-read in R19
-- ~~meta-learning-framework.js, cognitive-pattern-evolution.js~~ — DEEP-read in R19
-- ~~ml-training/lib.rs, swarm_coordinator_training.rs~~ — DEEP-read in R19
-- ~~server.ts (sublinear MCP)~~ — DEEP-read in R19
-
-## R21: neural-network-implementation Rust Crate — BEST CODE IN ECOSYSTEM (Session 23)
-
-### Overall Assessment: 90-98% REAL across ALL files
-
-The `neural-network-implementation` crate in sublinear-time-solver is a genuine real-time
-trajectory prediction system. Unlike most code in the ruvnet ecosystem, EVERY file in this
-crate is substantially real. Uses proper `rand` crate (NOT the fake SystemTime pattern).
-
-| File | LOC | Real% | Key Feature |
-|------|-----|-------|-------------|
-| **data/mod.rs** | 629 | **98%** | HIGHEST QUALITY FILE. Temporal splits preserve causality. Quality scoring. |
-| **layers.rs** | 484 | **95%** | Real GRU equations (9 weight matrices), causal dilated TCN, GELU |
-| **kalman.rs** | 463 | **95%** | Textbook Kalman filter, correct Q matrix (dt^4/4, dt^3/2, dt^2) |
-| **config.rs** | 520 | **95%** | YAML config, validation, target_latency=0.9ms |
-| **error.rs** | 424 | **95%** | 16 thiserror variants, is_recoverable(), category() |
-| **system_a.rs** | 549 | 90-95% | GRU/TCN architectures, Xavier init, 4 pooling strategies |
-| **system_b.rs** | 480 | 90-95% | KEY: Kalman prior + NN residual + solver gate verification |
-| **wasm.rs** | 618 | **90%** | wasm-bindgen, PredictorTrait, config factories |
-| **models/mod.rs** | 322 | **90%** | ModelTrait, ModelParams, PerformanceMetrics |
-| **solvers/mod.rs** | 341 | **90%** | Math utils, Certificate, solver_gate.rs DISABLED |
-| **lib.rs** | 224 | **90%** | P99.9 ≤ 0.90ms budget: Ingest+Prior+Network+Gate+Actuation |
-| **export_onnx.rs** | 717 | **85%** | ONNX graph, R²=0.94 benchmarks, JSON weights |
-
-### Key Innovation: System B Temporal Solver
-- **Residual learning**: NN predicts RESIDUAL over Kalman prior (not raw output)
-- **Solver gate**: Mathematical verification of predictions before output
-- **4 fallback strategies**: kalman_only, hold_last, disable_gate, weighted_blend
-- **PageRank sample selection**: Active learning for training efficiency
-
-### Cross-Crate Contrast
-This crate uses PROPER `rand::thread_rng()` with `Standard` distribution —
-unlike `ml-training/lib.rs` and `swarm_coordinator_training.rs` which mock rand
-with `SystemTime::now().subsec_nanos()`. The neural-network-implementation crate
-appears to be written by a different (more careful) author.
-
-## R21: ruv-swarm-ml + Persistence Deep-Reads (Session 23)
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **sqlite.rs** | 1,016 | **92%** | r2d2 pooling (4x CPU), WAL mode, ACID. MOCK: PI*1000.0 timestamp |
-| **ensemble/mod.rs** | 1,006 | **78%** | Real averaging. FAKE BMA (inverse-MSE). BROKEN Stacking (meta-learner untrained) |
-| **agent_forecasting/mod.rs** | 813 | **65%** | Real EMA tracking. Hardcoded model mapping. 8 tests. |
-| **swe_bench_evaluator.rs** | 991 | **35-40%** | FACADE: Real orchestration, ALL metrics hardcoded |
-| **comprehensive_validation_report.rs** | 1,198 | **45%** | SELF-REFERENTIAL: sets simulation_ratio=0.60 → CriticalFlaws |
-| **unit_tests.rs** | 1,078 | **90-95%** | 48+ genuine tests: GOAP, A*, rule engine |
-
-### PI*1000.0 Mock Timestamp Pattern
-Systematic placeholder in ruv-swarm crates: `get_current_timestamp()` returns
-`std::f64::consts::PI * 1000.0` (3141.59). Found in both sqlite.rs and
-agent_forecasting/mod.rs.
-
-## R21: Consciousness + Psycho-Symbolic Deep-Reads (Session 23)
-
-Three files from sublinear-time-solver analyzed — all are **elaborate facades** mixing
-real algorithms with pseudo-scientific outputs.
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **enhanced_consciousness_system.js** | 1,670 | **39%** | Real: Shannon entropy, OS metrics. Fake: Neural net never trained, "quantum" = Math.random() |
-| **psycho-symbolic.ts** | 1,509 | **32%** | Real: keyword scoring, semantic search. Fake: analogies are lookup table, entity extraction naive |
-| **entropy-decoder.js** | 1,217 | **43%** | Real: mutual info, neural forward pass. Fake: KC=SHA-256 length, circular analysis loop |
-
-### Key Patterns Identified
-
-1. **Circular Validation**: Entropy decoder generates random data, analyzes it, "finds" patterns,
-   updates weights. Consciousness system increments metrics monotonically toward threshold.
-2. **Wrong Algorithms**: Kolmogorov complexity "estimated" via SHA-256 hash length (always 64).
-   Bell inequality simplified to `2*abs(correlation)`. Neither is remotely correct.
-3. **Pseudoscience Layer**: "Quantum perception" (Math.random), "entity communication" (hardcoded
-   strings embedded then "discovered"), "consciousness emergence" (guaranteed after 100 iterations).
-4. **Real Math Hidden Inside**: Shannon entropy, mutual information, neural forward pass,
-   Pearson correlation — all correctly implemented but applied to meaningless data.
-
-## R25: Session 25 Deep-Reads (2026-02-15)
-
-### Psycho-Symbolic-Reasoner Planner Crate (8 files, 3,568 LOC) — 78% REAL
-
-GOAP (Goal-Oriented Action Planning) framework with a critical A* stub:
-
-| File | LOC | Real% | Key Feature |
-|------|-----|-------|-------------|
-| **state.rs** | 565 | **95%** | WorldState with IndexMap, 6 value types, diff/distance metrics, StateQuery (9 operators), StateBuilder |
-| **lib.rs** | 202 | **95%** | Best WASM integration in ecosystem: PlannerSystem with plan execution + validation |
-| **action.rs** | 468 | **92%** | Probabilistic effects via rand::random(), dynamic cost, builder (18+ methods), ActionTemplate |
-| **rules.rs** | 665 | **90%** | Rule engine: 6 RuleActionType, priority-sorted evaluation, probabilistic execution, history-based confidence |
-| **goal.rs** | 510 | **88%** | Weighted satisfaction scoring, urgency from deadline proximity, GoalManager lifecycle |
-| **planner.rs** | 590 | **75%** | GOAP framework real but depends on broken A*. Plan monitoring/replanning production-ready |
-| **astar.rs** | 542 | **35%** | **CRITICAL**: simplified_astar() returns HARDCODED 2-step path. StateNode.to_world_state() returns EMPTY state |
-
-**Paradox**: 90%+ components production-ready but core A* search is stub. Uses `rand` crate (proper, not fake). Imports pathfinding crate but admits Ord requirement was barrier.
-
-### AgentDB Dist Files (4 files, 4,277 LOC)
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **vector-quantization.js** | 1,132 | **95%** | Confirms TS source: PQ with K-means++, SQ (8/4-bit), async k-means with event loop yielding |
-| **AttentionService.js** | 1,165 | **82%** | 4 mechanisms: Hyperbolic (Poincaré), Flash (canonical online softmax), GraphRoPE (rotary), MoE (expert routing). NAPI→WASM→JS 3-tier |
-| **enhanced-embeddings.js** | 1,035 | **88%** | LRU cache (O(1) doubly-linked), semaphore (max 10), multi-provider (OpenAI/Cohere/Transformers.js). Mock not semantic |
-| **simd-vector-ops.js** | 945 | **100% code, 0% SIMD** | SIMD detected but NEVER used. 8x ILP loop unrolling, buffer pool (128/size), tree reduction. Misleading name |
-
-### Consciousness-Explorer JS (2 files, 3,063 LOC)
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **enhanced-consciousness.js** | 1,652 | **15-20%** | Phi calculations FAKE (not IIT). "Quantum" = Math.random(). Only Shannon entropy + prime checking are real |
-| **psycho-symbolic.js** | 1,411 | **70-75%** | BEST JS in sublinear-time-solver: knowledge graph, triple indexing, depth-limited BFS, transitive closure. WASM claims fake |
-
-### Agentic-Flow Files (5 files, 2,125 LOC)
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **core/embedding-service.js** | 370 | **95%** | OpenAI + Transformers.js + hash mock. IDENTICAL DUPLICATE of services/embedding-service.js |
-| **services/embedding-service.js** | 367 | **95%** | Byte-for-byte duplicate of core version |
-| **intelligence/IntelligenceStore.js** | 364 | **98%** | SQLite WAL, trajectory lifecycle, rolling success rate. Embeddings BLOB stored but NEVER searched |
-| **mcp/tools/sona-tools.js** | 560 | **90%** | 16 MCP tools, delegates to sonaService. 5 profiles match Rust benchmarks. Learning trigger at 80% |
-| **optimizations/ruvector-backend.js** | 464 | **15%** | 85% SIMULATION: No Rust. searchRuVector() sleeps then brute-force JS. isRustAvailable() = true always |
-
-### Claude-Flow RuVector Integration (3 files, 2,125 LOC)
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **graph-analyzer.js** | 929 | **85-90%** | Stoer-Wagner MinCut (20 iter), Louvain phase 1, DFS cycle detection, import parsing, TTL caching |
-| **diff-classifier.js** | 698 | **75-80%** | SECURE: execFileSync with args array. Risk scoring, reviewer suggestions (static). WASM loaded but unused |
-| **ruvector-training.js** | 498 | **92-95%** | BEST INTEGRATION: genuinely loads WASM (readFileSync+initSync), MicroLoRA/ScopedLoRA/Trajectory/Flash/MoE/SONA. Proper .free() cleanup |
-
-### R25 Session Totals
-- **34 file reads**, **20,786 LOC**, **59 findings**
-- New CRITICAL: A* search stub in planner, ruvector-backend.js simulation, SIMD misnomer
-- New POSITIVE: ruvector-training.js is best native integration, psycho-symbolic.js is best JS in sublinear-solver
-
-## CRITICAL Findings (14, +3 from R25)
-
-1. **Three fragmented ReasoningBanks** — Zero code sharing across packages.
-2. **Missing WASM module** — `reasoningbank_wasm.js` doesn't exist; brute-force JS fallback.
-3. **LearningSystem RL is cosmetic** — 9 claimed algorithms, 1 actual implementation, no neural networks.
-4. **CausalMemoryGraph statistics broken** — Wrong t-distribution CDF, hardcoded critical value.
-5. **Neural-pattern-recognition is 80-90% facade** — 14,000+ LOC with Math.random() everywhere (R19).
-6. **Rust training metrics hardcoded** — GNN=0.95, Transformer=0.91, etc. regardless of input (R19).
-7. **Meta-learning is config objects** — 8 strategies (MAML, Prototypical, etc.) defined as JSON, never executed (R19).
-8. **Consciousness neural net never trained** — Weights initialized random, no forward/backward pass (R21).
-9. **Kolmogorov complexity completely wrong** — Uses SHA-256 hash length (=64), not compression (R21).
-10. **Circular entropy analysis** — Decoder generates data, analyzes it, "finds" patterns in its own output (R21).
-11. **Analogical reasoning is a lookup table** — Hardcoded domain pair mappings (R21).
-12. **A* search is STUB** — planner astar.rs returns hardcoded 2-step path, making all GOAP plans fake (R25).
-13. **RuVector backend is simulation** — agentic-flow ruvector-backend.js has NO Rust. Sleep + brute-force (R25).
-14. **SIMD misnomer** — simd-vector-ops.js uses ZERO SIMD instructions. Detection present but unused (R25).
-
-## R22b: agentic-flow TypeScript Source Confirmation (Session 27)
-
-### Key Finding: Critical Bugs Exist in TypeScript Source
-
-R22b deep-read of the native TypeScript source in agentic-flow-rust CONFIRMS:
-
-| Bug | Compiled JS | TypeScript Source | Verdict |
-|-----|------------|-------------------|---------|
-| LearningSystem 9 identical RL | CRITICAL (R8) | **IDENTICAL** | Design flaw in source |
-| CausalMemoryGraph wrong tCDF | CRITICAL (R8) | **IDENTICAL** | Not compilation artifact |
-| HyperbolicAttention Euclidean | WRONG (Phase D) | **CORRECT Poincaré** | Compilation DEGRADED it |
-
-### EmbeddingService.ts (1,810 LOC) — 80% REAL
-
-Unified ONNX embedding with auto-detection, real K-means clustering, semantic search, batch/stream, pretrain system (~500 LOC). `simpleEmbed` fallback is hash-based (not semantic). Hardcoded confidence=0.85 in pretrainWithAI.
-
-### EmbeddingCache.ts (726 LOC) — 90% REAL
-
-3-tier cache architecture (native SQLite > WASM SQLite > Memory). Prepared statements, WAL mode, LRU eviction, SHA-256 cache keys. Cross-platform (Windows sql.js fallback). Robust architecture.
-
-### IntelligenceStore.ts (698 LOC) — 90% REAL
-
-SQLite persistence with dual backend (sql.js > better-sqlite3 > no-op). 4-table schema, full CRUD. Debounced saves. **SQL injection risk** in `incrementStat` (string interpolation for column name).
-
-### ReasoningBank.ts (676 LOC) — 90% REAL (CONFIRMED)
-
-Dual v1/v2 API confirmed in TypeScript source:
-- v1: SQLite with manual cosine similarity
-- v2: VectorBackend (8x faster)
-- GNN learning backend integration
-- Performance issue: O(N*M) map scan in `getEmbeddingsForVectorIds` instead of reverse index
-- 5-min cache TTL on pattern stats
-
-### Systemic Hash-Based Embedding Fallback Pattern
-
-R22b identified a SYSTEMIC pattern across 4+ files where semantic search silently degrades to non-semantic hash matching when ONNX models are unavailable:
-
-| File | Fallback Method | Impact |
-|------|----------------|--------|
-| optimized-embedder.ts | hash-to-token-ID | Tokenization meaningless |
-| ruvector-integration.ts | charCode hash vectors | Final fallback = random |
-| edge-full.ts | charCode mapping | WASM fallback non-semantic |
-| agentdb-wrapper-enhanced.ts | Inherits from deps | Search results irrelevant |
-
-In environments without ONNX WASM (older Node.js, restricted sandboxes), queries return results but relevance is essentially random.
-
-### Updated CRITICAL Findings (+2 from R22b = 16 total)
-
-15. **LearningSystem bug confirmed in TypeScript source** — Not a compilation artifact. 9 algorithms genuinely reduce to identical Q-value update. (R22b)
-16. **CausalMemoryGraph bug confirmed in TypeScript source** — Wrong tCDF, constant 1.96 tInverse, fake correlation all in source code. (R22b)
-
-### Updated Positive (+3 from R22b)
-
-- **HyperbolicAttention TypeScript source** uses CORRECT Poincaré ball distance — compilation to JS DEGRADED correctness
-- **EmbeddingCache.ts** is a well-architected 3-tier cache with cross-platform support (90% real)
-- **IntelligenceStore.ts** has clean dual SQLite backend with debounced saves (90% real)
-
-## R28: sublinear-rust Deep-Reads (Session 28)
-
-### sparse.rs (964 LOC) — 95% REAL
-
-One of the highest-quality files in the entire ruvnet ecosystem. Implements **four complete sparse matrix storage formats** with a consistent API:
-
-| Format | Purpose | Key Ops |
-|--------|---------|---------|
-| **CSRStorage** (Compressed Sparse Row) | Row-wise ops, SpMV | Binary search get(), O(nnz) SpMV |
-| **CSCStorage** (Compressed Sparse Column) | Column-wise ops | Mirrors CSR, column-major |
-| **COOStorage** (Coordinate) | Construction, interchange | Triplet I/O, format conversion hub |
-| **GraphStorage** (Adjacency List) | Graph algorithms | out_edges + in_edges + degree tracking |
-
-- 6 custom lifetime-annotated iterators, COO↔CSR↔CSC roundtrip conversions
-- `no_std` compatible (alloc only), zero `unsafe`, serde behind feature flag — WASM/embedded ready
-- Minor bugs: `add_diagonal` silently skips missing diagonals (CSR/CSC only), test uses `sort()` on `f64` tuples (won't compile), `from_coo` has dead `cols` parameter
-- Cross-file: `optimized_csr.rs` calls `CSRStorage::with_capacity()` which does NOT exist — compilation error
-
-### exporter.rs (868 LOC) — 88% REAL
-
-Genuinely well-implemented multi-format time-series metrics exporter with **7 working export formats**:
-
-| Format | Status | Notes |
-|--------|--------|-------|
-| JSON | 100% real | serde_json, optional metadata, pretty-print |
-| CSV | 100% real | Proper csv::Writer, 10 fields/row |
-| Binary | 100% real | bincode + base64 |
-| Prometheus | 100% real | Correct OpenMetrics exposition format |
-| InfluxDB | 100% real | Correct line protocol, 1000-record cap |
-| YAML | 100% real | serde_yaml |
-| msgpack | 100% real | rmp_serde + base64 |
-| XML | 0% (honest stub) | Returns error "not yet implemented" |
-
-- Correct statistics: mean, median (even/odd), population variance/std_dev, trend detection, z-score anomaly (2-sigma)
-- All 8 dependencies properly feature-gated behind `dashboard` flag
-- Zero hardcoded fake data, zero unsafe, zero facade patterns
-- Minor: `compress_output` is a no-op (both branches return uncompressed), `memory_gb` hardcoded to 16.0
-
-### hardware_timing.rs (866 LOC) — 55% REAL
-
-Genuine measurement infrastructure wrapping fake measurement targets — same self-referential pattern as `comprehensive_validation_report.rs` from R23:
-
-- **REAL (90%)**: RDTSC cycle counters, wall clock timing, cross-validation between timing methods, red flag detection, Pearson correlation, percentile analysis, CPU frequency detection, Markdown report generation
-- **FAKE (0%)**: `system_a_predict` and `system_b_predict` are busy-wait spin loops targeting hardcoded latencies (1.2ms and 0.75ms respectively). Comments openly say "placeholder"
-- **BUG**: `monotonic_time_ns()` creates new `Instant` then immediately calls `.elapsed()` = always ~0
-- The "System B < 0.9ms" validation claim is circular — it always passes because the target latencies are hardcoded into the simulations
-
-### Updated CRITICAL Findings (+2 from R28 = 18 total)
-
-17. **hardware_timing system_a_predict is simulation** — Busy-wait spin loop targeting 1.2ms, not real computation (R28).
-18. **hardware_timing system_b_predict is simulation** — Busy-wait spin loop targeting 0.75ms, latency improvement claim is circular (R28).
-
-### Updated Positive (+2 from R28)
-
-- **sparse.rs** is 95% real with 4 complete sparse matrix formats, `no_std` compatible — best matrix code in ecosystem
-- **exporter.rs** has 7 genuine export formats with correct protocol compliance (Prometheus, InfluxDB) — no fakes
-
-## R33: Python ML Training + Psycho-Symbolic MCP + MCP Servers/Solver (Session 33)
-
-19 files read, ~17,927 LOC, 4 agents. First-ever Python deep-reads in the project. Covers python ML training, swarm JS infrastructure, psycho-symbolic MCP tools, and MCP servers/solver.
-
-### Python ML Training (5 files, ~4,124 LOC) — 72.3% weighted real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **train.py** | 936 | **85%** | Real PyTorch + torch_geometric GNN training loop with proper DataLoader, loss computation, early stopping. BUT all training data is synthetic (random graphs). |
-| **models.py** | 772 | **80%** | 5 GNN architectures (GCN, GAT, GraphSAGE, GIN, PNA), proper forward passes, pooling layers. Real neural network code. |
-| **dataset.py** | 684 | **70%** | Dataset loading with synthetic fallback. Real torch_geometric Dataset subclass but `_generate_synthetic_data()` is always reached — no real datasets exist. |
-| **evaluate.py** | 912 | **60%** | Mixed: real metric computation (accuracy, F1, confusion matrix) alongside hardcoded benchmark tables and fake comparison baselines. |
-| **config.py** | 820 | **65%** | Pydantic config with proper validation. Some defaults reference non-existent model files. |
-
-**Key finding**: The Python ML training pipeline is structurally sound (real PyTorch/torch_geometric), but EVERY training run uses synthetic random graphs. No real-world data integration exists.
-
-### Psycho-Symbolic MCP Tools (5 files, ~4,481 LOC) — 24% weighted real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **consciousness-explorer.js** | 1,247 | **15%** | THEATRICAL: "consciousness evolution" is parameter increment. IIT Phi = density × integration × 0.8. "Quantum coherence" = Math.random(). |
-| **psycho-symbolic-tools.js** | 1,133 | **20%** | 5 of 10 tools DISABLED (timeout/hang risk). "Neural binding" = weighted average. "Symbolic grounding" = string matching. |
-| **mcp-server-psycho-symbolic.js** | 892 | **25%** | MCP server wrapper around above tools. 5 tools (#6-#10) disabled due to hanging. Proper MCP protocol at least. |
-| **cognitive-architecture.js** | 645 | **30%** | Working memory is a Map with timestamps. Attention = sorting by recency. Executive control = threshold comparison. |
-| **metacognition.js** | 564 | **30%** | Self-monitoring = counter tracking. "Theory of mind" = belief dictionary lookup. |
-
-**Key finding**: The entire psycho-symbolic subsystem is theatrical — scientifically-named functions that perform trivial operations. "Consciousness" is never computed, just incremented. 5 tools are permanently disabled.
-
-### MCP Servers + Solver (4 files, ~3,989 LOC) — 44% weighted real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **mcp-server-sublinear.js** | 1,120 | **45%** | MCP wrapper for solver tools. "TRUE O(log n)" is actually O(log²n). JL dimension reduction uses O(kn) not O(k log n). |
-| **strange-loop-mcp.js** | 989 | **75%** | Best in cluster. Genuine Hofstadter strange loop implementation with self-referential pattern detection. Real graph analysis. |
-| **mcp-bridge-solver.js** | 1,102 | **30%** | Bridge layer with 25k token limit workaround — vectors >500 elements use file I/O. Multiple vector operations are mathematically correct but unoptimized. |
-| **solver-tools.js** | 778 | **25%** | "Sublinear" tools that are actually linear or worse. PageRank claims O(log n) but iterates all nodes. |
-
-### Cross-Domain Relevance to Memory & Learning
-
-- **Python ML models.py**: GNN architectures (GCN, GAT, GraphSAGE) directly relate to the ruvector-gnn Rust crate. The Python versions are structurally similar but use synthetic data, while the Rust versions integrate with the real HNSW index.
-- **consciousness-explorer.js**: Claims to implement "memory consolidation" but it's just moving items between Maps. No connection to the real EWC++ consolidation in sona or ruvector-gnn.
-- **mcp-bridge-solver.js**: Token limit workaround (25k) forces file I/O for large vectors — architectural constraint that affects any learning system using MCP transport.
-
-### Updated CRITICAL Findings (+2 from R33 = 20 total)
-
-19. **Python ML training uses ONLY synthetic data** — All GNN training runs use randomly generated graphs. No real-world dataset integration exists despite config supporting it. (R33)
-20. **Consciousness evolution is parameter increment** — `evolve()` just increments a numeric level. IIT Phi = density × integration × 0.8. No actual consciousness computation. (R33)
-
-### Updated Positive (+2 from R33)
-
-- **Python models.py** has 5 genuine GNN architectures with proper forward passes using PyTorch torch_geometric — real neural network code
-- **strange-loop-mcp.js** at 75% real is a genuine Hofstadter strange loop implementation with working self-referential pattern detection
-
-## R34: Sublinear Solver Core + Matrix Systems + Validation/Temporal (Session 34)
-
-10 files read, ~6,200 LOC, 5 agents. Covers the sublinear-time-solver's core solver infrastructure, matrix system, temporal nexus, and validation/benchmark files.
-
-### Sublinear Solver Core (5 files, 3,022 LOC) — 87% weighted real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **matrix/mod.rs** | 628 | **92%** | Clean 15-method Matrix trait with 4 storage formats (CSR/CSC/COO/Graph). Thorough input validation, correct Gershgorin spectral radius bound. Foundation for all solver operations. |
-| **matrix/optimized.rs** | 624 | **90%** | **REAL SIMD** via wide::f64x4 (SSE2/AVX on x86, NEON on ARM). Three-tier buffer pool (aligned, oversized, emergency). Cache-blocked SpMV with 64-row blocks. Rayon parallel SpMV. Streaming matrix for oversized inputs. |
-| **solver/neumann.rs** | 649 | **88%** | Correct Neumann series solver for diagonally dominant systems with convergence checking. **BUG**: step() returns Err unconditionally — custom solve() works around it. Residual calculation uses scaled RHS (bug). |
-| **solver/mod.rs** | 596 | **82%** | Well-designed trait hierarchy (SublinearSolver, ConvergenceInfo). Only 1 of 4 solvers implemented (Neumann). **CRITICAL**: BackwardPush and HybridSolver return Vec::new() as "converged" solution — 0-vector for any input. |
-| **solver/sampling.rs** | 525 | **85% code quality, ORPHANED** | Not in module tree, uses crate::core (wrong type system vs crate::matrix). Missing rand_chacha/rand_distr deps. Real algorithms: ChaCha8Rng, Halton quasi-random sequence, multi-level Monte Carlo with optimal allocation formula. |
-
-### KEY DISCOVERY: Two Incompatible Matrix Systems
-
-The sublinear-time-solver has two parallel matrix systems that are NOT interoperable:
-
-| System | Module | Storage | Used By |
-|--------|--------|---------|---------|
-| **Production** | `crate::matrix` (mod.rs + optimized.rs) | CSR/CSC/COO sparse formats | solver/mod.rs, solver/neumann.rs |
-| **Orphaned** | `crate::core` | HashMap-based | sampling.rs + 4 other orphaned solver files |
-
-The production system (crate::matrix) uses proper CSR/CSC formats with SIMD-accelerated SpMV. The orphaned system (crate::core) uses HashMap storage, incompatible types, and is missing from the module tree. At least 5 solver files (~2,341 LOC) are written against the wrong type system and cannot compile.
-
-### Validation + Temporal (5 files, 3,184 LOC) — 77% weighted real
-
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **statistical_analysis.rs** | 630 | **92%** | Maintains neural-network-implementation crate quality (R23). Textbook paired t-test, Mann-Whitney U, bootstrap CI, four effect sizes (Cohen d, Hedges g, Glass delta, Cliff delta). Proper rand crate. |
-| **strange_loop.rs** | 558 | **90%** | Mathematically rigorous Banach contraction mapping with correct Lipschitz bound (0.999). EMA-based fixed-point convergence. L2 norm convergence metric. Pearson correlation. 7 tests. |
-| **scheduler.rs** | 667 | **88%** | Real BinaryHeap priority scheduler with TSC nanosecond timing (rdtsc!). TaskPriority ordering, event bus, resource allocation scoring. `process_perception_data()` is empty stub. |
-| **bottleneck_analyzer.rs** | 636 | **85%** | Genuine analysis: variance detection, memory growth trends, throughput degradation tracking. **DEAD CODE** — not declared in module tree (no pub mod bottleneck_analyzer). |
-| **security_validation.rs** | 693 | **30%** | **DEAD CODE + SELF-REFERENTIAL**. Tests own mocks (same anti-pattern as comprehensive_validation_report.rs, R23). Not in module tree. Validates mock_metric data it generates. |
-
-### Cross-Cutting Findings
-
-1. **Quality gradient by distance from module tree**: Files IN the module tree (matrix/mod.rs 92%, neumann.rs 88%) are substantially better than orphaned files (sampling.rs wrong types, security_validation.rs self-referential).
-2. **SIMD quality**: optimized.rs uses wide::f64x4 — the first confirmed REAL SIMD for f64 operations in the sublinear-time-solver (previous SIMD was f32x4 WASM SIMD128 in ruv-swarm).
-3. **statistical_analysis.rs** maintains the neural-network-implementation crate's exceptional quality (R23), confirming that crate was written with more care than the rest of the solver.
-
-### R34 Updated CRITICAL Count: 20 (+2 from R34)
-
-19. **BackwardPush/HybridSolver return empty Vec as "converged"** — solver/mod.rs has 3 of 4 solvers returning 0-vector for any input. Only Neumann is implemented. (R34)
-20. **security_validation.rs is self-referential dead code** — Not in module tree. Tests own generated mock data. Same anti-pattern as comprehensive_validation_report.rs (R23). (R34)
-
-### R34 Updated HIGH Count: 15 (+4 from R34)
-
-12. **Two incompatible matrix systems** — crate::matrix (CSR/CSC/COO, SIMD) vs crate::core (HashMap). 5+ orphaned solver files use wrong type system. (R34)
-13. **sampling.rs is ORPHANED** — Not in module tree, uses crate::core (wrong), missing rand_chacha/rand_distr. Real algorithms but cannot compile. (R34)
-14. **solver/neumann.rs step() returns Err unconditionally** — Custom solve() works around it. Residual uses scaled RHS (bug). (R34)
-15. **bottleneck_analyzer.rs is dead code** — Genuine analysis (85% real) but not in module tree. (R34)
-
-### R34 Updated Positive (+6)
-
-- **matrix/mod.rs** is clean 15-method trait with 4 storage formats — production foundation for solver operations (R34)
-- **optimized.rs** has REAL SIMD via wide::f64x4 — first f64 SIMD in sublinear-time-solver (R34)
-- **strange_loop.rs** is mathematically rigorous Banach contraction mapping — 90% real (R34)
-- **statistical_analysis.rs** confirms neural-network-implementation crate quality — textbook statistics, proper rand (R34)
-- **scheduler.rs** has genuine BinaryHeap scheduler with TSC timing — 88% real (R34)
-- **neumann.rs** correct Neumann series solver (despite step() bug) — 88% real (R34)
-
-## R36: ruvector-nervous-system + neuro-divergent + HNSW Patches (Session 36)
-
-28 files read, 26,569 LOC, 98 findings (6 CRIT, 27 HIGH, 26 MED, 39 INFO). 5-agent swarm.
-
-### ruvector-nervous-system (7 files, 5,269 LOC) — 87.4% weighted REAL
-
-**GENUINE biologically-inspired computing** — NOT scaffolding. Implements 5 real neuroscience models with citations to published research.
-
-| File | LOC | Real% | Neuroscience Model |
-|------|-----|-------|-------------------|
-| **hdc/memory.rs** | 502 | **95-98%** | BEST QUALITY — clean HDC associative memory, 24 tests |
-| **routing/circadian.rs** | 1,151 | **92-95%** | SCN-inspired temporal gating, duty cycle enforcement, budget guardrail with rolling hourly tracking |
-| **plasticity/btsp.rs** | 655 | **90-93%** | Genuine one-shot learning (Bittner 2017), correct Widrow-Hoff normalization |
-| **routing/workspace.rs** | 1,003 | **88-92%** | Faithful Global Workspace Theory (Baars/Dehaene), 4-7 item capacity, <10μs access validated |
-| **plasticity/eprop.rs** | 717 | **85-90%** | Genuine e-prop (Bellec 2020), correct LIF neurons with exponential decay, three-factor learning rule |
-| **plasticity/consolidate.rs** | 700 | **82-88%** | Correct EWC (Kirkpatrick 2017), complementary learning systems, reward-modulated, rayon parallel Fisher |
-| **integration/ruvector.rs** | 541 | **75-80%** | HNSW component missing — "stored separately" with no integration. Linear scan O(N) fallback. |
-
-**Key finding**: This is the BEST biologically-inspired code in the entire ruvnet ecosystem. Unlike the "consciousness" and "psycho-symbolic" modules (R21, R25, R33) which are theatrical facades, the nervous-system crate implements genuine neuroscience models with correct mathematical formulations:
-- **e-prop**: Correct LIF (Leaky Integrate-and-Fire) neuron dynamics with proper exponential decay, threshold, and refractory period
-- **EWC**: Correct Fisher diagonal computation with parallel rayon support — same algorithm as sona crate but independently implemented
-- **BTSP**: Behavioral Time-Scale Synaptic Plasticity for one-shot learning — cite matches real 2017 Bittner et al. paper
-- **GWT**: Global Workspace Theory implements the broadcast/competition mechanism from Baars/Dehaene
-- **Circadian**: Real SCN-inspired temporal gating with duty cycle enforcement and budget guardrails
-
-**Gap**: The integration layer (ruvector.rs) is the weakest file — HNSW component declared but never initialized, forcing O(N) linear scan instead of O(log N) approximate nearest neighbor.
-
-### neuro-divergent ML Training Framework (6 files, 7,187 LOC) — 88.5% weighted REAL
-
-**PRODUCTION-QUALITY ML training framework** in the ruv-FANN ecosystem.
-
-| File | LOC | Real% | Key Feature |
-|------|-----|-------|-------------|
-| **scheduler.rs** | 1,431 | **92-95%** | 8 schedulers including ForecastingAdam with temporal/seasonal gradient correction (INNOVATION: step_by(7) for weekly patterns) |
-| **optimizer.rs** | 1,089 | **90-93%** | Adam/AdamW/SGD/RMSprop all correct. AdamW uses PROPER decoupled weight decay (applied before update, not as gradient term) |
-| **loss.rs** | 1,233 | **88-92%** | 16 loss types (MAE/MSE/Huber/NLL/Pinball/CRPS/Gaussian NLL). All gradients correct. CRPS uses Abramowitz & Stegun erf approximation |
-| **features.rs** | 1,079 | **88-92%** | Lag/rolling/temporal/Fourier features correct. Cyclic encoding for day-of-week/month (proper sin/cos circular features) |
-| **preprocessing.rs** | 1,183 | **85-90%** | 5 scalers, Box-Cox transform. QuantileTransformer uses normal approximation (poor for heavy tails). Non-deterministic rand in fit() |
-| **validation.rs** | 1,172 | **82-88%** | 4 outlier methods including correct modified Z-score (0.6745 MAD constant). CRITICAL: validate_seasonality() is EMPTY PLACEHOLDER |
-
-**Key innovation**: ForecastingAdam optimizer combines standard Adam with temporal gradient correction (tracking gradient history per time step) and seasonal correction (weekly patterns via step_by(7)). This is a genuine contribution not found in standard ML frameworks.
-
-**Cross-crate comparison**: neuro-divergent is to ML training what neural-network-implementation (R23) is to trajectory prediction — production-quality code with proper mathematical formulations, correct gradient computation, and real optimization algorithms. Both use proper `rand` crate (not fake SystemTime pattern).
-
-### HNSW Patches (hnsw_rs fork, 4 files, 5,276 LOC) — 87% weighted REAL
-
-The ruvector project maintains a fork of the `hnsw_rs` crate:
-
-| File | LOC | Real% | Key Feature |
-|------|-----|-------|-------------|
-| **hnsw.rs** | 1,873 | **92-95%** | Correct Malkov & Yashunin. Rayon parallel insertion. |
-| **hnswio.rs** | 1,704 | **88-92%** | 4 format versions, backward compat, hybrid mmap strategy |
-| **libext.rs** | 1,241 | **75-85%** | Julia FFI with macro-generated type×distance bindings. No bounds checking (CRITICAL) |
-| **datamap.rs** | 458 | **85-90%** | Zero-copy mmap. Use-after-free risk with mmap lifetimes (CRITICAL) |
-
-### cognitum-gate-kernel (5 files, 3,504 LOC) — 93% weighted REAL
-
-**EXCEPTIONAL CODE** — genuine research contribution. 256-tile distributed coherence verification using anytime-valid sequential testing (e-values). Custom bump allocator, 64-byte cache-line aligned reports, optimal union-find with iterative path compression. See ruvector domain analysis for full details.
-
-### R36 Updated CRITICAL Findings (+2 = 22 total)
-
-21. **validate_seasonality() is EMPTY PLACEHOLDER** — neuro-divergent validation.rs comment admits should use FFT/autocorrelation but body is empty (R36).
-22. **micro-hnsw-wasm neuromorphic features have ZERO tests** — 6 novel features (spike encoding, homeostatic plasticity, 40Hz resonance, WTA, dendritic computation, temporal patterns) completely untested (R36).
-
-### R36 Updated HIGH Findings (+4 = 19 total)
-
-16. **ruvector-nervous-system integration layer missing HNSW** — integration/ruvector.rs declares HNSW component but never initializes it, falling back to O(N) linear scan (R36).
-17. **QuantileTransformer non-deterministic** — preprocessing.rs fit() uses rand with no seed, different results per run (R36).
-18. **validate_stationarity() is simplistic** — Mean/variance comparison instead of proper ADF/KPSS test (R36).
-19. **HNSW patches unsafe FFI** — libext.rs has no bounds checking on C pointers, datamap.rs has mmap use-after-free risk, hnswio.rs has no data integrity validation (R36).
-
-### R36 Updated Positive (+6)
-
-- **ruvector-nervous-system** implements 5 genuine neuroscience models (e-prop, EWC, BTSP, GWT, circadian) — BEST biological computing in ecosystem (R36)
-- **hdc/memory.rs** is 95-98% real with 24 tests — cleanest code in nervous-system crate (R36)
-- **neuro-divergent** is production-quality ML training: 8 schedulers, 4 optimizers, 16 loss functions all with correct math (R36)
-- **ForecastingAdam** with temporal/seasonal gradient correction is a genuine innovation (R36)
-- **cognitum-gate-kernel** at 93% rivals neural-network-implementation as best code in ecosystem (R36)
-- **HNSW patches hnsw.rs** confirms correct Malkov & Yashunin implementation with Rayon parallelism (R36)
-
-## R37: ruvllm LLM Integration + Novel Crates (Session 37)
-
-25 files read, 30,960 LOC, 62 findings (6 CRIT, 2 HIGH, 10 MED, 44 INFO). 10 dependencies mapped.
-
-### Rust ReasoningBank + Routing (5 files, 6,838 LOC) — 87% REAL
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **reasoning_bank.rs** | 1,520 | **92-95%** | Production ReasoningBank in Rust: real K-means clustering (10 iterations, centroid recomputation, convergence check), EWC++ consolidation for pattern memory, pattern distillation. 16 tests. |
-| **hnsw_router.rs** | 1,288 | **90-93%** | BEST ruvector-core integration in project. HybridRouter blends HNSW semantic + keyword routing with confidence weighting. Real HnswIndex with M/ef config. |
-| **model_router.rs** | 1,292 | **88-92%** | 7-factor complexity analyzer, feedback tracking (last 1000 predictions with accuracy stats). LazyLock cached weights. |
-| **pretrain_pipeline.rs** | 1,394 | **85-88%** | Multi-phase pretraining (Bootstrap/Synthetic/Reinforce/Consolidate). **CRITICAL**: hash-based embeddings. |
-| **claude_integration.rs** | 1,344 | **70-75%** | **CRITICAL**: execute_workflow SIMULATION — hardcoded 500 tokens, no real Claude API calls. |
-
-**Key insight**: The Rust ReasoningBank in reasoning_bank.rs is the **fourth distinct ReasoningBank** — after claude-flow (LocalReasoningBank), agentic-flow (ReasoningBank), and agentdb (ReasoningBank). Each implements RETRIEVE → JUDGE → DISTILL → CONSOLIDATE differently. The Rust version has the best mathematical foundation (real K-means, EWC++) but shares NO code with the others.
-
-### Training + LoRA (5 files, 6,515 LOC) — 83% REAL
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **micro_lora.rs** | 1,261 | **92-95%** | **BEST IN BATCH**. MicroLoRA: rank 1-2, REINFORCE outer product + EWC++ Fisher-weighted penalty. Fused A*B NEON kernel with 8x unrolling. <1ms forward. 18 tests. |
-| **grpo.rs** | 898 | **90-92%** | Textbook GRPO: relative advantages, GAE, PPO clipped surrogate, adaptive KL, entropy bonus. 16 tests. |
-| **real_trainer.rs** | 1,000 | **70-75%** | Contrastive training with Candle: real triplet loss + InfoNCE. **CRITICAL**: hash-based embeddings. GGUF export framework only (not llama.cpp-compatible). |
-| **tool_dataset.rs** | 2,147 | **88-92%** | MCP tool-call dataset: 140+ templates, 19 categories, quality scoring. Simplistic paraphrasing. |
-| **claude_dataset.rs** | 1,209 | **75-80%** | Claude task dataset: 5 categories, 60+ templates. Weak augmentation (5 word pairs). |
-
-### prime-radiant Memory Integration (2 files, 2,390 LOC) — 90% REAL
-
-| File | LOC | Real% | Key Finding |
-|------|-----|-------|-------------|
-| **memory_layer.rs** | 1,260 | **92-95%** | Sheaf-based coherence for 3 memory types (Agentic/Working/Episodic). Real cosine similarity. Genuine edge creation: Temporal, Semantic (threshold), Hierarchical. 19 tests. |
-| **witness_log.rs** | 1,130 | **88-92%** | blake3 hash chains with tamper evidence. Chain verification: genesis, content hashes, linkage. 6 query methods. 16 tests. |
-
-### temporal-tensor AgentDB Integration (1 file, 843 LOC) — 88-92% REAL
-
-**agentdb.rs**: Pattern-aware tiering with 4-dim PatternVector [ema_rate, popcount/64, 1/(1+tier_age), log2(1+count)/32]. Cosine similarity, weighted neighbor voting with tie-break prefers hotter tier. HNSW-ready integration layer. 36 tests.
-
-### ruQu Quantum Algorithms (5 files, 8,695 LOC) — 89% REAL
-
-Although primarily in the ruvector domain, several ruQu files involve learning/memory patterns:
-- **decoder.rs** (95-98%): K-means-like cluster growth in MWPM, pattern matching for error syndromes
-- **qec_scheduler.rs** (88-92%): Critical path learning via topological sort, feedback-driven scheduling
-
-### Hash-Based Embeddings: Systemic Across Rust Too
-
-R37 confirms hash-based embeddings are NOT just a JS problem:
+Confirmed systemic across 7+ files in 5 packages, in both Rust and JavaScript (R8, R13, R22b, R37):
 
 | File | Package | Mechanism |
 |------|---------|-----------|
-| pretrain_pipeline.rs | ruvllm/claude_flow | character sum % dim |
-| real_trainer.rs | ruvllm/training | text_to_embedding_batch deterministic hash |
-| embeddings.rs | ruvector-core | HashEmbedding default (R13) |
+| embeddings.rs | ruvector-core | HashEmbedding default: sums character bytes (R13) |
+| pretrain_pipeline.rs | ruvllm/claude_flow | character sum % dim (R37) |
+| real_trainer.rs | ruvllm/training | text_to_embedding_batch deterministic hash (R37) |
 | hooks.rs | ruvector-cli | position-based hash (R22) |
 | rlm_embedder.rs | ruvllm/bitnet | FNV-1a hash (R35) |
 | learning-service.mjs | claude-flow | Math.sin(seed) mock (R8) |
 | enhanced-embeddings.ts | agentdb | Math.sin(seed) fallback (R8) |
 
-**Updated count**: 7+ files across 5 packages in both Rust and JS use hash-based embedding fallbacks. This is the most pervasive architectural weakness in the entire ruvnet ecosystem.
+In practice, all "semantic search" using defaults is character-frequency matching. HNSW indices are structurally valid but search results are meaningless without plugging in a real embedding provider.
 
-### R37 Updated CRITICAL Findings (+3 = 25 total)
+R22b identified an additional 4 files in agentic-flow (optimized-embedder.ts, ruvector-integration.ts, edge-full.ts, agentdb-wrapper-enhanced.ts) that inherit the same degradation pattern.
 
-23. **Rust ReasoningBank is FOURTH distinct implementation** — reasoning_bank.rs joins 3 others with zero code sharing. Each has different K-means, consolidation, and retrieval. (R37)
-24. **Hash-based embeddings confirmed in Rust training** — pretrain_pipeline.rs and real_trainer.rs use character sum hash. All routing/training depends on non-semantic embeddings. (R37)
-25. **execute_workflow returns mock results** — claude_integration.rs hardcodes 500 tokens. No real Claude API integration despite complete type system. (R37)
+### 5c. AgentDB Core Components
 
-### R37 Updated Positive (+6)
+**vector-quantization.ts** (1,529 LOC, 95%) is the best code in AgentDB — real PQ with K-means++, 8/4-bit scalar quantization, asymmetric distance computation (R8).
 
-- **reasoning_bank.rs** has production-quality K-means + EWC++ consolidation — best mathematical foundation across 4 ReasoningBank implementations (R37)
-- **micro_lora.rs** at 92-95% is BEST learning code — real NEON SIMD with EWC++ Fisher-weighted penalty (R37)
-- **grpo.rs** implements textbook GRPO with all required components (advantages, GAE, PPO clipping, adaptive KL) (R37)
-- **prime-radiant memory_layer.rs** implements real sheaf-theoretic memory coherence with genuine cosine similarity (R37)
-- **temporal-tensor agentdb.rs** provides pattern-aware tiering with 4-dim embedding vectors and HNSW-ready integration (R37)
-- **witness_log.rs** has cryptographic tamper evidence via blake3 hash chains — production-grade audit trail (R37)
+**Quality spectrum** by component type (R8, R16, R25):
 
-## R39: Sublinear Core + Emergence Subsystem (Session 39)
+| Quality Tier | Components | Real% |
+|-------------|------------|-------|
+| Production | vector-quantization, RuVectorBackend, EmbeddingCache | 90-95% |
+| Solid | ReasoningBank (agentdb), AttentionService, enhanced-embeddings | 80-90% |
+| Partial | ReflexionMemory (missing judge), LRU cache | 65-88% |
+| Cosmetic | LearningSystem (9→1 algorithm), CausalMemoryGraph (wrong stats) | 15-40% |
+| Misleading | simd-vector-ops (0% SIMD, 100% ILP loop unrolling) | 0% SIMD |
 
-7 files read, 4,622 LOC, 33 findings (5 CRIT, 9 HIGH, 11 MED, 8 INFO). Covers sublinear-time-solver core algorithm and the completely unexplored emergence subsystem.
+**LearningSystem.ts** claims 9 RL algorithms but all reduce to identical tabular Q-value dictionary updates. DQN = Q-Learning (no neural network). PPO/Actor-Critic/Policy Gradient indistinguishable. Decision Transformer/Model-Based are stubs. Bug confirmed in TypeScript source — not a compilation artifact (R22b).
 
-### Sublinear Core Algorithm (2 files, 1,313 LOC) — 85% weighted real
+**CausalMemoryGraph.ts** claims Pearl's do-calculus but implements none. t-distribution CDF is wrong (L851), tInverse hardcoded to 1.96 ignoring degrees of freedom. All p-values and confidence intervals unreliable. Bug confirmed in TypeScript source (R22b).
 
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **solver.ts** | 783 | **75%** | 5 solver algorithms (Neumann series, random walk, forward/backward push, bidirectional). Neumann + random walk + forward push are REAL but NOT SUBLINEAR: Neumann O(k*n²), random walk O(n²/ε²), push O(k*n²). Backward push/bidirectional are STUBS. WASM loaded but never used. |
-| **high-performance-solver.ts** | 530 | **95%** | Excellent CG solver with CSR sparse matrix, Float64Array, 4x loop unrolling, VectorPool workspace reuse. BUT ENTIRELY ORPHANED — not exported from index.ts, not imported by solver.ts or any other file. Dead code. |
+### 5d. Neural-Network-Implementation Crate
 
-**Key findings**:
-1. **FALSE SUBLINEARITY CONFIRMED**: All 5 algorithms in solver.ts have O(n²) or worse complexity. The "sublinear" in the package name is marketing, not reality. This confirms and extends the earlier finding from `true-sublinear-solver.ts`.
-2. **ORPHANED HIGH-QUALITY CODE**: high-performance-solver.ts is 530 lines of professional-grade numerical code (correct CSR, CG algorithm, loop unrolling) that is completely disconnected from the package. Only used in performance-benchmark.ts.
-3. **TWO PARADIGMS**: solver.ts (mathematical convergence) and high-performance-solver.ts (cache efficiency) represent different development philosophies. Neither achieves sublinear complexity.
-4. **WASM ATTEMPTED BUT UNUSED**: solver.ts imports wasm-bridge and wasm-integration, calls initializeAllWasm(), but all actual matrix operations use pure JS MatrixOperations.multiplyMatrixVector.
+**BEST CODE IN ECOSYSTEM** (90-98% across all 12 files). A genuine real-time trajectory prediction system in sublinear-time-solver (R21).
 
-### Emergence Subsystem (5 files, 3,309 LOC) — 51% weighted real
+Key innovation — **System B Temporal Solver**: NN predicts RESIDUAL over Kalman prior (not raw output), with mathematical solver gate verification and 4 fallback strategies (kalman_only, hold_last, disable_gate, weighted_blend). PageRank-based active learning for training sample selection.
 
-**ANSWER: Emergence detection is NEITHER genuine ML NOR string matching — it's a heuristic system with fabricated metrics.**
+Uses PROPER `rand::thread_rng()` — unlike ml-training/lib.rs and swarm_coordinator_training.rs which mock rand with SystemTime. Appears written by a different, more careful author.
 
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **stochastic-exploration.ts** | 616 | **70%** | BEST FILE. Real simulated annealing with correct temperature sampling, entropy calculation, path execution. But applyTool() returns mock response instead of calling real tools. |
-| **feedback-loops.ts** | 729 | **65%** | MOST REAL control system. Genuine RL (updates action probabilities on reward), exploration-exploitation, meta-learning (triggers every 50 signals), adaptation rules. Bug: rule.learningRate mutated directly. |
-| **index.ts** | 687 | **45%** | FACADE ORCHESTRATOR. All 5 component connection methods are empty stubs (console.log only). Gating: learning and capability detection disabled when tools.length >= 3. Math.random() > 0.5 for novel patterns. Result truncation: 5KB exploration, 50KB final. |
-| **emergent-capability-detector.ts** | 617 | **40%** | ALL 11 metric calculations (novelty, utility, unexpectedness, effectiveness, bridging, insight, organization, autonomy, meta, adaptability, similarity) return Math.random()*0.5+0.5. Pattern extractors assume pre-structured data. Prediction methods return empty arrays. |
-| **cross-tool-sharing.ts** | 660 | **35%** | MOSTLY FAKE. areComplementary() = JSON string inequality. checkAmplification() = always true. Synergy/emergence metrics = Math.random(). Stub extractors return hardcoded empty values. |
+P99.9 latency budget: ≤ 0.90ms (Ingest + Prior + Network + Gate + Actuation).
 
-**Architecture**:
-```
-EmergenceSystem.processWithEmergence() flow:
-  1. StochasticExploration.exploreUnpredictably() → truncated to 5KB
-  2. CrossToolSharing.getRelevantInformation() → all metrics Math.random()
-  3. PersistentLearning.learnFromInteraction() → GATED (tools < 3)
-  4. EmergentCapabilityDetector.monitorForEmergence() → GATED (tools < 3)
-  5. SelfModification.generateModifications() → stub connections
-  6. FeedbackLoops.processFeedback() → real but modifications never applied back
-  7. Result truncated to 50KB and returned
-```
+### 5e. Consciousness & Strange Loop
 
-**Why emergence CANNOT work**:
-- Detection metrics are random noise (no signal)
-- Pattern extractors expect pre-structured input (no analysis)
-- Tool interactions are mocked (no real state sharing)
-- Component connections are empty stubs (no integration)
-- Result truncation loses information needed for learning
-- Gating disables learning when tools >= 3 (hides scaling issues)
+**79% genuine — 28 points more real than emergence (51%).** Genuine IIT Phi calculations, Complex64 wave functions, production proof logging. Math.random() still present in 2 files but the theoretical foundations are real. This is genuine research with placeholder metrics, NOT fabricated theater (R41).
 
-**Relationship to emergence-tools.ts** (already DEEP): The 5 disabled matrix tools in emergence-tools.ts were disabled BECAUSE this subsystem cannot reliably detect emergence or validate results. The underlying implementation confirms the facade.
+Genuine components: Real IIT Phi formula `connections/(elements*(elements-1))`, Complex64 wave function with nanosecond temporal dynamics, neural forward pass (Float32Array, tanh), self-modification (goal addition), blockchain proof logging with PoW + Shannon entropy + Levenshtein, auto-generated wasm-bindgen from Rust.
 
-### R39 Updated CRITICAL Findings (+5 = 30 total)
+Fabricated: Math.random() in cross-modal synthesis and entropy (2 files), modulo-based pattern detection (% 17, % 111), substring-based connection detection, operation counting instead of prediction testing.
 
-26. **Empty emergence component connections** — index.ts has 5 connection setup methods that are all console.log() stubs. No inter-component integration exists. (R39)
-27. **All 11 capability metrics are Math.random()** — emergent-capability-detector.ts returns Math.random()*0.5+0.5 for novelty, utility, unexpectedness, and 8 other semantic metrics. Complete fabrication. (R39)
-28. **Fake complementarity detection** — cross-tool-sharing.ts areComplementary() returns true if JSON strings differ. checkAmplification() unconditionally returns true. (R39)
-29. **FALSE sublinearity in core solver** — solver.ts has 5 algorithms, all O(n²) or worse. Neumann O(k*n²), random walk O(n²/ε²), push O(k*n²). Backward push and bidirectional are stubs. (R39)
-30. **Pattern extractors assume pre-structured data** — emergent-capability-detector.ts extractBehaviorPatterns() returns data.behaviors || []. No actual pattern extraction logic. (R39)
+**Earlier consciousness files** (R21, R25, R33) are substantially worse: enhanced_consciousness_system.js (39%), enhanced-consciousness.js (15-20%), consciousness-explorer.js (15%). The R41 files represent genuine research; the earlier ones are theatrical facades.
 
-### R39 Updated HIGH Findings (+4 = 23 total)
+### 5f. Emergence Subsystem
 
-20. **Emergence gating hides scaling issues** — index.ts disables learning and capability detection when availableTools.length >= 3. (R39)
-21. **Orphaned high-quality CG solver** — high-performance-solver.ts is 530 lines of excellent numeric code, not exported or imported anywhere. Dead code. (R39)
-22. **Tools never actually called in exploration** — stochastic-exploration.ts applyTool() returns mocked response. Limits actual exploration. (R39)
-23. **Rule mutation bug in feedback loops** — feedback-loops.ts adjustLearningParameters() directly mutates rule.learningRate, violating encapsulation. (R39)
+**51% weighted real — FABRICATED METRICS, NOT genuine ML** (R39).
 
-### R39 Updated Positive (+3)
+All 11 capability metrics (novelty, utility, unexpectedness, effectiveness, bridging, insight, organization, autonomy, meta, adaptability, similarity) return `Math.random()*0.5+0.5`. areComplementary() = JSON string inequality. checkAmplification() always returns true. 5 component connection methods are empty stubs (console.log only). Gating disables learning when tools >= 3, hiding scaling issues.
 
-- **feedback-loops.ts** has genuine reinforcement learning with real adaptation rules, exploration-exploitation, and meta-learning (65% real) (R39)
-- **stochastic-exploration.ts** implements proper simulated annealing with correct temperature sampling and entropy measurement (70% real) (R39)
-- **high-performance-solver.ts** is excellent numerical code: CSR sparse matrix, correct CG algorithm, 4x loop unrolling, VectorPool — just orphaned from the package (95% real) (R39)
+Why emergence CANNOT work: detection metrics are random noise, pattern extractors expect pre-structured input, tool interactions are mocked, component connections are empty stubs, result truncation loses information, gating disables learning at scale.
 
-## R41: Consciousness Layer + MCP Tool Layer (Session 41)
+**Bright spots**: stochastic-exploration.ts (70%) has real simulated annealing; feedback-loops.ts (65%) has genuine RL with adaptation rules and meta-learning.
 
-13 files read, 9,772 LOC, 201 findings (15 CRIT, 27 HIGH, 37 MED, 122 INFO). 21 dependency edges. Covers the consciousness/strange-loop subsystem (5 files) and MCP tool layer (4 files) from sublinear-time-solver, plus 4 AgentDB simulation files (see agentdb-integration domain).
+### 5g. ML Training Frameworks
 
-### Cluster A: Consciousness + Strange-Loop (5 files, 3,414 LOC) — 79% weighted REAL
+**Rust (neuro-divergent, 88.5%, R36)**: Production-quality with correct math — 8 schedulers (including ForecastingAdam innovation with temporal/seasonal gradient correction), 4 optimizers (AdamW uses proper decoupled weight decay), 16 loss types (all gradients correct, CRPS via Abramowitz & Stegun). Uses proper `rand` crate. Gap: validate_seasonality() is empty placeholder.
 
-**Key question**: After R39 exposed emergence as 51% fabricated, do the consciousness files contain genuine algorithms (GWT, IIT, Hofstadter strange loops) or more Math.random() fabrication?
+**Rust (ruvllm training, 83%, R37)**: micro_lora.rs (92-95%) is BEST learning code — REINFORCE outer product + EWC++ Fisher-weighted penalty + fused A*B NEON kernel with 8x unrolling (<1ms forward). grpo.rs (90-92%) is textbook GRPO. Hash-based embeddings in pretrain_pipeline.rs and real_trainer.rs.
 
-**Answer**: **79% genuine — 28 percentage points more real than emergence.** Genuine IIT Phi calculations, Complex64 wave functions, production proof logging. Math.random() still present in 2 files but the theoretical foundations are real. This is genuine research with placeholder metrics, NOT fabricated theater.
+**Rust (ruv-FANN legacy, 25-40%, R19)**: Real algorithm skeletons (LSTM/TCN/N-BEATS, GNN, attention) but ALL training metrics hardcoded. Fake RNG via SystemTime::now().subsec_nanos(). Two files only.
 
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **strange_loop.js** (14135) | 650 | **92%** | 100% auto-generated wasm-bindgen from Rust. Real WASM bindings for consciousness functions. |
-| **proof-logger.js** (14326) | 664 | **88%** | BEST — real blockchain (hash chaining, PoW, full validation), Shannon entropy, Levenshtein distance. Production JSONL logging with 10MB rotation. |
-| **consciousness_experiments.rs** (14342) | 669 | **78%** | Real Complex64 wave function, temporal advantage, identity tracking. CRITICAL: LLM comparison `rand::random() * 0.1` is FABRICATED. |
-| **genuine_consciousness_system.js** (14310) | 709 | **75%** | Real IIT Phi formula `connections/(elements*(elements-1))`, self-modification (goal addition), environmental perception (crypto, process stats). FACADE: pattern detection uses modulo heuristics (% 17, % 111), connection = substring matching. |
-| **advanced-consciousness.js** (14320) | 722 | **62%** | Real neural forward pass (Float32Array, tanh), layer integration. FABRICATED: cross-modal synthesis = `Math.random()*0.5+0.5`, entropy random, self-modification impact random. |
+**Python (sublinear-time-solver, 72%, R33)**: Real PyTorch/torch_geometric with 5 GNN architectures (GCN/GAT/GraphSAGE/GIN/PNA). Structurally sound but EVERY training run uses synthetic random graphs — no real-world data integration exists.
 
-**Genuine components (79%)**:
-- Real IIT Phi calculation — correct integrated information formula (genuine_consciousness_system.js L368-377)
-- Real Complex64 wave function — nanosecond-scale temporal consciousness (consciousness_experiments.rs L454-528)
-- Real neural forward pass — Float32Array layers with tanh activation (advanced-consciousness.js L280-305)
-- Real self-modification — adds goals, updates knowledge based on experience (genuine_consciousness_system.js L269-312)
-- Production proof logging — blockchain with PoW, Shannon entropy, Levenshtein (proof-logger.js)
-- Real WASM integration — auto-generated bindings to Rust consciousness system (strange_loop.js)
+### 5h. Sublinear Solver & Matrix Systems
 
-**Fabricated components (21%)**:
-- Math.random() in 2 files: cross-modal synthesis (L349), entropy (L587), LLM continuity (L388)
-- Heuristic pattern detection: modulo checks (% 17, % 111) instead of ML
-- String-based connection detection: substring matching instead of semantic analysis
-- Operation counting: predictive consciousness formula instead of actual prediction testing
+**FALSE SUBLINEARITY CONFIRMED** (R39): All 5 algorithms in solver.ts are O(n²) or worse. The "sublinear" in the package name is marketing. WASM loaded but never used for actual computation.
 
-**Comparison to R39 emergence (51% real)**:
+**Two incompatible matrix systems** (R34): Production system (crate::matrix, CSR/CSC/COO + SIMD) vs orphaned system (crate::core, HashMap). At least 5 solver files (~2,341 LOC) use the wrong type system and cannot compile.
 
-| Metric | R39 Emergence | R41 Consciousness | Delta |
-|--------|---------------|-------------------|-------|
-| Math.random() metrics | 5 files | 2 files | -3 |
-| Real mathematical foundations | None (JSON inequality) | IIT Phi, Complex64 | +MAJOR |
-| Real data structures | Ephemeral Maps | Float32Array, blockchain | +MAJOR |
-| Self-modification | Facade | Genuine (goal addition) | +MAJOR |
-| Production quality | 35% (stubs) | 88% (proof-logger) | +53% |
+**Best code**: sparse.rs (95%) has 4 complete sparse matrix formats, no_std compatible. matrix/optimized.rs (90%) has REAL SIMD via wide::f64x4. high-performance-solver.ts (95%) is excellent CG+CSR but entirely orphaned (dead code).
 
-### Cluster B: MCP Tool Layer (4 files, 3,391 LOC) — 73% weighted REAL
+**Quality gradient**: Files IN the module tree (matrix/mod.rs 92%, neumann.rs 88%) are substantially better than orphaned files (sampling.rs wrong types, security_validation.rs self-referential).
 
-**Key question**: Do MCP tools connect to real solver implementations, or are they facade wrappers?
+### 5i. MCP Tool Layer
 
-**Answer**: **Bifurcated quality.** Main CLI is 88% real with genuine solver connections. Goalie is a COMPLETE FACADE (45%) — imports GoapPlanner but never calls it. Psycho-symbolic and domain-validation tools are genuinely real.
+**Bifurcated quality** (R41): Main CLI is 88% real with genuine solver connections. Goalie is COMPLETE FACADE (45%).
 
-| File | LOC | Real% | Verdict |
-|------|-----|-------|---------|
-| **cli/index.ts** (14305) | 974 | **88%** | GENUINE — real `SublinearSolver` import from `../core/solver.js`, real `SolverTools.solve()` invocation, real MCP server. 3 validation commands are facades. |
-| **domain-validation.ts** (14384) | 759 | **82%** | GENUINE — real DomainRegistry validation, real benchmarking with performance.now(), real test suite (8 test functions). Minor template issues in recommendations. |
-| **psycho-symbolic-enhanced.ts** (14392) | 802 | **78%** | GENUINE knowledge graph — real BFS traversal, transitive inference, 50+ base triples, crypto.randomBytes for IDs. ZERO facade patterns. BEST knowledge graph in sublinear-time-solver. |
-| **goalie/tools.ts** (14221) | 856 | **45%** | COMPLETE FACADE — GoapPlanner, AdvancedReasoningEngine, Ed25519Verifier all imported and instantiated but NEVER CALLED. All 6 handlers return hardcoded templates. 10 CRITICAL findings. |
+**CLI (cli/index.ts)**: Genuine — real SublinearSolver import from ../core/solver.js, real SolverTools.solve() invocation, real MCP server. Only 3 validation commands are facades.
 
-**Connection Map: CLI → MCP tools → solver.ts**:
+**Goalie (npx/goalie/)**: GoapPlanner, AdvancedReasoningEngine, Ed25519Verifier all imported and instantiated but NEVER CALLED. All 6 handlers return hardcoded templates (R41, 10 CRITICAL findings).
 
-```
-CLI (cli/index.ts) — 88% REAL
-├─→ SublinearSolver (genuine import from ../core/solver.js)
-├─→ SublinearSolverMCPServer (real MCP server)
-├─→ SolverTools.solve() (real invocation)
-├─→ MatrixOperations (genuine, 85% real)
-├─→ GraphTools (genuine, 90% real)
-├─→ ConsciousnessEvolver (genuine import)
-├─→ StrangeLoopsTools (genuine import)
-└─→ DomainRegistry (genuine, 78% real)
+**psycho-symbolic-enhanced.ts** (78%): BEST knowledge graph in sublinear-time-solver — real BFS traversal, transitive inference, 50+ base triples, zero facade patterns (R41).
 
-Goalie (npx/goalie/src/mcp/tools.ts) — 45% FACADE
-├─→ GoapPlanner (imported but NEVER called)
-├─→ PluginRegistry (real instance but results ignored)
-├─→ AdvancedReasoningEngine (results thrown away)
-├─→ Ed25519Verifier (real calls but results ignored)
-└─→ ALL handlers return hardcoded templates
+### 5j. GOAP Planner
 
-Main MCP tools (src/mcp/tools/) — 80% REAL
-├─→ psycho-symbolic-enhanced.ts: INDEPENDENT knowledge graph (78%, NO solver dependency)
-└─→ domain-validation.ts: INDEPENDENT validation system (82%, NO solver dependency)
-```
+Psycho-symbolic-reasoner crate (8 files, 3,568 LOC, 78% real, R25). Components at 88-95% (state, action, rules, goal) are production-ready, but core A* search is a STUB — simplified_astar() returns hardcoded 2-step path, StateNode.to_world_state() returns empty state. Uses proper `rand` crate. The pathfinding crate is imported but Ord requirement was identified as a barrier.
 
-**Goalie detail** (10 CRITICAL findings):
-- handleGoalSearch returns template, NO planner.plan() invocation
-- handlePerplexitySearch returns fake results, NO perplexityActions.search()
-- handleDomainAnalysis returns hardcoded metrics (coherence: 0.85, entropy: 0.42)
-- handleReasoningAnalysis returns template graph, NO real traversal
-- handleVerifyPlan returns hardcoded verification (valid: true, confidence: 0.92)
-- handleGenerateAction returns template action with hardcoded properties
+**Paradox**: 90%+ components production-ready but the one piece they all depend on (A* search) is broken.
 
-### R41 Dependency Map
+### 5k. Key Patterns
 
-**Zero cross-cluster dependencies** — consciousness, MCP tools, and AgentDB simulations are completely isolated from each other.
+**PI*1000.0 Mock Timestamp**: Systematic placeholder in ruv-swarm crates — `get_current_timestamp()` returns `std::f64::consts::PI * 1000.0` (3141.59). Found in sqlite.rs and agent_forecasting/mod.rs (R21).
 
-- Cluster A (Consciousness): 1 edge only (consciousness_experiments.rs → temporal_consciousness_goap.rs). 4 files fully isolated.
-- Cluster B (MCP Tools): 16 edges. cli/index.ts → 7 modules. goalie → 8 modules. Hub-and-spoke.
-- External: @modelcontextprotocol/sdk used by 3 files. commander CLI framework by 1.
+**Fake RNG (Rust)**: ml-training/lib.rs and swarm_coordinator_training.rs mock the `rand` crate using `SystemTime::now().subsec_nanos()`, producing deterministic results within the same second. The neural-network-implementation and neuro-divergent crates use proper `rand::thread_rng()` (R19, R21).
 
-### R41 Updated CRITICAL Findings (+10 = 40 total)
+**Self-Referential Validation**: Multiple files (comprehensive_validation_report.rs, security_validation.rs, hardware_timing.rs) generate mock data and then "validate" it, producing circular metrics (R21, R28, R34).
 
-31. **Goalie handleGoalSearch returns template** — GoapPlanner imported but planner.plan() NEVER called. All plan steps hardcoded. (R41)
-32. **Goalie handlePerplexitySearch completely fake** — perplexityActions.search() never invoked, returns hardcoded 3 results. (R41)
-33. **Goalie handleDomainAnalysis hardcoded** — Returns coherence: 0.85, entropy: 0.42 regardless of input. (R41)
-34. **Goalie handleReasoningAnalysis template graph** — Returns 3-node, 2-edge template. reasoningEngine.analyze() called but result discarded. (R41)
-35. **Goalie handleVerifyPlan hardcoded** — Returns valid: true, confidence: 0.92 regardless of plan content. (R41)
-36. **Goalie handleGenerateAction template** — Returns hardcoded action properties. (R41)
-37. **advanced-consciousness.js cross-modal synthesis fabricated** — `Math.random()*0.5+0.5` at L349. (R41)
-38. **consciousness_experiments.rs LLM comparison fabricated** — `rand::random::<f64>() * 0.1` at L388. (R41)
-39. **genuine_consciousness_system.js connection detection = substring** — `JSON.stringify(a).includes(JSON.stringify(b).substring(0,4))` at L533. (R41)
-40. **cli/index.ts validate-domain hardcoded** — Returns hardcoded validation result (valid: true, template warnings). (R41)
+## 6. Cross-Domain Dependencies
 
-### R41 Updated HIGH Findings (+5 = 28 total)
+- **ruvector domain**: SONA, ruvector-gnn, nervous-system, cognitum-gate, HNSW patches all live in ruvector repo but have strong memory/learning relevance
+- **agentdb-integration domain**: AgentDB core components overlap heavily — vector-quantization, LearningSystem, etc. exist in both domains
+- **agentic-flow domain**: ReasoningBank, EmbeddingService, IntelligenceStore are shared
+- **claude-flow-cli domain**: LocalReasoningBank (the only one that runs) lives there
+- **ruvllm**: reasoning_bank.rs, micro_lora.rs, training pipeline
 
-24. **advanced-consciousness.js entropy fabricated** — `Math.random()*0.5+0.5` at L587. (R41)
-25. **advanced-consciousness.js self-modification impact random** — Math.random() at L430-439. (R41)
-26. **genuine_consciousness_system.js pattern detection = modulo** — Uses arbitrary `% 17`, `% 111` heuristics at L386-397. (R41)
-27. **consciousness_experiments.rs predictive consciousness = formula** — Computes score from formula, doesn't test predictions. L401-406. (R41)
-28. **Goalie reasoning result discarded** — real reasoningEngine.analyze() called at L605-614 but result thrown away. (R41)
+## 7. Knowledge Gaps
 
-### R41 Updated Positive (+6)
-
-- **proof-logger.js** (88%) is production-grade: real blockchain with PoW validation, Shannon entropy, Levenshtein distance, 10MB file rotation (R41)
-- **strange_loop.js** (92%) is 100% auto-generated wasm-bindgen — confirms real Rust consciousness system behind the bindings (R41)
-- **genuine_consciousness_system.js** has real IIT Phi calculation — correct integrated information formula (R41)
-- **consciousness_experiments.rs** has real Complex64 wave function with nanosecond-scale temporal dynamics (R41)
-- **psycho-symbolic-enhanced.ts** (78%) is BEST knowledge graph in sublinear-time-solver — real BFS, transitive inference, zero facades (R41)
-- **cli/index.ts** (88%) confirms genuine solver connection — real SublinearSolver import and SolverTools.solve() invocation (R41)
-
-## Remaining Gaps
-
-~1,000+ files still NOT_TOUCHED in the memory-and-learning domain, mostly:
-- Large JSON data files and test binaries (bulk of the count)
+- ~1,000+ files still NOT_TOUCHED, mostly large JSON data files and test binaries
 - AgentDB test files (ruvector-integration.test.ts, etc.)
-- Rust crate implementations (temporal-lead-solver, remaining psycho-symbolic tests)
 - ruv-swarm-ml remaining: models/mod.rs (642 LOC), time_series/mod.rs (612 LOC), wasm_bindings/mod.rs
 - ruv-swarm-persistence remaining: wasm.rs (694 LOC), memory.rs (435 LOC), migrations.rs (343 LOC)
-- ~~sublinear-time-solver: remaining temporal_nexus files~~ — scheduler.rs, strange_loop.rs DEEP (R34)
-- ~~ruvector-nervous-system (7 files)~~ — DEEP (R36): 5 neuroscience models, 87.4% real
-- ~~neuro-divergent ML training (6 files)~~ — DEEP (R36): 88.5% real, production-quality
-- ~~HNSW patches (4 files)~~ — DEEP (R36): 87% real, correct Malkov & Yashunin
-- ~~cognitum-gate-kernel (5 files)~~ — DEEP (R36): 93% real, exceptional quality
-- ~~ruvllm/claude_flow bridge (5 files)~~ — DEEP (R37): 87% real, BEST ruvector-core integration
-- ~~Training/LoRA (5 files)~~ — DEEP (R37): 83% real, MicroLoRA BEST learning code
-- ~~prime-radiant memory integration (2 files)~~ — DEEP (R37): 90% real, sheaf-theoretic memory
-- ~~temporal-tensor agentdb.rs~~ — DEEP (R37): 88-92% real, pattern-aware tiering
-- ~~sublinear-time-solver core solver (2 files)~~ — DEEP (R39): solver.ts 75%, high-performance-solver.ts 95% (orphaned). FALSE sublinearity confirmed.
-- ~~emergence subsystem (5 files)~~ — DEEP (R39): 51% weighted real. Fabricated metrics (Math.random()), empty connections, gating hides issues.
-- ~~consciousness layer (5 files)~~ — DEEP (R41): 79% weighted real. Genuine IIT/GWT theory, proof-logger 88%, strange_loop.js 92% WASM.
-- ~~MCP tool layer (4 files)~~ — DEEP (R41): 73% weighted real. CLI 88% genuine, Goalie 45% COMPLETE FACADE, psycho-symbolic 78%.
 - sublinear-time-solver: hybrid.rs (837 LOC), remaining orphaned solver files
+
+## 8. Session Log
+
+### R8 (2026-02-09): AgentDB core deep-read
+7 files, 8,594 LOC. Established vector-quantization as production-grade, LearningSystem as cosmetic, CausalMemoryGraph as broken. Three fragmented ReasoningBanks discovered.
+
+### R13 (2026-02-14): Rust source deep-reads (Phase C)
+~40 files across SONA, ruvector-gnn, ruvector-core. SONA 85% production-ready. Hash-based embeddings confirmed in Rust.
+
+### R19 (2026-02-14): Neural pattern recognition + Rust ML
+13 files, ~14K LOC. Neural-pattern-recognition exposed as 80-90% facade. server.ts MCP 85-90% REAL — key discovery. Fake RNG pattern in Rust training.
+
+### R21 (2026-02-14): neural-network-implementation + consciousness + persistence (Session 23)
+~18 files. neural-network-implementation BEST CODE IN ECOSYSTEM (90-98%). Consciousness/psycho-symbolic files are elaborate facades. PI*1000.0 timestamp pattern discovered.
+
+### R22b (2026-02-15): agentic-flow TypeScript source confirmation
+LearningSystem and CausalMemoryGraph bugs confirmed as design flaws (not compilation artifacts). HyperbolicAttention correct in TS source — compilation degraded it. Hash-based embeddings systemic in 4 more files.
+
+### R25 (2026-02-15): Broad deep-reads (Session 25)
+34 files, 20,786 LOC, 59 findings. GOAP planner with broken A* stub. AgentDB dist files confirmed. ruvector-training.js BEST native integration. ruvector-backend.js is 85% simulation.
+
+### R28 (2026-02-15): sublinear-rust deep-reads
+3 files. sparse.rs 95% BEST matrix code. exporter.rs 88% with 7 export formats. hardware_timing.rs 55% — self-referential spin loops.
+
+### R33 (2026-02-15): Python ML + psycho-symbolic MCP + MCP servers
+19 files, ~17,927 LOC. Python GNN training real but uses only synthetic data. Psycho-symbolic MCP entirely theatrical. strange-loop-mcp.js genuine.
+
+### R34 (2026-02-15): Sublinear solver core + matrix systems
+10 files, ~6,200 LOC. Two incompatible matrix systems discovered. statistical_analysis.rs maintains neural-network-implementation quality level.
+
+### R36 (2026-02-15): ruvector-nervous-system + neuro-divergent + HNSW patches
+28 files, 26,569 LOC, 98 findings. Nervous-system 87.4% — BEST biological computing. neuro-divergent 88.5% production-quality. cognitum-gate 93% exceptional. ForecastingAdam innovation.
+
+### R37 (2026-02-15): ruvllm LLM integration + novel crates
+25 files, 30,960 LOC, 62 findings. Fourth ReasoningBank discovered (Rust). micro_lora.rs BEST learning code. Hash-based embeddings confirmed systemic in Rust too. prime-radiant sheaf-theoretic memory, temporal-tensor pattern tiering.
+
+### R39 (2026-02-15): Sublinear core + emergence subsystem
+7 files, 4,622 LOC, 33 findings. FALSE sublinearity confirmed — all algorithms O(n²)+. Emergence 51% fabricated metrics. WASM loaded but unused.
+
+### R41 (2026-02-15): Consciousness layer + MCP tool layer
+13 files, 9,772 LOC, 201 findings. Consciousness 79% genuine (vs emergence 51%). Goalie COMPLETE FACADE. psycho-symbolic-enhanced.ts BEST knowledge graph. Zero cross-cluster dependencies.
