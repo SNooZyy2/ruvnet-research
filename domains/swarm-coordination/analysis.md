@@ -1,7 +1,7 @@
 # Swarm Coordination Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~17.1% (240/1402 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-16 (Session R59)
+> **Priority**: HIGH | **Coverage**: ~17.2% (241/1402 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-16 (Session R70)
 
 ## 1. Current State Summary
 
@@ -271,6 +271,7 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 |------|---------|-----|-------|-------|-------------|---------|
 | memory.rs | ruv-swarm-persistence | 434 | 95-98% | DEEP | PRODUCTION-QUALITY. 28/28 Storage trait methods, parking_lot::RwLock, atomic task claiming, multi-dimensional event ordering. Test harness for concurrent_tests.rs (100 agents). Three-backend architecture (Memory/SQLite/WASM) | R50 |
 | wasm.rs (persistence) | ruv-swarm-persistence | 694 | 95% | DEEP | Production IndexedDB via rexie. Only get_storage_size() stub | R31 |
+| lib.rs (persistence) | ruv-swarm-persistence | 250 | 88-92% | DEEP | Production trait-based persistence. 28 async CRUD methods via Storage trait, 3 backends (SQLite/IndexedDB/in-memory), QueryBuilder with SQL injection prevention, connection pooling | R70 |
 
 ### ruv-swarm SWE-bench Adapter + CLI (ruv-FANN)
 
@@ -299,6 +300,16 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | claude-integration/advanced-commands.js | ruv-swarm | 561 | 83% | DEEP | REAL GENERATOR — creates 9 markdown files in .claude/commands/. Content is aspirational templates | R43 |
 | claude-integration/remote.js | ruv-swarm | 408 | 15% | DEEP | COMPLETE FACADE — zero network transport. Generates local wrapper scripts (bash/batch/PowerShell). "Remote" = SSH env detection only | R43 |
 | claude-integration/docs.js | ruv-swarm | 1,548 | 78% | DEEP | GENUINE GENERATOR — real file merging, backups, writes 20+ command files. 41% functional code, 32% templates | R43 |
+| claude-integration/core.js | ruv-swarm | 112 | 72-76% | DEEP | CLI WRAPPER not MCP client. **CRITICAL: defaults to --dangerously-skip-permissions**. MCP registration via `claude mcp add`. Orphaned file checks for artifacts never created by this module | R66 |
+
+### ruv-swarm npm Runtime Layer (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| npm/src/index.js | ruv-swarm | 405 | 28-32% | DEEP | **PHANTOM API WRAPPER**. WASM API mismatch (expects RuvSwarm class, WASM exports create_swarm_orchestrator function). Namespace collision with index-enhanced.js. WorkerPool 100% TODO stubs. WASMLoader SIMD detection genuine (75%). Confirms R57 WASM API mismatch | R66 |
+| npm/src/utils.ts | ruv-swarm | 286 | 85-90% | DEEP | **GENUINE TS, 0% RUST INTEGRATION**. 9 utility functions all work correctly. deepClone handles Date/Array/Map/Set. retryWithBackoff exponential. recommendTopology heuristic if-else. Hardcoded cognitive profiles (10 agent types, static 0.0-1.0). Imports only TS types, zero FFI/WASM | R66 |
+| npm/src/logging-config.js | ruv-swarm | 179 | 75-80% | DEEP | GENUINE structured logging. 10 component namespaces (mcp-server, swarm-core, agent, neural, etc.). Singleton logger factory. Correlation ID child loggers for distributed tracing. Runtime reconfiguration. MCP stdio mode integration. NO swarm-wide log aggregation | R66 |
+| npm/src/types.ts | ruv-swarm | 164 | 88-92% | DEEP | **PRODUCTION-QUALITY type definitions**. Novel 6D CognitiveProfile (analytical/creative/systematic/intuitive/collaborative/independent). WasmModule interface defines full lifecycle (createSwarm/addAgent/assignTask/getState/destroy). AgentMemory in-memory only (Map, zero HNSW/AgentDB). SwarmState CENTRALIZED coordinator pattern. 9 event types on SwarmEventEmitter | R66 |
 
 ### Python ML Training (sublinear-time-solver)
 
@@ -367,6 +378,9 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | C43 | **swe-bench-adapter benchmarking THEATRICAL** — simulate_execution() = sleep(10ms). Memory/profile data hardcoded. Extends R43 benchmark deception pattern | benchmarking.rs | R57 | Open |
 | C44 | **ruv-swarm npm WASM API MISMATCH** — index.ts calls createSwarm()/addAgent()/assignTask() but WASM exports create_swarm_orchestrator()/spawn()/orchestrate(). Node.js fallback always executes | index.ts (npm) | R57 | Open |
 | C45 | **performance.js ALL metrics Math.random()** — WASM, swarm coordination, neural network performance all fabricated. optimize() = console.log theater | performance.js (npm) | R57 | Open |
+| C46 | **index.js PHANTOM API WRAPPER** — expects RuvSwarm class from WASM but WASM exports create_swarm_orchestrator() function. Namespace collision: re-exports index-enhanced.js then defines incompatible local RuvSwarm. WorkerPool 100% TODO stubs. All swarm creation calls throw "RuvSwarm is not a constructor" | index.js (npm/src) | R66 | Open |
+| C47 | **claude-integration/core.js defaults to --dangerously-skip-permissions** — invokeClaudeWithPrompt() uses unsafe flag unless `secure: true` explicitly passed. Backward-compat creates insecure default | claude-integration/core.js | R66 | Open |
+| C48 | **ruv-swarm npm layer has ZERO Rust integration** — utils.ts imports only TS types, index.js WASM bindings broken, types.ts defines WasmModule interface with no implementation. Two-tier architecture with no bridge | utils.ts, index.js, types.ts | R66 | Open |
 
 ### 3b. HIGH Findings
 
@@ -416,6 +430,7 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | H42 | **protocol.rs PRODUCTION WIRE PROTOCOL** — 92-95% real. MessagePack+JSON dual codecs via rmp_serde. Complete state machine (handshake/flow-control/compression/disconnect). Distributed RPC with UUID correlation IDs and TTL-based routing. Used by websocket.rs, shared_memory.rs, in_process.rs. Builder pattern for fluent API | protocol.rs | R50 | Open (positive) |
 | H43 | **simd_ops.rs real SIMD but downgraded** — 72-78%. Portable SIMD via `wide::f32x4` instead of ruvector-core's native intrinsics. 8 real operations but matrix multiply is pure scalar triple-loop. Real benchmarking infrastructure (SimdBenchmark) | simd_ops.rs | R50 | Open |
 | H44 | **SWE-Bench evaluation has REAL git infrastructure** — 85-95% real for sandbox creation (git clone --depth 1), patch application (git apply --check + git apply), test execution (TokioCommand with timeout), patch quality validation. Similar crate's TextDiff for comparison. Infrastructure works, data source mocked | evaluation.rs | R50 | Open (positive) |
+| H45 | **ruv-swarm-persistence/lib.rs PRODUCTION crate root** (88-92%) — defines Storage trait with 28 async CRUD methods, 3 backend implementations (SQLite via rusqlite, IndexedDB via rexie, in-memory). QueryBuilder prevents SQL injection via parameterization. Connection pooling with health checks. Completes persistence crate picture (lib.rs + memory.rs 95% + wasm.rs 95% + migrations.rs 92-95%) | lib.rs (persistence) | R70 | Open (positive) |
 
 ## 4. Positives Registry
 
@@ -466,6 +481,7 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | **memory.rs production persistence** — 95-98% real. 28/28 Storage trait, atomic task claiming, three-backend architecture (Memory/SQLite/WASM). FIRST 95%+ ruv-swarm Rust file. Extensively tested (100 concurrent agents) | memory.rs | R50 |
 | **protocol.rs production wire protocol** — 92-95% real. MessagePack+JSON, complete state machine, distributed RPC with UUID IDs, TTL routing. Used by 3 transport backends | protocol.rs | R50 |
 | **SWE-Bench git infrastructure genuine** — 85-95% real patch application, sandboxing, test execution via TokioCommand. Dataset is mocked but infrastructure production-ready | evaluation.rs | R50 |
+| **ruv-swarm-persistence crate COMPLETE at 93% weighted** — lib.rs (88-92%) + memory.rs (95-98%) + wasm.rs (95%) + migrations.rs (92-95%). Trait-based 3-backend architecture, 28 async CRUD methods, QueryBuilder with SQL injection prevention. BEST complete crate in ruv-swarm Rust | lib.rs (persistence) | R70 |
 
 ## 5. Subsystem Sections
 
@@ -667,5 +683,14 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 ### R57 (2026-02-16): ruv-swarm npm entry + SWE-bench adapter + AgentDB simulation
 6 swarm files, ~2,728 LOC, ~92 findings. **ruv-swarm npm SDK BIMODAL**: index.ts (72-76%) has production-quality client SDK (88-92%) but WASM API mismatch = 0% WASM integration (pure-JS fallback always executes). performance.js (25-30%) is R53 scheduler.ts pattern — ALL metrics Math.random(), optimize() = console.log theater. **SWE-bench adapter COMPLETE MISLABELING**: stream_parser.rs (75-80%) parses Claude Code CLI metrics, 0% SWE-bench content. benchmarking.rs (20-25%) simulate_execution() = sleep(10ms), hardcoded memory/profile data. Extends R43 benchmark deception. 4th mislabeled file in project. **AgentDB neural-augmentation BIMODAL**: (52%) graph infrastructure genuine (85-90%), GNN = Math.random(), RL = deterministic formula. Hardcoded "+29.4% improvement." Confirms R40 JS neural pattern.
 
+### R66 (2026-02-16): ruv-swarm npm runtime layer deep-read
+5 swarm files, ~1,146 LOC, ~75 findings. **TWO-TIER ARCHITECTURE CONFIRMED**: npm TS layer is developer-friendly convenience with **0% Rust integration**. types.ts (88-92%) is BEST file — production-quality type defs with novel 6D CognitiveProfile. utils.ts (85-90%) genuine TS helpers but zero FFI/WASM. logging-config.js (75-80%) genuine structured logging with 10 namespaces and correlation IDs. index.js (28-32%) is **PHANTOM API WRAPPER** — WASM API mismatch (class vs function), namespace collision with index-enhanced.js, WorkerPool 100% stubs. claude-integration/core.js (72-76%) **CRITICAL: defaults to --dangerously-skip-permissions**. Confirms R50/R57: npm layer designs good types, but implementation disconnected from Rust backend.
+
+### R69 (2026-02-16): ruv-swarm Rust crate layer
+4 swarm files, ~1,025 LOC, ~51 findings. **ruv-swarm Rust crates BIMODAL**: persistence/migrations.rs (92-95%) is BEST DB evolution code in ecosystem — version tracking, up/down migrations, transaction-safe, rollback support. BUT defines **3RD PERSISTENCE LAYER** (5 tables: agents/tasks/events/messages/metrics + DAG task_dependencies + agent_groups) with ZERO sync to ReasoningBank. Schema features (DAG tasks, agent groups, messages) all ORPHANED from runtime (R50: spawn.rs uses in-memory mpsc, memory.rs flat HashMap). **DAA memory.rs (0-5%) COMPLETE FACADE** — cognitive architecture vocabulary (working/LTM/episodic/semantic memory) with zero implementations, zero async, MemoryManager struct doesn't implement MemoryManager trait from resources.rs (name collision orphan). **logger.js (48-52%) PHANTOM**: R66 winston claim FALSE — zero winston imports, console.log only, broken log level filtering (checks level but never filters). **wasm_bindings/mod.rs (90-95%) GHOST WASM** — production wasm-bindgen to 27 ML models (MLP/LSTM/Transformer/DeepAR etc.), but `ml` feature optional + NOT default = never compiled/shipped. Published npm gets linear/mean stub. Best ML WASM in repo is the one that never runs.
+
 ### R59 (2026-02-16): ruv-fann benchmarking infrastructure
 2 swarm files, ~770 LOC, ~40 findings. **ruv-fann benchmarking REVERSES R57 theatrical pattern**: claude_executor.rs (75-80%) has GENUINE process spawning (tokio::process::Command, async timeout/kill, buffer_unordered parallelism) but SWE-Bench result extraction hardcoded zeros. metrics.rs (88-92%) is GENUINE metrics infrastructure (Instant::now(), p95/p99 percentiles, 14+ metric categories) with placeholder derived metrics. Both files match R55 performance_monitor.rs genuine quality pattern, NOT R56/R57 theatrical pattern. CONFIRMS cross-package quality difference: ruv-fann benchmarking is 75-92% vs sublinear-solver standalone benchmarks 8-25%.
+
+### R70 (2026-02-16): ruv-swarm-persistence crate root
+1 swarm file, 250 LOC, ~8 findings. **ruv-swarm-persistence/lib.rs (88-92%) PRODUCTION crate root** — defines Storage trait with 28 async CRUD methods across agents/tasks/events/messages/metrics tables. 3 backend implementations (SQLite/IndexedDB/in-memory). QueryBuilder with SQL injection prevention via parameterized queries. Connection pooling with health checks. COMPLETES persistence crate: lib.rs (88-92%) + memory.rs (95-98%) + wasm.rs (95%) + migrations.rs (92-95%) = **93% weighted average** — BEST COMPLETE CRATE in ruv-swarm Rust layer. But still 3rd disconnected persistence layer (no sync with TS ReasoningBank or Rust ReasoningBank). DEEP: 1,130→1,140.
