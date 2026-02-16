@@ -1,13 +1,19 @@
 # Swarm Coordination Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~18.4% (258/1402 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-16 (Session R80)
+> **Priority**: HIGH | **Coverage**: ~18.4% (259/1402 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-16 (Session R81)
 
 ## 1. Current State Summary
 
-The swarm-coordination domain spans 258 DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R79 completed the ruv-swarm-wasm core source layer, finished ruv-swarm-mcp and ruv-swarm-transport source coverage, and tested JS benchmark trustworthiness. R80 adds activation.rs (35-40% BROKEN) to complete WASM crate coverage with 2 critical API mismatches discovered.
+The swarm-coordination domain spans 259 DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R79 completed the ruv-swarm-wasm core source layer, finished ruv-swarm-mcp and ruv-swarm-transport source coverage, and tested JS benchmark trustworthiness. R80 added activation.rs (35-40% BROKEN) to complete WASM crate coverage. R81 analyzed neural-models barrel file (272 LOC), revealing ZERO Rust bridge and pure-JS training facade, contradicting R40's assumption of inference bridge to ruv-swarm-ml.
 
-**R79 key results:**
+**R81 key results:**
+
+- **neural-models/index.js BARREL + TRAINING FACADE** — 272 LOC barrel exports 8 classes (Transformer, CNN, GRU, Autoencoder, GNN, ResNet, VAE, LSTM) but ZERO Rust integration. Pure JS reimplementation contradicts R40's inference-bridge assumption. createNeuralModel factory pattern sound but orphaned from ruv-swarm-ml. Individual models call this.backward(loss, lr) but backward() in base.js only logs, does NOT update weights. Models appear trainable but gradient descent is fabricated (H169).
+- **MODEL_PRESETS 234 lines dead documentation** — Comprehensive presets for all 8 architectures (transformer small/base/large, CNN mnist/cifar10/imagenet, etc) with realistic hyperparameters NOT USED by imported models. Suggests multiple conflicting model definitions exist (neural-network-manager imports 3 sources).
+- **R40 CORRECTION**: Training facade extends from Python/Rust to JS. JS inference-only assumption INCORRECT — JS models have same training facade as R40 found in Rust training.rs.
+
+**R79 key results (carried forward):**
 
 - **ruv-swarm-wasm BIMODAL within single crate** — simd_tests.rs (88-92% GENUINE wasm_bindgen_test), training.rs (~80% GENUINE, 4/5 real ruv-fann algorithms, SARPROP silently falls back to RPROP), memory_pool.rs (78-82% GENUINE 3-tier pool). BUT agent.rs (28-32% FACADE, mock setTimeout execute), swarm.rs (0% ORPHANED, imports non-existent enums, cannot compile).
 - **ruv-swarm-mcp/src/ COMPLETE** (9/9 DEEP) — error.rs (88-92%) completes source layer with protocol-agnostic error bridge. Triple representation (message/JSON-RPC code/HTTP status). rmcp-decoupled by design.
@@ -16,18 +22,7 @@ The swarm-coordination domain spans 258 DEEP files across multi-agent lifecycle,
 - **JS benchmarks BOTH DECEPTIVE** — benchmark.js (0-5%) is 100% setTimeout fabrication, DEEPEST in research corpus. mcp-tools-benchmarks.js is 8th MISLABELED file — generic JS micro-benchmarks, not MCP tool testing. Extends R59 benchmark deception to JS layer.
 - **WASM scoreboard update**: +3 genuine (simd_tests, training, memory_pool), +2 theatrical (agent, swarm). Running total: 13 genuine + 1 GHOST vs 11 theatrical (54% genuine).
 
-**Top verdicts (carried forward):**
-
 **Top verdicts:**
-
-- **"Demonstration framework" extends to Rust CLI (R72)** — main.rs (82-86%) has production-quality clap 4.5 framework (90-95%) but **ZERO core crate integration**. Cargo.toml declares `ruv-swarm-core` + `ruv-swarm-agents` dependencies but NEVER imports them. All command execution is `tokio::time::sleep()` + `"Simulated result"` JSON. Perfect port of TS CLI's API surface with identical theatrical nature.
-- **THIRD MCP PROTOCOL discovered (R72)** — service.rs (88-92%) uses rmcp SDK v0.2.1 with macro-based tool registration (`#[tool]`, `#[tool_router]`), separate from agentic-flow's raw JSON-RPC 2.0 and mcp-manager.ts. 11 domain-specific tools vs 256 general-purpose. Genuine 2-layer delegation to orchestrator → core crate + persistence.
-- **config.rs PRODUCTION-QUALITY (R72, 88-92%)** — 5-layer hierarchical loading (defaults → global → profile → custom → env), 6 config structs, confirms R70's 3 backends (memory/sqlite/postgres). Two type-safety gaps (String instead of enum for backend/topology).
-- **DAA WASM inherits facade pattern (R72)** — wasm_simple.rs (22-28%) has genuine wasm-bindgen but decision/adaptation/coordination are string formatting. Two parallel WASM implementations (wasm.rs 735 LOC vs wasm_simple.rs 268 LOC) with zero documentation.
-- **ruv-swarm-wasm utils.rs (88%) genuine WASM** — production JS interop, feature detection, portable SIMD via `wide::f32x4`. BUT SIMD runtime detection stub (returns true unconditionally) and memory usage placeholder.
-- **Infrastructure vs. Intelligence split** — Plumbing is real (sqlite-pool 92%, wasm-loader 82%, config.rs 88-92%, service.rs 88-92%), but "smart" features are facades (neural.js 28%, wasm_simple.rs 22-28%).
-- **ruv-swarm-persistence crate COMPLETE** — lib.rs (88-92%) + memory.rs (95-98%) + wasm.rs (95%) + migrations.rs (92-95%) + models.rs (92-95%) = 93% weighted. BEST COMPLETE CRATE in ruv-swarm Rust layer.
-- **Rust CLI 3-4x higher quality infra than TS** — clap derive, config crate, tracing, tokio async. Both have identical theatrical execution (0%).
 - **Best infrastructure**: sqlite-pool.js (92%), storage.rs (95-98%), in_process.rs (92%), service.rs (88-92%), config.rs (88-92%), models.rs (92-95%).
 - **Worst gaps**: neural.js (28%), wasm_simple.rs (22-28%), neural-coordination-protocol.js (10-15%), QUIC empty everywhere, GPU operations zero.
 
@@ -803,3 +798,5 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R81 (2026-02-16): npm security module (security.js)
 1 file, 218 LOC, 8 findings (3 HIGH). WasmIntegrityVerifier silent failures + updateHash bypass. CommandSanitizer blacklist insufficient (permissive regex, static methods). DependencyVerifier zero integrity checks (version-only, vulnerable to npm hijacking).
+### R81 (2026-02-16): neural-models barrel + training facade
+1 file, 272 LOC, 5 findings (2 HIGH, 1 MEDIUM, 2 INFO). **neural-models/index.js BARREL + TRAINING FACADE** — 272 LOC exports 8 model classes (Transformer, CNN, GRU, Autoencoder, GNN, ResNet, VAE, LSTM) but ZERO Rust integration. Pure JS reimplementation contradicts R40's inference-bridge assumption. createNeuralModel factory pattern sound but orphaned from ruv-swarm-ml. Individual models call this.backward(loss, lr) but backward() in base.js only logs console.log(), does NOT update weights. forward() works, training() runs forward+loss+backward but stub backward means NO GRADIENT UPDATES. Models appear trainable but gradient descent is fabricated (H169). MODEL_PRESETS 234 lines (237+ if counting formatting) of dead documentation with comprehensive presets for all 8 architectures NOT USED by imported models. Suggests multiple conflicting model definitions exist (neural-network-manager imports 3 sources: index.js + presets/index.js + neural-presets-complete.js). R40 CORRECTION: Training facade extends from Python/Rust to JS. JS inference-only assumption INCORRECT — JS models have same training facade as R40 found in training.rs. DEEP: 1,233→1,234.

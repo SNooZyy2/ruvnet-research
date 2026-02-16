@@ -663,6 +663,8 @@ The memory-and-learning domain spans 254 files / ~89K LOC across AgentDB, Reason
 | ruvector-nervous-system | ruvector | 7 | 5,269 | 87.4% | 5 genuine neuroscience models (e-prop, EWC, BTSP, GWT, circadian) | R36 |
 | neuro-divergent | ruv-FANN | 6 | 7,187 | 88.5% | Production ML training. 8 schedulers, 16 loss types | R36 |
 | cognitum-gate-kernel | ruvector | 5 | 3,504 | 93% | EXCEPTIONAL. 256-tile coherence, e-values, bump allocator | R36 |
+
+| js/mcp-dense-fix.js | sublinear-time-solver | 286 | 10-15% | DEEP | PERFORMANCE CLAIM DEMO, NOT FUNCTIONAL MCP INTEGRATION. Claims 4000x+ improvement (7700ms→<2ms) but never tests against actual broken MCP Dense. getMCPToolDefinition() = schema template with NO transport binding. Does NOT patch ORPHANED MCP→Rust solver gap (R76). Benchmark() uses hardcoded constants, circular logic (tests itself, not original). THEATRICAL — shows what optimized performance COULD be. | R81 |
 | HNSW patches (hnsw_rs fork) | ruvector | 4 | 5,276 | 87% | Correct Malkov & Yashunin. Rayon parallel insertion | R36 |
 
 ## 3. Findings Registry
@@ -1006,6 +1008,27 @@ The memory-and-learning domain spans 254 files / ~89K LOC across AgentDB, Reason
 | H155 | **quick_demo.rs THEATRICAL** — spin-loop latency fabrication, predetermined victory, fake Kalman. R59 deception confirmed. nalgebra imported NEVER USED | quick_demo.rs | R80 | Open |
 | H156 | **performance.ts ORPHANED** — 88-92% genuine monitoring but zero usage across codebase | performance.ts | R80 | Open |
 | H157 | **realistic-implementation/lib.rs HONEST BASELINE** — 92-95% genuine with PyTorch ground truth. Validates R23 BEST rating (positive) | realistic-implementation/lib.rs | R80 | Open (positive) |
+
+| C78 | **async_learner_v2.rs thread-based actor has deadlock risk** — std::thread::spawn (line 38) uses rx.blocking_recv() inside tokio context. blocking_recv is OK in dedicated thread, but closure-captured ReasoningEngine+storage creates hidden thread pool assumption. If tokio runtime is single-threaded, panics. No panic recovery | async_learner_v2.rs (reasoningbank-learning) | R81 | Open |
+| C79 | **V2 async wrapper is NOT streaming** — Despite "async" naming, batch-per-message channel-based actor pattern. Fixed buffer of 100 commands (line 38). No streaming patterns, no backpressure handling, no adaptive batch sizing. Still batch-mode learning like V1 | async_learner_v2.rs (reasoningbank-learning) | R81 | Open |
+| C80 | **async_learner_v2 has asymmetric error handling** — Init errors caught (line 48-51), but if learner thread crashes at runtime, calls hang waiting for response that never comes (lines 79-80 LearnFromTask). Silent ring closure without panic guard | async_learner_v2.rs (reasoningbank-learning) | R81 | Open |
+| C81 | **V2 apply_learning DISCONNECTED from optimizer.rs** — ApplyLearning (lines 102-115) passes task_description and task_category but NEVER calls optimizer.rs (statistical strategy ranker, R78). Another parallel unintegrated learning layer (confirms R51 pattern). No cross-reference to optimization strategies | async_learner_v2.rs (reasoningbank-learning) | R81 | Open |
+| C82 | **Pattern cloning inefficiency** — LearnFromTask clones Pattern (line 87: pattern.clone()). If Pattern contains task trace/embeddings, overhead is significant. No Arc<Pattern> wrapper or by-reference passing. Hostile to high-frequency learning calls | async_learner_v2.rs (reasoningbank-learning) | R81 | Open |
+### mcp-dense-fix.js (R81)
+1. **CRITICAL - PERFORMANCE CLAIM DEMONSTRATION (lines 1-286)**: File claims to fix 190x MCP Dense slowdown (7.7s→0.04s Python) with 4000x+ improvement to <2ms via BMSSP+WASM. However, (1) never instantiates or tests against actual broken MCP Dense implementation — only tests itself, (2) benchmark() uses hardcoded Python times as constants, not actual measurements, (3) getMCPToolDefinition() is schema template with ZERO MCP transport binding, (4) does NOT patch the ORPHANED MCP→Rust solver gap discovered in R76. This is theatrical performance demonstration, not functional integration.
+
+2. **HIGH - HARDCODED BENCHMARK CIRCULARITY (lines 115-175)**: benchmark() static method generates synthetic test matrices (diagonally dominant, ~0.1% sparsity) but has NO validation that these match the "190x slower" problem scenario. Test cases hardcoded (sizes 100, 1000, 5000). Status check (line 161) compares executionTime < pythonTime where pythonTime values (5.0ms, 40.0ms, 500.0ms) are hardcoded constants, not actual Python measurements. Zero cross-validation against original implementation.
+
+3. **HIGH - MISSING MCP TRANSPORT LAYER (lines 180-215)**: getMCPToolDefinition() returns standard MCP schema (name "solve_linear_system_fast") but does NOT implement ANY of the 4 known MCP protocols (JSON-RPC R51, rmcp R72, fastmcp TS, custom Rust traits). Function returns definition only — would require external wrapper to invoke via MCP. Module export (line 211) has no MCP server binding.
+
+4. **HIGH - INTEGRATION DEPENDENCY CLAIMS UNVERIFIED (lines 11-30)**: Imports BMSSPSolver and FastConjugateGradient from ./bmssp-solver.js and ./fast-solver.js. R76 found BMSSP "novel but mathematically unsound". R56 found backward_push.rs "genuine but orphaned". This file imports them directly but never validates whether they solve the actual dense problem or are themselves problematic.
+
+5. **MEDIUM - ALGORITHMIC HEURISTIC LACK JUSTIFICATION (lines 45-85)**: solve() method uses hardcoded threshold: if nnz < 10% of n², use BMSSP; else use FastConjugateGradient. No empirical justification for 10% threshold. No sensitivity analysis. Decision logic is reasonable but appears arbitrary.
+
+6. **MEDIUM - SPEEDUP METRIC MISLEADING (lines 86-106)**: Residual error calculation (lines 87-93) is mathematically correct L2 norm. However, speedupVsPython metric (line 106) = 40.0 / executionTime assumes fixed 40ms Python baseline for 1000x1000 matrices. If actual Python times differ, metric becomes meaningless. No ground truth provided.
+
+7. **MEDIUM - MODULE INTEGRATION INCOMPLETE (lines 205-215)**: Exports MCPDenseSolverFixed class and includes CLI benchmark invocation (lines 213-215). However, benchmark() is NEVER called by actual MCP server or tool invoker. Would require external integration point. Standard Node.js pattern but integration point missing.
+
 
 ## 4. Positives Registry
 
@@ -1635,5 +1658,8 @@ R78 (2026-02-17): CONNECTED clear + ReasoningBank Rust completion + sublinear co
 
 | Session | Date | Focus | Files | Key Findings |
 |---------|------|-------|-------|--------------|
-| R81 | 2026-02-16 | test-retrieval.ts | 1 | 16th hash-embedding (synthetic sin/cos). Unit test isolation — no query embedding, no MMR test. Config weights present but unused. Cosine similarity math correct standalone. |
+| R81 | 2026-02-17 | reasoningbank-storage/adapters/native.rs | 1 | **Single Mutex blocks executor (CRITICAL)** — NativeStorage 6th independent adapter. No connection pooling, embedding storage unused, no transactions. |
+| R81 | 2026-02-17 | mcp-dense-fix.js performance claim analysis | 1 | **THEATRICAL PERFORMANCE DEMO** — claims 4000x+ fix (7700ms→<2ms) but never tests against actual broken MCP Dense. benchmark() circular (tests itself). getMCPToolDefinition() = schema template, NO MCP transport. Does NOT patch ORPHANED MCP→Rust gap (R76). Hardcoded thresholds, misleading speedup metric. |
 
+
+| R81 | 2026-02-17 | reasoningbank-learning/async_learner_v2.rs | 1 | **V2 = actor pattern wrapper, NOT streaming layer**. Thread-based deadlock risk (tokio single-threaded). Asymmetric error handling (init caught, runtime crashes silent). DISCONNECTED from optimizer.rs (R78 strategy ranker). Pattern cloning inefficiency. 5 CRITICAL findings. |
