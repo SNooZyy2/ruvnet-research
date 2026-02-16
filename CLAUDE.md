@@ -344,7 +344,7 @@ Each research agent `.md` file is a prompt template. To use it in a swarm, read 
 |---------------|-------------------|-------|-----|
 | `reader.md` | `Bash` | sonnet | Needs Bash for DB writes via `node -e` |
 | `scanner.md` | `Bash` | haiku | Simple filesystem walk + DB inserts |
-| `synthesizer.md` | `v3-coder` | sonnet | Needs Read + Write + Bash for docs + DB |
+| `synthesizer.md` | `general-purpose` | sonnet | Needs Read + Write + Bash for docs + DB |
 | `mapper.md` | `Bash` | sonnet | Needs Read + Grep + Bash for tracing |
 | `facade-detector.md` | `Bash` | sonnet | Needs Read + Bash for analysis + DB |
 | `cross-repo-tracer.md` | `Bash` | sonnet | Needs Grep across repos + Bash for DB |

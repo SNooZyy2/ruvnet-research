@@ -1,18 +1,18 @@
 # Swarm Coordination Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~18.4% (259/1402 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-16 (Session R81)
+> **Priority**: HIGH | **Coverage**: ~21.4% (306/1428 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-16 (Session R82)
 
 ## 1. Current State Summary
 
-The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R79 completed the ruv-swarm-wasm core source layer, finished ruv-swarm-mcp and ruv-swarm-transport source coverage, and tested JS benchmark trustworthiness. R80 added activation.rs (35-40% BROKEN) to complete WASM crate coverage. **R81 completes npm runtime analysis (4 files, ~934 LOC)** — neural-models/index.js (272 LOC) reveals ZERO Rust bridge and pure-JS training facade, gh-cli-coordinator.js (260 LOC, 88-92%) is production GitHub CLI wrapper for issue-based task distribution, security.js (218 LOC, ~65%) has WASM integrity bypass + insufficient sanitization, singleton-container.js (183 LOC, ~85%) is genuine IoC container that does NOT wire the 6 parallel routing systems.
+The swarm-coordination domain spans 267 DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R79-R81 completed ruv-swarm-wasm core source, ruv-swarm-mcp, ruv-swarm-transport, and npm runtime analysis. **R82 completes CONNECTED tier clear + DAA type architecture (4 files, ~462 LOC)** — wasm neural.rs (155 LOC, 85-90%) REVERSES R80 activation.rs with correct ruv-fann API (NetworkBuilder, run(), get_weights/set_weights, 17-variant activation parser), types.rs (132 LOC, 78-82%) RESOLVES R69 ghost model mismatch (AgentType = 5 agent ROLES not 27 neural models, two separate type hierarchies), daa neural.rs (94 LOC, 0-5%) PURE METADATA FACADE confirming R69 GHOST WASM pattern, patterns.rs (81 LOC, 15-20%) defines 6 cognitive thinking styles but 67% undefined with zero behavior logic.
 
-**R81 key results (4 files, ~934 LOC):**
+**R82 key results (4 files, ~462 LOC):**
 
-- **neural-models/index.js (~15%) BARREL + TRAINING FACADE** — 272 LOC barrel exports 8 classes (Transformer, CNN, GRU, Autoencoder, GNN, ResNet, VAE, LSTM) but ZERO Rust integration. Pure JS reimplementation contradicts R40's inference-bridge assumption. createNeuralModel factory pattern sound but orphaned from ruv-swarm-ml. Individual models call this.backward(loss, lr) but backward() in base.js only logs, does NOT update weights. Models appear trainable but gradient descent is fabricated. 234 lines MODEL_PRESETS dead documentation with comprehensive presets for all 8 architectures NOT USED by imported models. Suggests multiple conflicting model definitions (neural-network-manager imports 3 sources: index.js + presets/index.js + neural-presets-complete.js). **R40 CORRECTION**: Training facade extends from Python/Rust to JS — JS models have same training facade as R40 found in training.rs.
-- **gh-cli-coordinator.js (88-92%) PRODUCTION GitHub CLI wrapper** — 260 LOC with real execSync('gh ...') calls for all GitHub operations (issue list/edit/comment/pr-create). Issue-based swarm task distribution with swarm-* label prefix. 1-hour lock expiry mechanism via SQLite. Five sequential claimTask operations (label, comment, DB record) atomic-enough for GitHub-based coordination. createAllocationPR() orchestrates multi-step git workflow (branch/commit/push/pr-create). getCoordinationStatus() read-only aggregation. cleanupStaleLocks() maintenance. NOT connected to 6 routing systems (ADR-008/LLMRouter/RuvLLMOrchestrator/ProviderManager/SemanticRouter/ModelRouter) — operates at different abstraction layer (GitHub API issue distribution vs model selection). Infrastructure-ready task distribution layer.
-- **security.js (~65%) MIXED quality** — 218 LOC with real SHA256 hashing, SecurityError class. BUT WasmIntegrityVerifier silent failure mode (loadKnownHashes() catches all errors without logging), updateHash parameter bypasses integrity on first run (allows attacker WASM into checksums.json), no signature verification. CommandSanitizer blacklist approach insufficient (permissive regex allows path separators/equals, misses newlines/command substitution variants, static method pattern suggests immature design, allowlist includes undefined "claude" command). DependencyVerifier only checks version (no package integrity/checksums/signatures, vulnerable to npm substitution/hijacking attacks).
-- **singleton-container.js (~85%) GENUINE IoC CONTAINER** — 183 LOC with factory registration, lazy singletons, dependency chain resolution, proper process cleanup. Does NOT wire the 6 routing systems — pure framework with zero hardcoded registrations. Missing circular dependency detection.
+- **neural.rs (wasm) 85-90% GENUINE** — 155 LOC REVERSES R80 activation.rs (35-40% broken). Correct ruv-fann API: NetworkBuilder, run(), get_weights/set_weights, 17-variant activation parser. All verified against ruv-fann 0.1.5 source. Inference-only (no train()). Metrics struct is facade (never populated). WASM scorecard: +1 genuine → 14 genuine + 1 GHOST vs 11 theatrical (56% genuine).
+- **types.rs (daa) 78-82% genuine type architecture** — 132 LOC RESOLVES R69 ghost model mismatch. AgentType enum defines 5 agent ROLES (Researcher, Coder, Analyst, Coordinator, Specialist), NOT 27 neural models. Two separate type hierarchies that never connected. DecisionContext production-quality (5 fields), AutonomousCapability 11 well-defined variants. NeuralNetworkManager is STUB (only initialized: bool).
+- **neural.rs (daa) 0-5% PURE METADATA FACADE** — 94 LOC. NeuralManager stores HashMap<String, NeuralNetworkInfo> but ZERO neural computation (no forward/backward/train/run). Zero ruv-fann imports. Compare: ruv-swarm-wasm neural.rs wraps real Network<f32>. Confirms R69 GHOST WASM pattern.
+- **patterns.rs (daa) 15-20% skeletal** — 81 LOC. PatternManager pure data structure. Defines 6 cognitive thinking styles (Convergent, Divergent, Lateral, Systems, Critical, Adaptive) but only 2 have metadata (67% undefined). Zero behavior: no selection, effectiveness tracking, or evolution logic.
 
 **R79 key results (carried forward):**
 
@@ -215,6 +215,9 @@ The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle,
 | bin/daa-coordinator.rs | ruv-swarm-daa | 465 | 65% | DEEP | Daemon skeleton. select_optimal_agent() returns first HashMap key | R34 |
 | lib.rs (DAA) | ruv-swarm-daa | 460 | 55% | DEEP | orchestrate_task() hardcodes success:true, 100ms, 0.95 efficiency | R34 |
 | traits.rs | ruv-swarm-daa | 402 | 80% | DEEP | 5 sophisticated traits, ZERO implementations | R34 |
+| types.rs | ruv-swarm-daa | 132 | 78-82% | DEEP | RESOLVES R69 — AgentType = 5 ROLES not 27 models. DecisionContext production-quality. NeuralNetworkManager STUB | R82 |
+| neural.rs | ruv-swarm-daa | 94 | 0-5% | DEEP | PURE METADATA FACADE. HashMap storage, ZERO computation. Confirms R69 GHOST WASM | R82 |
+| patterns.rs | ruv-swarm-daa | 81 | 15-20% | DEEP | 6 cognitive styles defined, 67% undefined. Zero behavior logic | R82 |
 
 ### ruv-swarm-wasm Rust Crate (ruv-FANN)
 
@@ -223,6 +226,7 @@ The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle,
 | neural_swarm_coordinator.rs | ruv-swarm-wasm | 791 | 15-20% | DEEP | All 4 training modes return hardcoded loss curves | R29 |
 | swarm_orchestration_wasm.rs | ruv-swarm-wasm | 757 | 20-25% | DEEP | execute_distributed_task() always returns {status:"initiated"} | R29 |
 | utils.rs | ruv-swarm-wasm | 300 | 88% | DEEP | GENUINE WASM utility — JS interop, feature detection, performance timing, portable SIMD via wide::f32x4. SIMD runtime detection stub (returns true). Memory usage placeholder (hardcoded 64KB) | R72 |
+| neural.rs | ruv-swarm-wasm | 155 | 85-90% | DEEP | REVERSES R80 activation.rs — correct ruv-fann API (NetworkBuilder, run(), get_weights/set_weights, 17 activations). Inference-only. Metrics facade | R82 |
 
 ### ruv-swarm-cli Rust Crate (ruv-FANN)
 
@@ -436,7 +440,9 @@ The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle,
 | C54 | **benchmark.js 100% FABRICATED** — All 6 benchmarks use setTimeout (50ms/5ms/3ms/20ms) as "measurements". RuvSwarm initialized but never used in tests. Score always 100% (hardcoded delays < targets). DEEPEST fabrication in research corpus (0-5%). Extends R59 benchmark deception to JS | benchmark.js (ruv-swarm npm) | R79 | Open |
 | C55 | **mcp-tools-benchmarks.js MISLABELED** — 8th mislabeled file. Despite name, does NOT invoke any MCP tools. Generic JS micro-benchmarks (array alloc, JSON parse, matrix multiply). Sound performance.now() technique measuring wrong target. Zero of R51's 256 MCP tools tested | mcp-tools-benchmarks.js (ruv-swarm npm) | R79 | Open |
 | C56 | **agent.rs FACADE execute()** — JsAgent.execute() uses js_sys::Promise::new with hardcoded 100ms setTimeout. Returns synthetic TaskResponse with hardcoded "completed" status. Zero actual task dispatch. Violates core Agent trait contract (sync vs async, missing health_check/status) | agent.rs (ruv-swarm-wasm) | R79 | Open |
-| C57 | **activation.rs API mismatches** — Calls non-existent neuron.activate() (should be calculate()) and Neuron::new with 3 params (should be 2). Cannot compile. Confirms R79 BIMODAL | activation.rs (ruv-swarm-wasm) | R80 | Open |
+| C57 | **activation.rs API mismatches** — Calls non-existent neuron.activate() (should be calculate()) and Neuron::new with 3 params (should be 2). Cannot compile. Confirms R79 BIMODAL | activation.rs (ruv-swarm-wasm) | R80 | Resolved by R82 |
+| C58 | **DAA neural.rs PURE METADATA FACADE** — 0-5%. NeuralManager stores HashMap<String, NeuralNetworkInfo> but ZERO neural computation (no forward/backward/train/run). Zero ruv-fann imports. Confirms R69 GHOST WASM pattern | neural.rs (ruv-swarm-daa) | R82 | Open |
+| C59 | **R69 ghost model mismatch RESOLVED** — AgentType enum defines 5 agent ROLES (Researcher, Coder, Analyst, Coordinator, Specialist), NOT 27 neural models. Two separate type hierarchies never connected. NeuralNetworkManager is STUB | types.rs (ruv-swarm-daa) | R82 | Open (resolution) |
 
 ### 3b. HIGH Findings
 
@@ -517,6 +523,9 @@ The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle,
 | H167 | **createNeuralModel factory pattern correct but disconnected** — Dynamic import + async constructor pattern sound, but models are orphaned from Rust. Used by neural-network-manager.js which also imports 2 OTHER preset sources (presets/index.js, neural-presets-complete.js), suggesting multiple conflicting model definitions | neural-models/index.js | R81 | Open |
 | H168 | **MODEL_PRESETS 234 lines dead documentation** — Comprehensive presets for all 8 architectures (transformer small/base/large, CNN mnist/cifar10/imagenet, GRU text_classification/sequence_generation/time_series, etc) with realistic hyperparameters. NOT USED by imported model files. Pure documentation artifact | neural-models/index.js | R81 | Open |
 | H169 | **TRAINING FACADE CONFIRMED** — Individual models (transformer.js etc) call this.backward(loss, lr) but backward() in base.js only logs console.log(), does NOT update weights. forward() works, training() runs forward+loss+backward but stub backward means NO GRADIENT UPDATES. Models appear trainable but gradient descent is fabricated | neural-models/index.js, base.js | R81 | Open |
+| H170 | **REVERSES R80 activation.rs** — wasm neural.rs has correct ruv-fann API: NetworkBuilder, run(), get_weights/set_weights, 17-variant activation parser. All verified against ruv-fann 0.1.5 source. Inference-only (no train()) | neural.rs (ruv-swarm-wasm) | R82 | Open (positive) |
+| H171 | **wasm neural.rs metrics facade** — NetworkMetrics defined but never populated. compute_metrics() returns default values | neural.rs (ruv-swarm-wasm) | R82 | Open |
+| H172 | **patterns.rs 67% undefined cognitive styles** — Defines 6 thinking styles (Convergent, Divergent, Lateral, Systems, Critical, Adaptive) but only 2 have metadata. Zero behavior: no selection, effectiveness tracking, or evolution | patterns.rs (ruv-swarm-daa) | R82 | Open |
 ## 4. Positives Registry
 
 | Description | File(s) | Session |
@@ -568,6 +577,8 @@ The swarm-coordination domain spans 263 DEEP files across multi-agent lifecycle,
 | **models.rs (92-95%) completes ruv-swarm-persistence as production-quality crate** — 5 data models with serde, UUID v4, builder pattern, retry logic | models.rs | R71 |
 | **SWE-Bench git infrastructure genuine** — 85-95% real patch application, sandboxing, test execution via TokioCommand. Dataset is mocked but infrastructure production-ready | evaluation.rs | R50 |
 | **ruv-swarm-persistence crate COMPLETE at 93% weighted** — lib.rs (88-92%) + memory.rs (95-98%) + wasm.rs (95%) + migrations.rs (92-95%). Trait-based 3-backend architecture, 28 async CRUD methods, QueryBuilder with SQL injection prevention. BEST complete crate in ruv-swarm Rust | lib.rs (persistence) | R70 |
+| **wasm neural.rs correct ruv-fann API** — 85-90% genuine. NetworkBuilder, run(), get_weights/set_weights, 17-variant activation parser verified against ruv-fann 0.1.5. REVERSES R80 activation.rs broken API | neural.rs (ruv-swarm-wasm) | R82 |
+| **types.rs resolves R69 ghost model confusion** — 78-82% genuine type architecture. AgentType = 5 agent ROLES not 27 neural models. DecisionContext production-quality with 5 fields, AutonomousCapability 11 well-defined variants | types.rs (ruv-swarm-daa) | R82 |
 | **ruv-swarm-mcp/src/ COMPLETE** (9/9 DEEP) — error.rs (88-92%) triple error representation (string/JSON-RPC/HTTP). Session-aware tracing with credential stripping. Protocol-agnostic by design | error.rs | R79 |
 | **ruv-swarm-transport/src/ COMPLETE** (5/5 DEEP) — lib.rs (90%+) clean barrel with async Transport trait, DashMap registry, 7 error variants | lib.rs (transport) | R79 |
 | **simd_tests.rs GENUINE WASM SIMD testing** — wasm_bindgen_test with real math verification (tolerance, element-wise). 5 test functions + 3 JS-callable suites | simd_tests.rs | R79 |
@@ -641,7 +652,7 @@ The ruv-FANN repository contains 11 Rust crates for swarm coordination. Quality 
 
 **Moderate quality (60-80%)**: ruv-swarm-wasm cognitive layer (agent_neural.rs 80-85%, simd_optimizer.rs 85-90%, cognitive_diversity_wasm.rs 75-80%) — genuinely trains ruv_fann networks with IncrementalBackprop, real f32x4 WASM SIMD128 intrinsics, real Shannon diversity index. ruv-swarm-persistence (sqlite.rs 92%, ensemble/mod.rs 78%, agent_forecasting/mod.rs 65%) — r2d2 pooling with WAL and ACID, real averaging and EMA, but PI*1000.0 mock timestamp (R21, R31).
 
-**Facades (5-35%)**: ruv-swarm-daa (gpu.rs 15%, daa_gpu_agent_framework.rs 5-8%, coordination_protocols.rs 30%, lib.rs 55%) — ZERO GPU ops despite 3 GPU-named files, all 11 types from ruv_fann::webgpu don't exist, seek_consensus() sets consensus_reached=true unconditionally, orchestrate_task() hardcodes success:true. ruv-swarm-wasm neural (neural_swarm_coordinator.rs 15-20%, swarm_orchestration_wasm.rs 20-25%, learning_integration.rs 30-40%) — all 4 training modes return hardcoded loss curves [0.5,0.3,0.2,0.15,0.1], 4 optimization algorithms return pattern.clone() (R28, R29, R34).
+**Facades (5-35%)**: ruv-swarm-daa (gpu.rs 15%, daa_gpu_agent_framework.rs 5-8%, coordination_protocols.rs 30%, lib.rs 55%, neural.rs 0-5%, patterns.rs 15-20%) — ZERO GPU ops despite 3 GPU-named files, all 11 types from ruv_fann::webgpu don't exist, seek_consensus() sets consensus_reached=true unconditionally, orchestrate_task() hardcodes success:true. **R82**: neural.rs is PURE METADATA FACADE (HashMap storage, zero computation), patterns.rs defines 6 cognitive styles but 67% undefined with zero behavior. types.rs (78-82%) RESOLVES R69 ghost model mismatch — AgentType = 5 agent ROLES not 27 neural models. ruv-swarm-wasm neural (neural_swarm_coordinator.rs 15-20%, swarm_orchestration_wasm.rs 20-25%, learning_integration.rs 30-40%) — all 4 training modes return hardcoded loss curves [0.5,0.3,0.2,0.15,0.1], 4 optimization algorithms return pattern.clone(). **R82**: neural.rs (85-90%) REVERSES R80 activation.rs with correct ruv-fann API (R28, R29, R34, R82).
 
 **Interface drift epidemic**: Three-way API mismatches — handlers.rs (R28) has ~12 wrong method calls to orchestrator.rs (R31), tools.rs schemas (R31) don't match validation.rs strategies (4 vs 6), lib.rs (R31) has 85% commented out disconnecting the entire MCP server. Components developed independently and never integrated.
 
@@ -798,8 +809,11 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 ### R80 (2026-02-16): CONNECTED clear — activation.rs
 1 file, 82 LOC. activation.rs (35-40% BROKEN) — 2 API mismatches with ruv-fann prevent compilation. Genuine design (18/25 activation functions, wasm_bindgen) but broken execution. Confirms R79 BIMODAL. DEEP: 257→258.
 
-### R81 (2026-02-16): GitHub CLI Coordinator
-1 file, 198 LOC. **gh-cli-coordinator.js (88-92% GENUINE)** — production-quality GitHub CLI wrapper using execSync() for all GitHub operations. Real shell commands to `gh issue list|edit|comment`, real swarm-task label management via GitHub labels, 1-hour lock expiry mechanism via SQLite. Five sequential claimTask operations (label, comment, DB record) are atomic-enough for GitHub-based coordination. createAllocationPR() orchestrates multi-step git workflow (branch/commit/push/pr-create). getCoordinationStatus() provides read-only swarm status via issue aggregation. cleanupStaleLocks() maintenance routine. NOT connected to 6 routing systems (ADR-008/LLMRouter/RuvLLMOrchestrator/ProviderManager/SemanticRouter/ModelRouter) — operates at different abstraction layer (GitHub API issue distribution vs model selection). Part of ruv-swarm npm package GitHub CLI subsystem, orthogonal to R72 demonstration-framework finding (which is runtime task execution stub; this is task distribution stub). Infrastructure-ready but orchestration disabled. DEEP: 1,232→1,233.
+### R81 (2026-02-16): npm runtime analysis
+4 files, ~934 LOC, 13 findings (3H). neural-models/index.js (15%) barrel + training facade — ZERO Rust bridge. gh-cli-coordinator.js (88-92%) production GitHub CLI wrapper. security.js (65%) MIXED — real SHA256 but WASM integrity bypass. singleton-container.js (85%) genuine IoC container, does NOT wire 6 routing systems. DEEP: 1,232→1,236.
+
+### R82 (2026-02-16): CONNECTED clear + DAA type architecture
+4 files, ~462 LOC, 5 findings (2C, 3H). **wasm neural.rs (85-90%) REVERSES R80 activation.rs** — correct ruv-fann API (NetworkBuilder, run(), get_weights/set_weights, 17 activations). **types.rs (78-82%) RESOLVES R69 ghost model** — AgentType = 5 ROLES not 27 models. **daa neural.rs (0-5%) PURE FACADE** — HashMap storage, zero computation. patterns.rs (15-20%) defines 6 cognitive styles, 67% undefined. WASM: +1 genuine → 14:11 (56%). DEEP: 1,256→1,260.
 
 ### R81 (2026-02-16): npm security module (security.js)
 1 file, 218 LOC, 8 findings (3 HIGH). WasmIntegrityVerifier silent failures + updateHash bypass. CommandSanitizer blacklist insufficient (permissive regex, static methods). DependencyVerifier zero integrity checks (version-only, vulnerable to npm hijacking).
