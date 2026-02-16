@@ -11,6 +11,7 @@ This is a research project analyzing the ruvnet multi-repo universe (claude-flow
 
 ## Behavioral Rules
 
+- **CRITICAL: NEVER spawn a research Task agent without first reading its template from `agents/`** — see Agent Registry below. The template MUST be injected as the prompt prefix. Bare prompts are forbidden.
 - ALWAYS update the database when reading files (depth, lines_read, last_read_date)
 - ALWAYS insert findings with appropriate severity (CRITICAL/HIGH/MEDIUM/INFO) and category
 - ALWAYS tag files with domains via file_domains junction table
