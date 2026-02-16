@@ -27,7 +27,7 @@ All database operations use better-sqlite3. Use inline Node.js via Bash tool:
 ```bash
 node -e "
 const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
-const rows = db.prepare('SELECT * FROM priority_gaps LIMIT 10').all();
+const rows = db.prepare('SELECT * FROM smart_priority_gaps WHERE tier_rank <= 2 LIMIT 10').all();
 console.log(JSON.stringify(rows, null, 2));
 db.close();
 "
@@ -35,7 +35,14 @@ db.close();
 
 ## Query Recipes
 
-### 1. What should I read next?
+### 1. What should I read next? (smart, relevance-tiered)
+```sql
+SELECT * FROM smart_priority_gaps WHERE tier_rank <= 2 LIMIT 10;
+```
+Tiers: CONNECTED (has dep to DEEP file), OWN_CODE (custom-src), PROXIMATE (3+ DEEP in same dir), NEARBY (1-2 DEEP), DOMAIN_ONLY (tag only).
+Use `tier_rank <= 2` for high-signal files, or `LIMIT 10` without filter for all tiers.
+
+### 1b. What should I read next? (raw, unranked)
 ```sql
 SELECT * FROM priority_gaps LIMIT 10;
 ```
@@ -108,14 +115,35 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 
 ### 10. Tag file with domain
 ```sql
-INSERT OR IGNORE INTO file_domains (file_id, domain_id, relevance_score)
-VALUES (?, ?, ?);
+INSERT OR IGNORE INTO file_domains (file_id, domain_id)
+VALUES (?, ?);
 ```
 
 ### 11. Add dependency
 ```sql
 INSERT INTO dependencies (source_file_id, target_file_id, relationship, evidence)
 VALUES (?, ?, ?, ?);
+```
+
+### 12. Check package connectivity
+```sql
+SELECT * FROM package_connectivity ORDER BY total_cross_deps ASC;
+```
+
+### 13. Find isolated subtrees (Goalie-like islands)
+```sql
+SELECT * FROM subtree_connectivity
+WHERE outbound_cross_deps = 0 AND inbound_cross_deps = 0 AND untouched >= 10
+ORDER BY total_loc DESC;
+```
+
+### 14. List/add exclusion patterns
+```sql
+-- List current exclusions
+SELECT * FROM exclude_paths;
+-- Add new exclusion (priority_gaps view auto-filters these)
+INSERT OR IGNORE INTO exclude_paths (pattern, reason, added_date)
+VALUES ('%pattern%', 'reason why excluded', '2026-02-16');
 ```
 
 ## Session Protocol
@@ -135,10 +163,54 @@ db.close();
 ```bash
 node -e "
 const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
-const gaps = db.prepare('SELECT * FROM priority_gaps LIMIT 10').all();
+const gaps = db.prepare('SELECT * FROM smart_priority_gaps WHERE tier_rank <= 2 LIMIT 10').all();
 console.log(JSON.stringify(gaps, null, 2));
 db.close();
 "
+```
+
+### 2b. Check for Isolated Subtrees (MANDATORY before planning)
+Before selecting files from smart_priority_gaps, check for disconnected islands that should be excluded.
+Files in isolated subtrees have zero cross-package dependencies and waste research time.
+
+Only trust RELIABLE confidence — LOW_CONFIDENCE and NO_DATA mean we haven't recorded enough
+dependencies to judge. When confidence is low, do NOT auto-exclude; instead investigate first.
+```bash
+node -e "
+const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
+// RELIABLE islands are safe to exclude without investigation
+const reliable = db.prepare(\`
+  SELECT * FROM subtree_connectivity
+  WHERE outbound_cross_deps = 0 AND inbound_cross_deps = 0
+    AND untouched >= 10 AND confidence = 'RELIABLE'
+  ORDER BY total_loc DESC LIMIT 10
+\`).all();
+console.log('RELIABLE isolated (safe to exclude):');
+console.log(JSON.stringify(reliable, null, 2));
+// LOW_CONFIDENCE/NO_DATA need investigation before excluding
+const suspect = db.prepare(\`
+  SELECT * FROM subtree_connectivity
+  WHERE outbound_cross_deps = 0 AND inbound_cross_deps = 0
+    AND untouched >= 10 AND confidence != 'RELIABLE'
+  ORDER BY total_loc DESC LIMIT 10
+\`).all();
+console.log('SUSPECT (need investigation before excluding):');
+console.log(JSON.stringify(suspect, null, 2));
+db.close();
+"
+```
+If a RELIABLE subtree is isolated AND not core to claude-flow's runtime, add it to `exclude_paths`:
+```bash
+node -e "
+const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
+const today = new Date().toISOString().slice(0, 10);
+db.prepare('INSERT OR IGNORE INTO exclude_paths (pattern, reason, added_date) VALUES (?, ?, ?)').run('%pattern%', 'reason', today);
+db.close();
+"
+```
+Also check that selected files from smart_priority_gaps are not in known-isolated packages:
+```sql
+SELECT * FROM package_connectivity WHERE connectivity = 'ISOLATED';
 ```
 
 ### 3. Research Loop
@@ -343,7 +415,7 @@ Complete research session workflow:
 
 | Phase | Agents | Parallel? |
 |-------|--------|-----------|
-| 1. Plan | Query `priority_gaps`, select files | Sequential |
+| 1. Plan | Query `smart_priority_gaps` (tier_rank <= 2), select files | Sequential |
 | 2. Read | reader ×3-5 + facade-detector ×2 | Parallel |
 | 3. Map | mapper ×1 | After phase 2 |
 | 4. Score | realness-scorer ×1 | After phase 2 |
@@ -383,6 +455,11 @@ These gotchas MUST be included in agent prompts to avoid errors:
 - `file_domains` table: only `file_id, domain_id` (NO `relevance_score`)
 - Date: compute in JS (`new Date().toISOString().slice(0,10)`) and pass as parameter — avoids quoting issues in `node -e`
 - `packages.base_path` uses `~` — expand with `.replace(/^~/, process.env.HOME)` in Node.js
+- `exclude_paths` table: `pattern, reason, added_date` — 39 patterns auto-filtered by `priority_gaps` view
+- `smart_priority_gaps` view: relevance-tiered priority queue. Use `WHERE tier_rank <= 2` for high-signal files. Tiers: CONNECTED (1), OWN_CODE (1), PROXIMATE (2), NEARBY (3), DOMAIN_ONLY (4)
+- `priority_gaps` view: raw unranked priority queue (use `smart_priority_gaps` instead)
+- `package_connectivity` view: shows ISOLATED/WEAKLY_CONNECTED/CONNECTED per package
+- `subtree_connectivity` view: same at directory level — use to find Goalie-like islands before reading
 
 ## Common Tasks
 
@@ -391,9 +468,10 @@ These gotchas MUST be included in agent prompts to avoid errors:
 SELECT f.* FROM files f
 JOIN file_domains fd ON f.id = fd.file_id
 JOIN domains d ON fd.domain_id = d.id
-WHERE d.priority = 1
+WHERE d.priority = 'HIGH'
   AND f.depth IN ('NOT_TOUCHED', 'SURFACE', 'MENTIONED')
-ORDER BY f.total_lines DESC
+  AND NOT EXISTS (SELECT 1 FROM exclude_paths ep WHERE f.relative_path LIKE ep.pattern)
+ORDER BY f.loc DESC
 LIMIT 10;
 ```
 
@@ -402,8 +480,10 @@ LIMIT 10;
 SELECT f.* FROM files f
 LEFT JOIN file_domains fd ON f.id = fd.file_id
 WHERE fd.file_id IS NULL
+  AND f.depth != 'EXCLUDED'
   AND f.relative_path NOT LIKE '%test%'
-  AND f.relative_path NOT LIKE '%node_modules%';
+  AND f.relative_path NOT LIKE '%node_modules%'
+  AND NOT EXISTS (SELECT 1 FROM exclude_paths ep WHERE f.relative_path LIKE ep.pattern);
 ```
 
 ### Track session progress

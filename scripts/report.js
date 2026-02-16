@@ -81,8 +81,10 @@ function generateReport() {
       SUM(CASE WHEN depth = 'MEDIUM' THEN 1 ELSE 0 END) as medium_count,
       SUM(CASE WHEN depth = 'SURFACE' THEN 1 ELSE 0 END) as surface_count,
       SUM(CASE WHEN depth = 'MENTIONED' THEN 1 ELSE 0 END) as mentioned_count,
-      SUM(CASE WHEN depth = 'NOT_TOUCHED' THEN 1 ELSE 0 END) as untouched_count
+      SUM(CASE WHEN depth = 'NOT_TOUCHED' THEN 1 ELSE 0 END) as untouched_count,
+      SUM(CASE WHEN depth = 'EXCLUDED' THEN 1 ELSE 0 END) as excluded_count
     FROM files
+    WHERE depth != 'EXCLUDED'
   `).get();
 
   const totalFiles = stats.total_files || 0;
@@ -220,29 +222,32 @@ function generateReport() {
   }
   sections.push('');
 
-  // 6. Priority Gaps
+  // 6. Priority Gaps (smart, relevance-tiered)
   sections.push(`## Priority Gaps (Top 20)\n`);
-  sections.push('*NOT_TOUCHED files in HIGH priority domains — what to read next*\n');
+  sections.push('*Relevance-tiered: CONNECTED/OWN_CODE (rank 1) → PROXIMATE (2) → NEARBY (3) → DOMAIN_ONLY (4)*\n');
 
   const gaps = db.prepare(`
     SELECT
       domain_name,
       package_name,
       relative_path,
-      loc
-    FROM priority_gaps
+      loc,
+      relevance_tier,
+      tier_rank
+    FROM smart_priority_gaps
+    ORDER BY tier_rank ASC, loc DESC
     LIMIT 20
   `).all();
 
   if (gaps.length > 0) {
     const rows = [
-      '| Domain | Package | File | LOC |',
-      '|--------|---------|------|-----|'
+      '| Tier | Domain | Package | File | LOC |',
+      '|------|--------|---------|------|-----|'
     ];
 
     gaps.forEach(g => {
       rows.push(
-        `| ${g.domain_name} | ${g.package_name} | ${g.relative_path} | ${formatNumber(g.loc)} |`
+        `| ${g.relevance_tier} | ${g.domain_name} | ${g.package_name} | ${g.relative_path} | ${formatNumber(g.loc)} |`
       );
     });
 

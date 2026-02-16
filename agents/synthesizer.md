@@ -124,6 +124,7 @@ const gaps = db.prepare(\`
   JOIN domains d ON fd.domain_id = d.id
   WHERE d.name = ?
     AND f.depth IN ('NOT_TOUCHED', 'SURFACE', 'MENTIONED')
+    AND NOT EXISTS (SELECT 1 FROM exclude_paths ep WHERE f.relative_path LIKE ep.pattern)
   ORDER BY f.loc DESC
   LIMIT 20
 \`).all(domainName);
