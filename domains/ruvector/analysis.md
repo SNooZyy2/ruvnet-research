@@ -1,7 +1,7 @@
 # Ruvector Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~7.8% (168/~2,150 DEEP est.) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R39)
+> **Priority**: HIGH | **Coverage**: ~8.5% (182/~2,150 DEEP est.) | **Status**: In Progress
+> **Last updated**: 2026-02-16 (Session R54)
 
 ## 1. Current State Summary
 
@@ -10,11 +10,15 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 **Top-level verdicts:**
 
 - **Hash-based embeddings are systemic across Rust + JS.** 7+ files default to character-sum or FNV-1a hash, not semantic embeddings. All "semantic search" using defaults is character-frequency matching.
-- **Best code:** temporal-tensor (95%, production-ready), ruQu QEC (91%, genuine quantum error correction), ruvllm kernels (90%, NEON SIMD), cognitum-gate-kernel (93%, rivals neural-network-impl), postgres SIMD (95-98%).
-- **Worst code:** ruvector-graph has production parser but NO executor (30-35% complete), postgres HNSW `connect_node_to_neighbors()` completely empty, speculative decoding 2x SLOWER than vanilla.
-- **Core HNSW wraps hnsw_rs** — not novel, but adds real value (SIMD, REDB, concurrency).
+- **Best code:** temporal-tensor (95%, production-ready), ruQu QEC (91→89% revised with subpoly_decoder drag), ruvllm kernels (90%, NEON SIMD), cognitum-gate-kernel (93%, rivals neural-network-impl), postgres SIMD (95-98%), ruqu-core (noise 96-98%, mitigation 95-98%, transpiler 95-98%).
+- **Worst code:** ruvector-graph has production parser but NO executor (30-35% complete), postgres HNSW `connect_node_to_neighbors()` completely empty, speculative decoding 2x SLOWER than vanilla, index_bench.rs (42%) theatrical benchmarking (HNSW search is brute-force O(n)), subpolynomial/mod.rs (45-50%) false complexity claims, **subpoly_decoder.rs (35-40%) 3rd FALSE subpolynomial** — O(n²) greedy under "provable" claims.
+- **Edge AI confirmed production-grade** — lora.rs (90-95%) real dual-SIMD LoRA with Q4/Q8 quantization, federated.rs (95-98%) BEST federated learning in project (Byzantine-robust, differential privacy, TopK compression).
+- **TWO independent LoRA implementations**: micro_lora.rs (training-focused, EWC++, sona) vs edge-net lora.rs (inference-focused, quantized, WASM).
+- **Core HNSW wraps hnsw_rs** — vendored upstream v0.3.3 (NOT patched), but adds real value (SIMD, REDB, concurrency).
 - **Attention crate is real** — 18+ implementations (Flash, Hyperbolic, MoE, Graph, Sheaf, OT, PDE) across 66 files, ~9,200 LOC. SIMD/Rayon features are no-ops.
 - **Three distinct HNSW implementations:** ruvector-core (wrapper), micro-hnsw-wasm (novel `#![no_std]` <12KB), hyperbolic-hnsw (Poincare geometry).
+- **TWO independent SIMD codebases:** ruvector-core (distance metrics for HNSW) and edge-net (NN inference — matmul, activations, quantization). Zero code sharing.
+- **DUAL query languages confirmed:** Cypher (parser only, no executor) AND SPARQL (93-95% parser + 92% executor). Both property graphs and RDF triple stores supported.
 - **AI co-authored explicitly** — commits credit "Claude Opus 4.5/4.6". Scope (GNN, quantum, FPGA, Raft, graph DB, 39 attention types, postgres ext) would take 2-3 years for experienced team.
 
 ## 2. File Registry
@@ -26,8 +30,8 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | simd_intrinsics.rs | ruvector-core | 1,605 | 90% | DEEP | Real AVX-512/AVX2/NEON runtime detection. PQ incomplete | C |
 | agenticdb.rs | ruvector-core | 1,447 | 70% | DEEP | Metadata filtering integration. Hash embeddings CRITICAL | C |
 | lockfree.rs | ruvector-core | 591 | 85% | DEEP | Real lock-free structures via crossbeam | C |
-| hnsw.rs | hnsw_rs fork | 1,873 | 92-95% | DEEP | Correct Malkov & Yashunin, Rayon parallel insertion | R36 |
-| hnswio.rs | hnsw_rs fork | 1,704 | 88-92% | DEEP | 4 format versions, mmap. CRIT: no checksum validation | R36 |
+| hnsw.rs | hnsw_rs vendored | 1,873 | 98-100% | DEEP | NOT a patch — vendored upstream v0.3.3. Zero modifications. Complete Malkov & Yashunin | R52 |
+| hnswio.rs | hnsw_rs vendored | 1,704 | 95-98% | DEEP | Dual-file persistence, 4 format versions, hybrid mmap. No postgres/AgentDB connection | R52 |
 | libext.rs | hnsw_rs fork | 1,241 | 75-85% | DEEP | Julia FFI. CRIT: no bounds checking, std::mem::forget | R36 |
 | datamap.rs | hnsw_rs fork | 458 | 85-90% | DEEP | Zero-copy mmap. CRIT: use-after-free risk | R36 |
 
@@ -85,7 +89,9 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | distance/simd.rs | ruvector-postgres | 2,129 | 95-98% | DEEP | BEST SIMD IN ECOSYSTEM. AVX-512/AVX2/NEON. 23 tests | R22 |
 | index/hnsw_am.rs | ruvector-postgres | 1,997 | 75-80% | DEEP | CRIT: connect_node_to_neighbors() EMPTY | R22 |
 | index/ivfflat_am.rs | ruvector-postgres | 2,165 | 80-85% | DEEP | Real k-means++, Lloyd. STUBS: insert, delete, retrain | R22 |
+| sparql/parser.rs | ruvector-postgres | 2,496 | 93-95% | DEEP | PRODUCTION W3C SPARQL 1.1 parser. All 4 query forms, property paths, 33+ functions | R52 |
 | sparql_executor.rs | ruvector-postgres | 1,885 | 92% | DEEP | COMPLETE SPARQL 1.1 query engine. BGP, property paths, 7 aggs | R34 |
+| index_bench.rs | ruvector-postgres | 1,395 | 42% | DEEP | THEATRICAL: HNSW search is brute-force O(n). Zero postgres integration despite location | R52 |
 | operators.rs | ruvector-postgres | ~1,200 | 85% | DEEP | 54 verified SQL functions | Initial |
 | healing/learning.rs | ruvector-postgres | 670 | 92-95% | DEEP | Genuine adaptive weight formula, confidence scoring | R36 |
 | healing/detector.rs | ruvector-postgres | 826 | 85-90% | DEEP | 8 problem types. All 8 metric collection methods EMPTY | R36 |
@@ -103,6 +109,17 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | noise_model.rs | ruQu | 1,330 | 82-85% | DEEP | 7 noise channels, Kraus operator validation | R37 |
 | tile.rs | ruQu | 2,125 | 92% | DEEP | Coherence gate, Union-Find, Ed25519 signatures. 27 tests | R39 |
 | planner.rs | ruQu | 1,478 | 88% | DEEP | 4 backend cost models, entanglement estimation. 33 tests | R39 |
+| filters.rs | ruQu | 1,357 | 82-86% | DEEP | MISNAMED — coherence quality gate, NOT quantum filtering. Three-filter pipeline (structural/shift/evidence). 14 tests | R54 |
+| fabric.rs | ruQu | 1,280 | 93-96% | DEEP | Production 256-tile WASM fabric orchestrator. Blake3 audit trails, surface code generator. 23 tests | R54 |
+
+### ruqu-core Extended
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| mitigation.rs | ruqu-core | 1,276 | 95-98% | DEEP | Three NISQ-era strategies (ZNE, Measurement Error, CDR). Richardson extrapolation, tensor-product calibration. 40+ tests | R54 |
+| transpiler.rs | ruqu-core | 1,211 | 95-98% | DEEP | Complete 3-phase circuit transpiler. 3 hardware backends (IBM/IonQ/Rigetti). 44 tests. BEST-IN-CLASS | R54 |
+| subpoly_decoder.rs | ruqu-core | 1,208 | 35-40% | DEEP | **FALSE SUBPOLYNOMIAL** (3rd instance). O(n²) greedy under "provable O(d^{2-ε})" claims. Zero citations | R54 |
+| noise.rs | ruqu-core | 1,175 | 96-98% | DEEP | Production Kraus operator formalism. 4 noise channels + hardware calibration pipeline. 498 test lines. BEST-IN-CLASS | R54 |
 
 ### Prime-Radiant Coherence
 
@@ -126,12 +143,16 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | sparse.rs | sublinear-solver | 964 | 95% | DEEP | 4 sparse formats (CSR/CSC/COO/Graph), no_std | R28 |
 | wrapper/mod.rs | ruvector-mincut | 1,505 | 90% | DEEP | Bounded-range decomposition from arXiv:2512.13105. 22 tests | R34 |
 | hierarchy.rs | ruvector-mincut | 1,489 | 88% | DEEP | 3-level hierarchy. check_and_split_expander incomplete | R34 |
+| subpolynomial/mod.rs | ruvector-mincut | 1,385 | 45-50% | DEEP | FALSE subpolynomial complexity. Invalid arXiv citation. Same R39 pattern | R52 |
 | graph Cypher parser | ruvector-graph | 1,296 | 95% | DEEP | Production parser. CRIT: NO EXECUTOR | C |
 
 ### Edge-Net P2P Transport
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
+| simd.rs | edge-net (ruvector) | 1,418 | 92-95% | DEEP | COMPLETE independent SIMD for NN inference. Real AVX2/WASM/SSE4.1, Q4/Q8 quantization, numerically stable | R52 |
+| lora.rs | edge-net (ruvector) | 1,355 | 90-95% | DEEP | Complete edge LoRA. Dual SIMD (AVX2+WASM128), Q4/Q8 quantization, LRU adapter pool, WASM bindings. 15 tests. Independent from micro_lora.rs | R54 |
+| federated.rs | edge-net (ruvector) | 1,218 | 95-98% | DEEP | BEST federated learning in project. Byzantine-robust (MAD+median), differential privacy (Gaussian), TopK compression with error feedback, reputation-weighted FedAvg. 13 tests | R54 |
 | p2p.rs | edge-net (ruvector) | 845 | 92-95% | DEEP | **REVERSES R42**: Real libp2p (Gossipsub/Kademlia/RequestResponse/Identify), NOISE+yamux+TCP, direct RAC integration via broadcast_rac_event(), 6 gossipsub topics, production P2P | R44 |
 | advanced.rs | edge (ruvector) | 2041 | 72% | DEEP | MISNOMER — zero networking. ML primitives: Raft 85%, SNN 95% (STDP), HDC 93%, HNSW reimpl 88%, hash embeddings (8th occurrence), quantization 92% | R44 |
 | swarm.rs | edge (ruvector) | 612 | 72% | DEEP | Production crypto protocol (Ed25519+AES-256-GCM 88%, identity registry 85%, task claiming 80%) but 0% GUN network transport — all publish = stubs | R44 |
@@ -162,6 +183,15 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | C12 | **Postgres healing metrics empty** — All 8 metric collection methods in detector.rs return empty/zero. Self-healing system cannot detect problems | healing/detector.rs | R36 | Open |
 | C13 | **micro-hnsw-wasm neuromorphic unvalidated** — 6 novel features (spike encoding, homeostatic plasticity, 40Hz resonance, WTA, dendritic computation, temporal patterns) have ZERO tests | micro-hnsw-wasm | R36 | Open |
 | C14 | **ruQu remote quantum providers ALL stub** — IBM/IonQ/Rigetti/Braket all return AuthenticationFailed. Only LocalSimulator works | qec_scheduler.rs | R37 | Open |
+| C15 | **HNSW "patches" are vendored upstream** — hnsw.rs is unmodified hnsw_rs v0.3.3 from crates.io. Directory name `scripts/patches/` is misleading — zero ruvector-specific modifications | hnsw.rs | R52 | Open |
+| C16 | **index_bench.rs HNSW is brute-force O(n)** — search_with_ef() iterates ALL nodes linearly. Benchmarks measure brute-force kNN, NOT real HNSW graph traversal | index_bench.rs | R52 | Open |
+| C17 | **index_bench.rs zero postgres** — Located in ruvector-postgres/benches/ but contains zero PostgreSQL code (no pgrx, sqlx, tokio_postgres). Complete mislabeling | index_bench.rs | R52 | Open |
+| C18 | **subpolynomial/mod.rs invalid paper citation** — Claims arXiv:2512.13105 (Dec 2024) but arXiv format 2512.NNNNN means Dec 2025, not 2024. Theoretical foundation suspect | subpolynomial/mod.rs | R52 | Open |
+| C19 | **subpolynomial/mod.rs FALSE complexity claims** — Claims O(n^{o(1)}) subpolynomial but implements O(log n) levels × O(recourse). Same R39 false sublinearity pattern | subpolynomial/mod.rs | R52 | Open |
+| C20 | **subpolynomial/mod.rs deterministic contradiction** — Claims "deterministic" subpolynomial mincut, which is an OPEN PROBLEM in graph algorithms. No randomization in code either | subpolynomial/mod.rs | R52 | Open |
+| C21 | **subpoly_decoder.rs FALSE subpolynomial** — 3rd instance of false complexity. Claims "provable O(d^{2-ε} polylog d)" but ALL 3 decoders use O(n²) greedy_pair_and_correct. Zero citations, zero empirical validation | subpoly_decoder.rs | R54 | Open |
+| C22 | **filters.rs COMPLETE domain mislabeling** — Named "filters" in quantum crate but implements classical coherence quality gate. Zero connection to decoder.rs. Zero quantum error filtering | filters.rs | R54 | Open |
+| C23 | **ruQu contains two unrelated systems** — QEC (decoder/syndrome/surface_code) and coherence gate (filters/fabric/tile) share a crate name but have ZERO cross-references. "Qu" may mean "Quality" not "Quantum" | ruQu crate | R54 | Open |
 
 ### 3b. HIGH Findings
 
@@ -183,6 +213,14 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | H14 | **Training data augmentation simplistic** — tool_dataset and claude_dataset have weak paraphrasing (5 word pairs, literal replacement) | tool_dataset.rs, claude_dataset.rs | R37 | Open |
 | H15 | **tile.rs witness hash only processes 6/255 worker reports** — Significant undersampling | tile.rs | R39 | Open |
 | H16 | **planner.rs CliffordT overflow** — Silently becomes u64::MAX at t_count>40 | planner.rs | R39 | Open |
+| H17 | **Two independent SIMD codebases** — ruvector-core (distance metrics) and edge-net (NN inference). Zero code reuse despite overlapping math (dot product in both) | simd_intrinsics.rs, simd.rs | R52 | Open |
+| H18 | **subpolynomial expander splitting incomplete** — check_and_split_expander() has TODO "A full split would require more complex logic". Just marks invalid | subpolynomial/mod.rs | R52 | Open |
+| H19 | **index_bench.rs code duplication** — Reimplements HNSW (280 LOC) and IVFFlat (200 LOC) internally instead of importing ruvector-core production code | index_bench.rs | R52 | Open |
+| H20 | **subpolynomial fragmentation + witness imports unused** — Two supporting modules imported but never called. Incomplete integration | subpolynomial/mod.rs | R52 | Open |
+| H21 | **transpiler.rs "noise-aware" claim FALSE** — Module comment claims noise-aware transpilation but ZERO noise modeling. No error rates, gate fidelities, or noise-adaptive compilation | transpiler.rs | R54 | Open |
+| H22 | **TWO independent LoRA implementations** — micro_lora.rs (training, EWC++, sona) and lora.rs (inference, quantization, WASM, edge-net). Zero code sharing despite same algorithm | micro_lora.rs, lora.rs | R54 | Open |
+| H23 | **THREE independent noise/noise_model files** — ruQu noise_model.rs (R37), ruqu-core noise.rs (R54), plus surface_code.rs noise handling. No single noise source of truth | noise.rs, noise_model.rs | R54 | Open |
+| H24 | **subpoly_decoder.rs zero citations** — Unlike mod.rs (invalid arXiv), subpoly_decoder.rs has NO references, DOIs, or paper citations. Theoretical claims unsupported | subpoly_decoder.rs | R54 | Open |
 
 ## 4. Positives Registry
 
@@ -217,6 +255,16 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | **hnsw_router.rs BEST ruvector-core integration** — Real HnswIndex, HybridRouter blends semantic+keyword | hnsw_router.rs | R37 |
 | **micro_lora.rs BEST learning code** — NEON 8x unroll, EWC++ Fisher penalty, <1ms forward. 92-95% real | micro_lora.rs | R37 |
 | **sparse.rs** — 95%, 4 sparse formats (CSR/CSC/COO/Graph), no_std compatible. BEST matrix code | sparse.rs | R28 |
+| **SPARQL parser production W3C** — 93-95%, 2,496 LOC recursive-descent. All 4 query forms, property paths, aggregates, 33+ built-in functions, UPDATE operations. ruvector has BOTH parser AND executor for SPARQL | sparql/parser.rs | R52 |
+| **edge-net SIMD production-quality** — 92-95%, real AVX2/WASM/SSE4.1 intrinsics. Numerically stable softmax (log-sum-exp), Welford layer norm, Q4/Q8 quantization, 19 tests. Independent from ruvector-core SIMD | simd.rs (edge-net) | R52 |
+| **hnswio.rs BEST-IN-CLASS persistence** — 95-98%, dual-file format (graph+data), hybrid mmap strategy, 4 backward-compatible versions, zero-copy serialization, concurrent safety | hnswio.rs | R52 |
+| **hnsw.rs vendored upstream quality** — 98-100%, complete Malkov & Yashunin 2018. Rayon parallel insert, FilterT filtered search, LayerGenerator exponential sampling. Battle-tested upstream code | hnsw.rs | R52 |
+| **ruqu-core noise.rs BEST-IN-CLASS** — 96-98%, production Kraus operator formalism. 4 noise channels (depolarizing, amplitude damping, phase damping, thermal relaxation). Hardware calibration pipeline (T1/T2→γ/λ). 498 test lines. Comparable to Qiskit Aer | noise.rs | R54 |
+| **ruqu-core mitigation.rs publication-quality** — 95-98%, three NISQ-era strategies (ZNE, Measurement Error, CDR). Richardson exact extrapolation, tensor-product calibration optimization, Clifford data regression. 40+ tests at 1e-12 precision | mitigation.rs | R54 |
+| **ruqu-core transpiler.rs BEST-IN-CLASS** — 95-98%, complete 3-phase quantum circuit transpiler. 3 hardware backends (IBM Eagle, IonQ Aria, Rigetti Aspen), BFS qubit routing, 2-level optimization, 44 tests. Mid-tier Qiskit equivalent | transpiler.rs | R54 |
+| **fabric.rs production orchestration** — 93-96%, 256-tile WASM fabric. Blake3 cryptographic audit trails, surface code topology generator, 2μs latency target, 23 tests | fabric.rs | R54 |
+| **edge-net federated.rs BEST federated learning** — 95-98%, Byzantine-robust MAD+median, (ε,δ)-DP Gaussian mechanism, TopK compression with error feedback (arXiv:1712.01887), reputation-weighted FedAvg with superlinear weighting, WASM cross-platform. Exceeds sona (85%) | federated.rs | R54 |
+| **edge-net lora.rs production edge LoRA** — 90-95%, complete Low-Rank Adaptation with dual SIMD (AVX2+WASM128), Q4/Q8 quantization (4-8× memory reduction), LRU adapter pool with task routing, online gradient accumulation, P2P serialization, 15 tests | lora.rs | R54 |
 
 ## 5. Subsystem Sections
 
@@ -230,7 +278,7 @@ Three distinct HNSW implementations exist, each serving different use cases (con
 
 **hyperbolic-hnsw** adapts HNSW for Poincare ball geometry: Mobius addition, exp/log maps, parallel transport, tangent space pruning (cheap Euclidean check, exact Poincare for top-N), per-shard curvature, dual-space index.
 
-**HNSW patches (R36)**: ruvector maintains a fork of `hnsw_rs` with enhancements. hnsw.rs (92-95%) correct Malkov & Yashunin with Rayon parallel insertion. hnswio.rs (88-92%) 4 format versions, mmap strategy. **CRITICAL**: libext.rs (75-85%) Julia FFI has no bounds checking on C pointers, std::mem::forget leaks. hnswio.rs has no checksum validation — corrupted data silently loads. datamap.rs (85-90%) use-after-free risk with mmap lifetimes.
+**HNSW "patches" (R36, CORRECTED R52)**: R52 line-by-line DEEP read reveals these are **NOT patches** — `scripts/patches/hnsw_rs/` contains a **vendored copy** of upstream hnsw_rs v0.3.3 with ZERO ruvector-specific modifications. Directory naming is misleading. hnsw.rs (98-100%) is complete Malkov & Yashunin with Rayon parallel insert, FilterT search, LayerGenerator exponential sampling — all upstream features. hnswio.rs (95-98%) is BEST-IN-CLASS HNSW persistence: dual-file format (graph+data), hybrid mmap (upper layers in memory, lower mmapped), 4 backward-compatible format versions, zero-copy raw serialization, concurrent safety via unique basename generation. **No postgres or AgentDB integration** — file-based persistence only. **CRITICAL**: libext.rs (75-85%) Julia FFI has no bounds checking on C pointers, std::mem::forget leaks. datamap.rs (85-90%) use-after-free risk with mmap lifetimes. All distance calculations delegated to external `anndists` crate — SIMD is NOT in hnsw.rs itself.
 
 ### 5b. Hash-Based Embeddings (Systemic Weakness)
 
@@ -266,7 +314,9 @@ Substantial PostgreSQL extension rivaling pgvector in feature scope. 290+ SQL fu
 
 **Index implementations**: hnsw_am.rs (75-80%) has real beam search + greedy descent, insertion logic. **CRITICAL**: `connect_node_to_neighbors()` COMPLETELY EMPTY — graph never actually linked. ivfflat_am.rs (80-85%) has real k-means++ initialization (D² weighting, ChaCha8Rng), Lloyd clustering, adaptive probes. **CRITICAL**: insert, delete, retrain all STUBS.
 
-**SPARQL executor (92%, R34)**: COMPLETE SPARQL 1.1 query engine (unlike Cypher which has NO executor). Full algebra (BGP, OPTIONAL, MINUS, FILTER, VALUES, UNION), property paths (BFS), all 7 aggregates (COUNT, SUM, AVG, MIN, MAX, GROUP_CONCAT, SAMPLE), 30+ expression types. DELETE is no-op. In-memory TripleStore (not PostgreSQL-backed). Memory leak: `Box::leak()` on named graphs.
+**SPARQL system (93% weighted, R34+R52)**: COMPLETE SPARQL 1.1 with both parser AND executor. parser.rs (93-95%, 2,496 LOC, R52) is a production W3C SPARQL 1.1 recursive-descent parser: all 4 query forms (SELECT/CONSTRUCT/ASK/DESCRIBE), full UPDATE operations (INSERT/DELETE/LOAD/CLEAR/CREATE/DROP), property paths (sequence/alternative/inverse/transitive), graph patterns (OPTIONAL/UNION/MINUS/GRAPH/FILTER/BIND/VALUES/SERVICE/subqueries), aggregates (COUNT/SUM/AVG/MIN/MAX/GROUP_CONCAT/SAMPLE), 33+ built-in functions (string/numeric/datetime/hash/UUID), proper AST representation (907 LOC ast.rs). Total SPARQL module: 7,421 LOC across 7 files. executor.rs (92%, 1,884 LOC, R34) full algebra execution, property paths (BFS), all 7 aggregates. DELETE is no-op. In-memory TripleStore. **Two SPARQL implementations exist**: ruvector-postgres (this) and rvlite (embedded).
+
+**Benchmark system (42%, R52)**: index_bench.rs is **theatrical benchmarking** — uses production-quality criterion framework (proper warmup, statistical analysis, recall@10, p50/p95/p99 latency percentiles) but measures **wrong implementations**. HNSW search_with_ef() is brute-force O(n) linear scan, NOT real HNSW graph traversal. IVFFlat K-means is genuine. Reimplements HNSW (280 LOC) and IVFFlat (200 LOC) internally instead of importing ruvector-core. Located in ruvector-postgres/benches/ but contains ZERO postgres code. Different category of facade than R43's rustc_benchmarks (15%): not asymptotic deception, but algorithmic mislabeling.
 
 **Healing subsystem (76% weighted, R36)**: Real learning but stub execution. learning.rs (92-95%) BEST — genuine adaptive weight formula, confidence scoring, human feedback. detector.rs (85-90%) 8 problem types but all 8 metric collection methods return empty (CRITICAL). engine.rs (75-80%) cooldown/rate-limiting real but timeout enforcement missing (CRITICAL). strategies.rs (60-65%) StrategyRegistry 95% real but ALL 5 execution methods (reindex, promote, evict, block, repair) are log-only stubs (CRITICAL). worker.rs (70-75%) health check loop works but bgworker registration COMMENTED OUT.
 
@@ -300,15 +350,23 @@ Complete BitNet 1-bit LLM inference backend optimized for Apple Silicon M4 Pro. 
 
 store.rs (~2,500 LOC, 92-95%, R22) BEST FILE — 74.7KB. Real 4-tier quantization (3-8 bit), CRC32 integrity, SVD frame reconstruction. store_ffi.rs (889 LOC, 90-92%, R37) 11 extern "C" FFI functions for WASM/C, real quantization via crate::quantizer. agentdb.rs (843 LOC, 88-92%, R37) pattern-aware tiering with 4-dim PatternVector, cosine similarity, weighted neighbor voting, 36 tests. quantizer.rs (1,430 LOC, 93-95%, R37) K-means PQ with configurable subvectors, asymmetric distance computation. compressor.rs (1,568 LOC, 95-98%, R37) Delta + run-length + Huffman pipeline, CRC32 integrity. tiering.rs (1,613 LOC, 93-95%, R37) 4-tier storage (Hot→Warm→Cold→Archive) with LRU tracking, promotion/demotion with hysteresis.
 
-### 5g. ruQu Quantum Error Correction
+### 5g. ruQu + ruqu-core Quantum Computing
 
-**GENUINE QEC** — not a facade. 91.3% weighted real across 7 files, 12,298 LOC. Top 15% quality in entire ecosystem. Deep-read R37 and R39.
+**GENUINE QEC + COMPLETE QC PIPELINE** — not a facade. Now 15 files across ruQu + ruqu-core, ~18,500 LOC. Revised weighted avg ~89% (subpoly_decoder drags from 91.3%). Deep-read R37, R39, R54.
 
-decoder.rs (2,400 LOC, 95-98%, R37) BEST FILE — Union-Find O(α(n)) decoder with iterative path compression + union-by-rank, MWPM with partitioned tile parallelism, K-means-like cluster growth. syndrome.rs (1,640 LOC, 90-92%, R37) real AVX2 SIMD vpshufb lookup popcount, cache-line aligned DetectorBitmap (64 bytes, 1024 detectors), streaming parity. surface_code.rs (1,820 LOC, 88-92%, R37) complete surface code with weight-2 stabilizers, Z/X boundary operators, minimum-weight decoder integration. qec_scheduler.rs (1,505 LOC, 88-92%, R37) critical path learning via topological sort, feedback-driven scheduling, all remote providers (IBM/IonQ/Rigetti/Braket) stub (CRITICAL). noise_model.rs (1,330 LOC, 82-85%, R37) 7 noise channels (depolarizing, amplitude damping, phase flip, etc.), Kraus operator validation.
+**R54 CRITICAL DISCOVERY**: ruQu contains TWO unrelated systems under one crate:
+- **QEC system**: decoder.rs, syndrome.rs, surface_code.rs, noise_model.rs, qec_scheduler.rs — genuine quantum error correction
+- **Coherence gate system**: filters.rs, fabric.rs, tile.rs, planner.rs — classical statistical decision pipeline for gate quality
 
-tile.rs (2,125 LOC, 92%, R39) coherence gate architecture, PatchGraph syndrome modeling over 1024 rounds, Union-Find connected components (100% correct), Ed25519 signatures via ed25519_dalek, Blake3 hash-chain receipt log, 3-filter gate decision (structural, shift, evidence), 27 tests. **Issues**: witness hash only processes 6/255 worker reports (HIGH), boundary flag never set during normal operation (MEDIUM). planner.rs (1,478 LOC, 88%, R39) execution planner with 4 backend cost models (StateVector, Stabilizer, TensorNetwork, CliffordT), real entanglement estimation via cut-counting, ZNE/CDR error mitigation, 33 tests. **Issues**: CliffordT overflow at t_count>40 — silently becomes u64::MAX (HIGH).
+These systems have ZERO cross-references. "Qu" may mean "Quality" not "Quantum" for the coherence gate subsystem.
 
-60 tests in tile.rs+planner.rs alone. Algorithms align with published benchmarks (QISKIT, cirq, ProjectQ).
+**ruQu QEC (unchanged from R37/R39)**: decoder.rs (2,400 LOC, 95-98%) BEST FILE — Union-Find O(α(n)) + MWPM. syndrome.rs (1,640 LOC, 90-92%) real AVX2 SIMD. surface_code.rs (1,820 LOC, 88-92%) complete surface code. qec_scheduler.rs (1,505 LOC, 88-92%) critical path learning, remote providers stub. noise_model.rs (1,330 LOC, 82-85%) 7 noise channels.
+
+**ruQu Coherence Gate (R39+R54)**: tile.rs (2,125 LOC, 92%) coherence gate architecture, Union-Find, Ed25519, 27 tests. planner.rs (1,478 LOC, 88%) 4 backend cost models, 33 tests. filters.rs (1,357 LOC, 82-86%, R54) MISNAMED — three-filter coherence pipeline (structural min-cut + shift drift + evidence e-value), production statistical methods, 14 tests, ZERO quantum filtering. fabric.rs (1,280 LOC, 93-96%, R54) production 256-tile WASM orchestrator, Blake3 audit trails, surface code topology generator, 23 tests.
+
+**ruqu-core Foundation (R54)**: mitigation.rs (1,276 LOC, 95-98%) THREE NISQ-era strategies — ZNE (Richardson exact extrapolation, polynomial least-squares), Measurement Error (tensor-product calibration, O(n·2^n) scalable inversion), CDR (Clifford data regression). 40+ tests at 1e-12 precision. transpiler.rs (1,211 LOC, 95-98%) BEST-IN-CLASS — complete 3-phase transpiler (decompose/route/optimize), 3 real hardware backends (IBM Eagle, IonQ Aria, Rigetti Aspen), BFS qubit routing with SWAP insertion, 2-level optimization (inverse cancellation + Rz merging), 44 tests. noise.rs (1,175 LOC, 96-98%) BEST-IN-CLASS — production Kraus operator formalism, 4 channels (depolarizing, amplitude damping, phase damping, thermal relaxation), hardware calibration pipeline (T1/T2→γ/λ derivation), confusion matrix inversion for readout, 498 test lines. Comparable to Qiskit Aer. subpoly_decoder.rs (1,208 LOC, 35-40%) **FALSE SUBPOLYNOMIAL** — 3rd instance of false complexity pattern (R39, R52, R54). Claims "provable O(d^{2-ε} polylog d)" but ALL 3 decoders (Hierarchical, Renormalization, SlidingWindow) use O(n²) greedy_pair_and_correct. Zero citations. Implementation is CORRECT but conventional — use decoder.rs's Union-Find instead.
+
+**Combined ruQu+ruqu-core pipeline**: noise.rs (noise models) → mitigation.rs (error mitigation) → transpiler.rs (circuit compilation) → surface_code.rs (QEC layout) → decoder.rs (error correction). This is a **near-complete quantum computing stack** from noise characterization to error-corrected execution.
 
 ### 5h. Prime-Radiant & Cognitum-Gate
 
@@ -320,7 +378,7 @@ tile.rs (2,125 LOC, 92%, R39) coherence gate architecture, PatchGraph syndrome m
 
 **ruvector-graph (30-35% complete, C)**: Cypher parser is production-quality (1,296-line recursive descent, correct lexer). **CRITICAL**: NO query executor — AST generated but never executed. MVCC incomplete (no conflict detection/GC), ALL optimizations 0% stubs, hybrid features type-defs only, distributed system blueprint-only. Hyperedge support unique but partial. "Working Cypher queries" claim is FALSE.
 
-**Contrast**: ruvector-postgres has COMPLETE SPARQL 1.1 query engine (R34). Property paths (BFS), all 7 aggregates, full algebra execution. Cypher has parser only, SPARQL has parser AND executor.
+**Contrast**: ruvector-postgres has COMPLETE SPARQL 1.1 system (R34+R52) — BOTH production parser (93-95%, 2,496 LOC) AND executor (92%, 1,884 LOC). Total 7,421 LOC across 7 files. Property paths, all 7 aggregates, full algebra execution, 33+ built-in functions. Cypher has parser only, SPARQL has parser AND executor. ruvector is a **multi-model database** supporting both property graph (Cypher) and RDF triple store (SPARQL) paradigms, though only SPARQL has end-to-end query capability.
 
 ### 5j. SONA & Learning
 
@@ -328,7 +386,39 @@ tile.rs (2,125 LOC, 92%, R39) coherence gate architecture, PatchGraph syndrome m
 
 **ruvector-gnn (80%, ~6,000 LOC, C)**: Custom hybrid GNN (GAT+GRU+edge-weighted), not a wrapper. EWC fully implemented. Reads HNSW structure, refines embeddings. 3 unsafe blocks (mmap, properly audited).
 
-### 5k. Development Methodology
+### 5k. Subpolynomial Algorithms (R52)
+
+**subpolynomial/mod.rs (45-50%, 1,385 LOC, R52)**: Theatrical claims with partial implementation. Claims to implement a "December 2024 breakthrough" from arXiv:2512.13105, but the arXiv ID format is invalid (2512 = Dec 2025, not 2024). The theoretical foundation is suspect.
+
+**FALSE complexity**: Claims O(n^{o(1)}) subpolynomial update time but implements O(log n) levels × O(recourse). Same pattern as R39's false sublinearity in sublinear-time-solver. Claims "Deterministic" subpolynomial mincut, which is an OPEN PROBLEM in graph algorithms — neither randomization nor subpolynomial bounds are achieved.
+
+**Partial implementation**: Multi-level hierarchy and incremental API (insert_edge/delete_edge) are real. Core algorithmic primitive (expander splitting) has TODO "A full split would require more complex logic". Falls back to full recomputation on deletions (NOT truly incremental). Two supporting modules (fragmentation, witness) imported but NEVER CALLED. 12 tests cover API behavior but not complexity bounds.
+
+**Comparison to R42 dynamic_mincut**: More ambitious claims but less complete implementation. dynamic_mincut EXCEEDS R34 with working algorithms; subpolynomial/mod.rs has grander documentation but incomplete primitives.
+
+### 5l. Edge-Net AI Layer (R52+R54)
+
+**PRODUCTION-GRADE edge computing stack** — SIMD compute (R52) + LoRA inference (R54) + Federated learning (R54). Three files, combined 93-96% weighted avg.
+
+**simd.rs (92-95%, R52)**: Complete SIMD for NN inference (see 5l-simd below).
+
+**lora.rs (90-95%, 1,355 LOC, R54)**: Complete edge LoRA implementation. True low-rank adaptation W' = W + (A·B) * (alpha/rank) with Kaiming init for A, zero-init for B. Dual SIMD targets (AVX2 + WASM128) with automatic detection — same architectural pattern as simd.rs. Q4/Q8 quantization for edge devices (4-8× memory reduction). LRU adapter pool with configurable slots, task-based cosine similarity routing, usage tracking. Online gradient accumulation (SGD update on B matrix). P2P serialization via bincode. 9 WASM exports. 15 tests. **Independent from micro_lora.rs** — this is inference-focused (quantized, WASM, adapter pool) while micro_lora.rs is training-focused (EWC++, federated, sona). ComputeOps trait defined but UNUSED (over-engineering). Task embeddings hardcoded, not learned.
+
+**federated.rs (95-98%, 1,218 LOC, R54)**: **BEST federated learning in entire project** — exceeds sona (85%) by 10-13 points. Five major components: (1) TopK Sparsifier with stateful error feedback (Deep Gradient Compression, arXiv:1712.01887, 90% compression ratio), (2) Byzantine detection via coordinate-wise median + MAD with Z-score threshold (1.4826 scaling), (3) Differential privacy with (ε,δ)-DP Gaussian mechanism (Box-Muller transform, WASM-compatible PRNG), (4) Reputation-weighted FedAvg with superlinear weighting (rep^1.5), (5) Gossipsub gradient sharing protocol with multi-stage validation (model hash, staleness, reputation, magnitude). SGD with momentum for model updates. Cross-platform WASM support. 13 tests. **Missing**: No actual libp2p networking code (architectural separation — networking in p2p.rs per R44). No signature implementation (field exists, unused).
+
+**Edge-net stack verdict**: The complete edge-net AI pipeline (SIMD→LoRA→Federated) is **production-grade** at 93-96% weighted. Combined with p2p.rs (92-95%, R44), this is a real distributed edge AI system — inference, adaptation, and collaborative learning all functional.
+
+### 5l-simd. Edge-Net SIMD Compute (R52)
+
+**simd.rs (92-95%, 1,418 LOC, R52)**: Complete, independent SIMD compute library for neural network inference. **CRITICAL finding: completely independent from ruvector-core**. The ruvector ecosystem has TWO independent SIMD codebases with zero code sharing:
+- **ruvector-core**: Distance metrics (L2, cosine, dot product) for HNSW indexing
+- **edge-net**: NN layer operations (matmul, activations, normalization, quantization) for inference
+
+Real SIMD intrinsics: AVX2 (`#[target_feature(enable = "avx2")]`), WASM simd128, SSE4.1, with runtime dispatch via `is_x86_feature_detected!()`. Numerically stable: softmax uses log-sum-exp trick (tested with [1000, 1001, 1002]), layer norm uses Welford's algorithm with f64 accumulation. Production Q4/Q8 quantization: block-wise with per-block scales, on-the-fly dequantization in matvec, <15% Q4 error, <2% Q8 error.
+
+Activation functions: GELU (fast tanh via Padé approximation), ReLU (SIMD), SiLU (scalar only — missed optimization). Tiled matrix multiplication with TILE_SIZE=64 but suboptimal B column gathering (strided access, per-iteration Vec allocation). 19 tests validate correctness. CPU-only (no GPU backend integration despite R38 CUDA-WASM findings).
+
+### 5m. Development Methodology
 
 RuVector is **explicitly AI co-authored**. Commits credit "Claude Opus 4.5/4.6". Velocity: 834 commits in 81 days (10.3/day), ~600 LOC/commit, 76 crates (~0.94/day), v0.1.0 "Production Ready" 1 day after repo creation. This is 6-20x faster than sustainable human-only development.
 
@@ -346,7 +436,7 @@ Scope (GNN, quantum, FPGA, distributed consensus, graph DB, 39 attention types, 
 
 ## 7. Knowledge Gaps
 
-- **76 crates total** — only ~20 crates deep-read across 168 files
+- **76 crates total** — only ~22 crates deep-read across 174 files
 - **ruvllm remaining** — 309 files, ~197K LOC unread
 - **ruvector-graph** — query executor investigation (why SPARQL has one, Cypher doesn't)
 - **npm packages** — 50+ packages, most unread
@@ -394,3 +484,9 @@ Phase C Rust source examination. CRITICAL placeholder embeddings discovered. HNS
 
 ### R44 (2026-02-15): Edge-Net P2P Transport
 3 files, 3,498 LOC, ~63 findings. **MAJOR REVERSAL**: p2p.rs (92-95%) has production libp2p with Gossipsub/Kademlia/RequestResponse, NOISE encryption, direct RAC integration via broadcast_rac_event() — edge-net IS a distributed system. advanced.rs (72%) is a MISNOMER — zero networking, actually ML primitives (SNN 95%, Raft 85%, HDC 93%, hash embeddings 8th occurrence). swarm.rs (72%) has excellent cryptographic protocol (Ed25519+AES-256-GCM) but 0% GUN network transport (all publish = stubs). Two parallel P2P architectures: edge-net uses libp2p (production), edge uses GUN relays (stubs).
+
+### R54 (2026-02-16): ruQu Quantum Extended + Edge AI
+8 files, ~10,080 LOC, ~170 findings. DEEP: 970→978. **Cluster A (ruQu Extended)**: filters.rs (82-86%) MISNAMED — coherence quality gate NOT quantum filtering, three-filter pipeline (structural/shift/evidence), 14 tests, zero connection to decoder.rs. fabric.rs (93-96%) production 256-tile WASM fabric orchestrator, Blake3 audit trails, surface code topology generator, 23 tests. **Cluster B (ruqu-core Extended)**: mitigation.rs (95-98%) three complete NISQ-era strategies (ZNE, Measurement Error, CDR), Richardson exact extrapolation, tensor-product calibration, 40+ tests at 1e-12. transpiler.rs (95-98%) complete 3-phase quantum circuit transpiler, 3 real hardware backends (IBM/IonQ/Rigetti), 44 tests, BEST-IN-CLASS. subpoly_decoder.rs (35-40%) **FALSE SUBPOLYNOMIAL** — 3rd instance. O(n²) greedy under "provable O(d^{2-ε})" claims. Zero citations. noise.rs (96-98%) BEST-IN-CLASS Kraus operator formalism, 4 noise channels + hardware calibration, 498 test lines. **Cluster C (Edge AI)**: lora.rs (90-95%) complete edge LoRA with dual SIMD (AVX2+WASM128), Q4/Q8 quantization, LRU adapter pool, independent from micro_lora.rs. federated.rs (95-98%) BEST federated learning — Byzantine-robust, differential privacy, TopK compression, reputation-weighted FedAvg. **Key findings**: ruQu contains TWO unrelated systems (QEC + coherence gate). Near-complete QC pipeline confirmed (noise→mitigation→transpiler→surface_code→decoder). Edge AI stack production-grade at 93-96% weighted. FALSE subpolynomial pattern now confirmed in 3 files across project.
+
+### R52 (2026-02-16): Algorithmic Infrastructure Deep-Dive
+6 files, ~10,271 LOC, 118 findings (26C, 30H, 31M, 31I). DEEP: 955→970. **Cluster A (HNSW patches)**: hnsw.rs (98-100%) is vendored upstream hnsw_rs v0.3.3, NOT a patch — zero ruvector modifications. CORRECTS R36 "fork" assessment. hnswio.rs (95-98%) BEST-IN-CLASS persistence — dual-file format, hybrid mmap, 4 versions, zero-copy. No postgres/AgentDB integration. All SIMD delegated to anndists crate. **Cluster B (Graph query)**: SPARQL parser.rs (93-95%) PRODUCTION W3C SPARQL 1.1 — all 4 query forms, property paths, 33+ functions, proper AST. Total SPARQL module 7,421 LOC. ruvector confirmed as multi-model DB (Cypher parser + SPARQL parser+executor). index_bench.rs (42%) THEATRICAL — HNSW search is brute-force O(n), zero postgres despite location. New facade category: "algorithmic mislabeling". **Cluster C (Subpoly+SIMD)**: subpolynomial/mod.rs (45-50%) FALSE complexity claims — invalid arXiv citation, O(log n) not O(n^{o(1)}), deterministic open problem. Same R39 false sublinearity pattern. simd.rs (92-95%) COMPLETE independent SIMD for NN inference — real AVX2/WASM/SSE4.1, Q4/Q8 quantization, numerically stable. TWO independent SIMD codebases in ruvector (core=distance, edge-net=inference).

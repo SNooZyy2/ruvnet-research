@@ -1,7 +1,7 @@
 # Swarm Coordination Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: 16.6% (232/1402 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R50)
+> **Priority**: HIGH | **Coverage**: ~17.1% (240/1402 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-16 (Session R59)
 
 ## 1. Current State Summary
 
@@ -117,6 +117,23 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | research-swarm.ts | agentdb | 188 | 40% | DEEP | Real DB, fake research, hardcoded outcomes | R9 |
 | lean-agentic-swarm.ts | agentdb | 183 | 70% | DEEP | Real concurrency, coordinator query-only | R9 |
 | multi-agent-swarm.ts | agentdb | 147 | 30% | DEEP | Invalid test — no real contention | R9 |
+| neural-augmentation.js | agentdb | 472 | 52% | DEEP | BIMODAL: graph infra 85-90%, neural 15-20% (GNN=Math.random(), RL=deterministic formula). Hardcoded "+29.4% improvement" | R57 |
+
+### ruv-swarm npm Entry Point + SWE-bench Adapter (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| index.ts (npm/src) | ruv-swarm | 457 | 72-76% | DEEP | BIMODAL: production SDK 88-92% (events, topology, metrics), WASM integration 0% (API mismatch, Node fallback always executes). Genuine pure-JS fallback works | R57 |
+| performance.js (npm/src) | ruv-swarm | 458 | 25-30% | DEEP | THEATRICAL. All WASM/swarm/neural metrics = Math.random(). optimize() = console.log + setTimeout. R53 scheduler.ts pattern extended | R57 |
+| stream_parser.rs (swe-bench-adapter) | ruv-swarm | 439 | 75-80% | DEEP | COMPLETE MISLABELING. 0% SWE-bench — parses Claude Code CLI metrics. Genuine async streaming (tokio mpsc), multi-stream management. 4th mislabeled file | R57 |
+| benchmarking.rs (swe-bench-adapter) | ruv-swarm | 430 | 20-25% | DEEP | THEATRICAL. simulate_execution() = sleep(10ms). Hardcoded memory/profile data. Valid statistics on fake data. Extends R43 benchmark deception | R57 |
+
+### ruv-fann Benchmarking (ruv-FANN)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| claude_executor.rs | ruv-fann-rust | 387 | 75-80% | DEEP | BIMODAL: genuine process spawning (tokio::process::Command), async timeout/kill, batch parallel (buffer_unordered). BUT SWE-Bench extraction hardcoded zeros ("Would need to parse"). ORPHANED module. REVERSES R57 swe-bench-adapter theatrical pattern | R59 |
+| metrics.rs | ruv-fann-rust | 383 | 88-92% | DEEP | GENUINE metrics infra. Instant::now() timing, p95/p99 percentile calculation, 14+ metric categories. Placeholder derived metrics (coordination overhead=0, ML inference=0, code quality hardcoded). Matches R55 performance_monitor.rs pattern | R59 |
 
 ### ruv-swarm-core Rust Crate (ruv-FANN)
 
@@ -346,6 +363,10 @@ The swarm-coordination domain spans 238 files / 67K LOC across multi-agent lifec
 | C39 | **path-security.ts ORPHANED** — 437 LOC of OWASP-compliant security code (canonicalization, null byte protection, symlink resolution, atomic writes) with ZERO imports found in AgentDB codebase. RuVectorBackend.ts reimplements its own validatePath() instead of using this module | path-security.ts | R48 | Open |
 | C40 | **spawn.rs ZERO process spawning** — 412 LOC named "spawn" but contains ZERO tokio::process, std::process, or fork/exec calls. All 5 runtime operations are tokio::time::sleep() delays. Comment "In a real implementation" at line 366 acknowledges simulation. Agents = JSON metadata objects with unpopulatable metrics. DEFINITIVELY CONFIRMS R31 "demonstration framework" in Rust | spawn.rs | R50 | Open |
 | C41 | **SWE-Bench evaluation uses mock dataset** — download_instance() returns hardcoded "mock/repo" with fabricated fields. Benchmarking simulates via sleep(10ms). Hardcoded ExecutionResult (output="Mock execution output", exit_code=0). SAME pattern as R43 rustc_benchmarks | evaluation.rs | R50 | Open |
+| C42 | **swe-bench-adapter COMPLETE MISLABELING** — Package name claims SWE-bench integration but stream_parser.rs parses Claude Code CLI output (0% SWE-bench). 4th mislabeled file after R51 http-streaming-updated.ts | stream_parser.rs | R57 | Open |
+| C43 | **swe-bench-adapter benchmarking THEATRICAL** — simulate_execution() = sleep(10ms). Memory/profile data hardcoded. Extends R43 benchmark deception pattern | benchmarking.rs | R57 | Open |
+| C44 | **ruv-swarm npm WASM API MISMATCH** — index.ts calls createSwarm()/addAgent()/assignTask() but WASM exports create_swarm_orchestrator()/spawn()/orchestrate(). Node.js fallback always executes | index.ts (npm) | R57 | Open |
+| C45 | **performance.js ALL metrics Math.random()** — WASM, swarm coordination, neural network performance all fabricated. optimize() = console.log theater | performance.js (npm) | R57 | Open |
 
 ### 3b. HIGH Findings
 
@@ -642,3 +663,9 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R48 (2026-02-15): ruv-swarm npm runtime completion + AgentDB security
 2 swarm files, 1,061 LOC. diagnostics.js (87%) genuine system monitoring — real process internals, pattern detection, actionable recommendations. errors.js (90%) complete error taxonomy — 11 typed classes, used extensively (26 sites). COMPLETES ruv-swarm npm source picture: 8:1 genuine infrastructure-to-facade ratio. Also: path-security.ts (88-92%) is ORPHANED — 437 LOC of OWASP-compliant security code with zero imports in entire AgentDB codebase.
+
+### R57 (2026-02-16): ruv-swarm npm entry + SWE-bench adapter + AgentDB simulation
+6 swarm files, ~2,728 LOC, ~92 findings. **ruv-swarm npm SDK BIMODAL**: index.ts (72-76%) has production-quality client SDK (88-92%) but WASM API mismatch = 0% WASM integration (pure-JS fallback always executes). performance.js (25-30%) is R53 scheduler.ts pattern — ALL metrics Math.random(), optimize() = console.log theater. **SWE-bench adapter COMPLETE MISLABELING**: stream_parser.rs (75-80%) parses Claude Code CLI metrics, 0% SWE-bench content. benchmarking.rs (20-25%) simulate_execution() = sleep(10ms), hardcoded memory/profile data. Extends R43 benchmark deception. 4th mislabeled file in project. **AgentDB neural-augmentation BIMODAL**: (52%) graph infrastructure genuine (85-90%), GNN = Math.random(), RL = deterministic formula. Hardcoded "+29.4% improvement." Confirms R40 JS neural pattern.
+
+### R59 (2026-02-16): ruv-fann benchmarking infrastructure
+2 swarm files, ~770 LOC, ~40 findings. **ruv-fann benchmarking REVERSES R57 theatrical pattern**: claude_executor.rs (75-80%) has GENUINE process spawning (tokio::process::Command, async timeout/kill, buffer_unordered parallelism) but SWE-Bench result extraction hardcoded zeros. metrics.rs (88-92%) is GENUINE metrics infrastructure (Instant::now(), p95/p99 percentiles, 14+ metric categories) with placeholder derived metrics. Both files match R55 performance_monitor.rs genuine quality pattern, NOT R56/R57 theatrical pattern. CONFIRMS cross-package quality difference: ruv-fann benchmarking is 75-92% vs sublinear-solver standalone benchmarks 8-25%.

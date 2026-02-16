@@ -253,6 +253,16 @@ research/
 
 ## Research Swarm Protocol
 
+### OVERRIDE: Research sessions ignore generic swarm rules
+
+When executing a research plan (any file in `daily-plan/`), the following rules from the main `~/CLAUDE.md` are **overridden**:
+
+1. **Do NOT run `claude-flow swarm init`** — research agents are spawned directly via Task tool, not through CLI swarm coordination. The swarm init step primes the orchestrator toward generic agent types (`v3-coder`, `v3-researcher`) which are WRONG for research.
+2. **Do NOT use generic agent types** — never use `v3-coder`, `v3-researcher`, `v3-tester`, or any other generic Task subagent_type for research file reads. ALWAYS use the Agent Registry table below.
+3. **The `"spawn swarm"` trigger phrase** in research context means: read the plan, create a session, read the `reader.md` template, and spawn one `Bash` agent per file. It does NOT mean `claude-flow swarm init`.
+4. **Spawn per-file, not per-cluster** — each file in the plan gets its own agent. Never group an entire cluster into a single agent.
+5. **Always inject the agent template** — read `agents/reader.md` and include its full contents in the Task prompt, followed by the file-specific assignment.
+
 ### Agent Registry
 
 Each research agent `.md` file is a prompt template. To use it in a swarm, read its contents and inject them into a Task tool call with the appropriate `subagent_type`.
