@@ -444,7 +444,7 @@ Add these to the existing trigger phrase table:
 - NEVER spawn two synthesizers for the same domain — they'll overwrite each other
 - Mapper should run AFTER readers complete (needs their findings for context)
 - Realness-scorer should run AFTER readers complete (needs their findings data)
-- When spawning 5+ agents, use `model: haiku` for readers and `model: sonnet` for facade-detector/synthesizer
+- When spawning 5+ agents, use `model: sonnet` for readers and `model: sonnet` for facade-detector/synthesizer
 
 ### DB Schema Reminders for Agents
 

@@ -1,7 +1,7 @@
 # AgentDB Integration Domain Analysis
 
 > **Priority**: MEDIUM | **Coverage**: ~16.6% (89/517 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-17 (Session R91)
+> **Last updated**: 2026-02-17 (Session R96)
 
 ## 1. Current State Summary
 
@@ -20,6 +20,8 @@ AgentDB is a 507-file / 153K LOC vector database with agent learning capabilitie
 - **Three parallel AgentDB systems**: Native standalone MCP server, agentic-flow wrapper, claude-flow patched bridge — only native works correctly.
 - **R20 root cause clarification (R88)**: RuVectorBackend accepts correct Float32Array vectors and performs genuine HNSW search. The R20 failure is upstream — EmbeddingService never initialized in claude-flow bridge means hash-based garbage vectors are fed in. The backend itself works correctly; it is the INPUT that is wrong.
 - **RuVectorBackend.ts revised down to 72-78% (R91)**: `updateAdaptiveParams()` only adjusts `efSearch` (not M/efConstruction despite incrementing `indexRebuildCount`). `insertBatchParallel()` creates a local semaphore bypassing the instance-level one. mmap wired in constructor but not used in hot paths. L2 similarity formula (Math.exp(-distance)) is uncalibrated.
+- **AIDefenceGuard is STANDALONE (R92)**: The `aidefence` npm package (^2.1.1) is listed in ruvbot's package.json but never imported anywhere in the codebase. AIDefenceGuard.ts is entirely self-contained with 28 hand-crafted regex patterns for injection/jailbreak/PII detection. It is NOT wired into AgentDB at runtime. The integration scenario (`aidefence-integration.ts`) is a simulation-only scaffold — hardcoded threat data, commented-out causal links, and `enablePolicyVerification` with zero implementation behind it.
+- **MemoryController.ts revised down to 72% (R96)**: The controller is a pure in-memory Map store — NOT a SQL/persistent CRUD controller as the file registry previously indicated (95%). It is the **10th disconnected persistence layer** in the project. No EmbeddingService usage: callers must supply pre-computed embeddings, structurally embedding the R20 root cause. VectorBackend is OPTIONAL (defaults null); when absent, search falls back to O(n) pure-JS cosine similarity. delete() has a critical bug: removes from Map but NOT from VectorBackend — deleted memories resurface in ANN results. CrossAttentionController is initialized and populated but NEVER consulted during search(). THREE attention controllers initialized unconditionally regardless of `enableAttention` config. Attention score combination hardcoded at `0.5*base + 0.5*(attention/2)` with unexplained `/2`.
 
 The integration gap is organizational, not technical. AgentDB quality exceeds the rest of the ruvnet ecosystem across search, quantization, security, and attention.
 
@@ -44,7 +46,7 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | NightlyLearner.ts | agentdb | 665 | 80% | DEEP | SQL path works, attention path broken by R20 | R16, R40 |
 | LearningSystem.ts | agentdb | 1,288 | 55% | DEEP | 9 RL algorithms = 1 Q-value dict, no neural nets | R8, R22 |
 | CausalMemoryGraph.ts | agentdb | 876 | 65% | DEEP | Wrong t-CDF formula, fake correlation via session count | R8, R22 |
-| MemoryController.ts | agentdb | 462 | 95% | DEEP | Attention orchestration, temporal decay weighting | R16 |
+| MemoryController.ts | agentdb | 462 | 72% | DEEP | Pure in-memory Map store (10th disconnected persistence layer). No EmbeddingService — callers supply embeddings. VectorBackend optional (null default → O(n) JS cosine fallback). delete() BUG: removes from Map but NOT VectorBackend. CrossAttentionController initialized but NEVER called in search(). THREE attention controllers unconditionally initialized. Attention combination hardcoded 0.5*base + 0.5*(attention/2) | R16, R96 |
 | ReflexionMemory.ts | agentdb | 1,115 | 65% | DEEP | Storage works, missing judge function (breaks arXiv paper) | R8 |
 
 ### Search & Optimization
@@ -145,6 +147,14 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | edge-full.ts | agentic-flow | 943 | 75% | DEEP | 6-module WASM toolkit. JS fallback is CHARACTER HASHING | R32 |
 | reasoningbank_wasm_bg.js | agentic-flow | 556 | 100% | DEEP | wasm-bindgen auto-generated, 5 async methods | R32 |
 
+### AIDefence Security Module (R92)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| npm/packages/ruvbot/src/security/AIDefenceGuard.ts | ruvbot | 763 | 82-88% | DEEP | STANDALONE — 28 genuine regex patterns. `aidefence` npm dep listed but never imported. enablePolicyVerification has ZERO implementation behind it. behaviorBaseline in-memory only | R92 |
+| npm/packages/ruvbot/tests/unit/security/aidefence-guard.test.ts | ruvbot | 235 | — | DEEP | 37 tests, all mocks, zero verification of actual behavioral analysis methods. Tests never exercise enableBehavioralAnalysis path | R92 |
+| simulation/scenarios/aidefence-integration.ts | agentdb | 166 | 25% | DEEP | Simulation-only scenario scaffold. Hardcoded threat data, commented-out causal links, EmbeddingService loaded but unused in threat analysis. NOT runtime integration | R92 |
+
 ## 3. Findings Registry
 
 ### 3a. CRITICAL Findings
@@ -170,6 +180,8 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | C17 | **RuVectorBackend.js uses dynamic require()** — `require('ruvector')` and `require('@ruvector/core')` will fail at runtime if native packages not installed. No graceful fallback like enhanced-embeddings.ts | RuVectorBackend.js | R50 | Open |
 | C18 | **AttentionService.ts "39 attention mechanisms in SQL" has ZERO backing** — `db` parameter is dead code; zero SQL operations execute in any code path. The claim of SQL-backed attention storage is completely fabricated. | AttentionService.ts | R91 | Open |
 | C19 | **AttentionService.ts WASM/NAPI backends never compiled** — No `pkg/` directory, no `.node` file. All 39 claimed mechanisms default to `enabled:false`. All computation falls through to JS fallbacks. The WASM/NAPI scaffolding is inert. | AttentionService.ts | R91 | Open |
+| C20 | **MemoryController.ts is the 10th disconnected persistence layer** — PURE in-memory Map store. No SQL, no file I/O, no AgentDB persistence. All stored memories are lost on process restart. Not a CRUD controller — the name and prior 95% assessment were incorrect. | MemoryController.ts | R96 | Open |
+| C21 | **MemoryController.ts delete() BUG — deleted memories resurface in ANN search** — `delete()` removes the entry from the in-memory Map but does NOT call `vectorBackend.remove()`. Deleted memories remain indexed in VectorBackend and continue to appear in ANN search results. | MemoryController.ts | R96 | Open |
 
 ### 3b. HIGH Findings
 
@@ -228,6 +240,16 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | H51 | **RuVectorBackend.ts updateAdaptiveParams() only adjusts efSearch** — Increments `indexRebuildCount` but never rebuilds or adjusts M/efConstruction. Adaptive tuning is partial — only query-time parameter changed, not index structure. | RuVectorBackend.ts | R91 | Open |
 | H52 | **RuVectorBackend.ts insertBatchParallel() semaphore scope bug** — Creates a new local `Semaphore` per call, completely bypassing the instance-level semaphore. Concurrent batch inserts can exceed intended concurrency limits. | RuVectorBackend.ts | R91 | Open |
 | H53 | **RuVectorBackend.ts L2 similarity uncalibrated** — Uses `Math.exp(-distance)` which maps L2 distances nonlinearly to (0, 1] without dataset-specific normalization. Results are not comparable to cosine similarity scores or across datasets with different scale. | RuVectorBackend.ts | R91 | Open |
+| H54 | **AIDefenceGuard.ts behaviorBaseline is stateless across sessions** — `behaviorBaseline` is an in-memory `Map` with no persistence to AgentDB, SQLite, or any store. Behavioral baseline resets on every process restart; labeled production-ready but cannot learn patterns across restarts. | AIDefenceGuard.ts | R92 | Open |
+| H55 | **AIDefenceGuard.ts enablePolicyVerification flag has zero implementation** — Config accepts `enablePolicyVerification: true` but zero policy verification code exists in the file. Setting the flag has no runtime effect whatsoever. | AIDefenceGuard.ts | R92 | Open |
+| H56 | **AIDefenceGuard.ts is not wired into AgentDB runtime** — `aidefence` npm dependency (^2.1.1) is listed in ruvbot's package.json but never imported anywhere in the codebase. AIDefenceGuard.ts is entirely self-contained. The simulation scenario (`aidefence-integration.ts`) shows intent but is not executed in production. AgentDB has no runtime security guard. | AIDefenceGuard.ts, aidefence-integration.ts | R92 | Open |
+| H57 | **aidefence-integration.ts scenario is non-functional** — Causal links between threats and defenses are commented out ("would link actual defense deployment to threat mitigation"). All 5 threat patterns (sql_injection, xss_attack, csrf_vulnerability, ddos_attempt, privilege_escalation) are hardcoded with fixed severity scores 0.88-0.98. EmbeddingService initialized but never used in threat analysis or defense selection. | aidefence-integration.ts | R92 | Open |
+| H58 | **MemoryController.ts has NO EmbeddingService — callers must supply pre-computed embeddings** — Zero embedding generation or initialization. All store() calls require caller-supplied vectors, making MemoryController a structural encoding of the R20 root cause: whoever calls store() must have already solved the embedding problem. | MemoryController.ts | R96 | Open |
+| H59 | **MemoryController.ts VectorBackend is OPTIONAL and defaults null** — When VectorBackend is null (default), search() falls back to O(n) pure-JS cosine similarity scan. The "AgentDB RESCUED" path (R50 RuVectorBackend.js) is opt-in only, not the default code path. | MemoryController.ts | R96 | Open |
+| H60 | **MemoryController.ts CrossAttentionController initialized but NEVER consulted** — CrossAttentionController is instantiated and populated but is never called in search() or retrieveWithAttention(). Only SelfAttentionController and MultiHeadAttentionController are invoked. Dead integration despite full initialization. | MemoryController.ts | R96 | Open |
+| H61 | **MemoryController.ts THREE attention controllers initialized regardless of enableAttention** — SelfAttentionController, CrossAttentionController, and MultiHeadAttentionController are all instantiated unconditionally in the constructor, even when `enableAttention: false`. Overhead is constant, not gated. | MemoryController.ts | R96 | Open |
+| H62 | **MemoryController.ts attention score combination has unexplained /2** — The combination formula is `0.5*base + 0.5*(attentionScore/2)`, giving attention a maximum weight of 0.25 even at full strength. The division by 2 is hardcoded with no documentation or tuning rationale. | MemoryController.ts | R96 | Open |
+| H63 | **MemoryController.ts confirms R48 three-layer architecture** — This is Layer 3 (JS application). Default null VectorBackend means the default call path bypasses Layer 2 (VectorBackend/HNSW entirely) and relies on O(n) scan. The three-layer fit (QUIC sync + VectorBackend + MemoryController) is confirmed but the default wiring short-circuits the vector search tier. | MemoryController.ts | R96 | Open |
 
 ## 4. Positives Registry
 
@@ -267,6 +289,8 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | **AttentionService.ts 4 genuine JS math implementations** — FlashAttention (Dao et al. 2022 tiled online-softmax), HyperbolicAttention (Poincaré ball), GraphRoPE (rotary PE with hop distance), MoEAttention (cosine gating + entropy regularization). These are algorithmically correct despite WASM/NAPI scaffolding being inert. | AttentionService.ts | R91 |
 | **AttentionService.ts real downstream consumers** — 3 genuine callers (NightlyLearner, CausalMemoryGraph, ExplainableRecall) confirm the attention service is integrated into AgentDB's production code paths | AttentionService.ts | R91 |
 | **RuVectorBackend.ts prototype pollution defense** — Object.keys guard prevents prototype chain pollution on metadata ingestion, one of the more careful security implementations in the backend tier | RuVectorBackend.ts | R91 |
+| **AIDefenceGuard.ts 28 genuine regex patterns** — INJECTION_PATTERNS covers direct override, role manipulation, system prompt extraction, jailbreak, code injection, and data exfiltration with well-designed hand-crafted patterns. HOMOGLYPH_MAP covers 8 Cyrillic lookalike chars for real unicode normalization attack prevention | AIDefenceGuard.ts | R92 |
+| **AIDefenceGuard.ts middleware factory pattern** — `createAIDefenceMiddleware()` is a clean adapter implementing validateInput + validateOutput dual-validation pipeline. `createStrictConfig()` and `createPermissiveConfig()` are correct and useful configuration factory helpers | AIDefenceGuard.ts | R92 |
 
 ## 5. Subsystem Sections
 
@@ -335,8 +359,8 @@ Both are inference-only with random weights (not trainable). **AttentionService.
 | Quality Tier | Components | Real% | Notes |
 |--------------|------------|-------|-------|
 | **Production** | ReasoningBank, HNSWIndex, Quantization, HybridSearch, Security | 95-98% | Best code in ruvnet |
-| **Solid** | ExplainableRecall, BatchOperations, MemoryController | 85-95% | Production-ready with gaps |
-| **Partial** | NightlyLearner, CausalRecall, SkillLibrary | 75-90% | Real core, incomplete features |
+| **Solid** | ExplainableRecall, BatchOperations | 85-95% | Production-ready with gaps |
+| **Partial** | NightlyLearner, CausalRecall, SkillLibrary, MemoryController | 72-90% | Real core, incomplete features, critical bugs |
 | **Broken** | LearningSystem, CausalMemoryGraph | 55-65% | Critical bugs, cosmetic implementations |
 | **Stub** | QUICClient, WASMVectorSearch | 0-70% | Missing dependencies |
 
@@ -466,6 +490,37 @@ Tool coverage gap: User exposes 6/27 native tools, 2 work (stats), 3 are broken 
 
 The compiled `.js` (R50, 88-92%) holds up better than the `.ts` source, since the `.js` assessment focused on VectorDB integration correctness rather than adaptive parameter completeness.
 
+### 5k. AIDefence Security Guard — Standalone Module (R92)
+
+**AIDefenceGuard.ts** (763 LOC, 82-88%) is a self-contained rule-based security module in the `ruvbot` package. It is NOT integrated with AgentDB at runtime despite being architecturally adjacent.
+
+**What is genuine:**
+- **28 INJECTION_PATTERNS** covering direct override, role manipulation, system prompt extraction, jailbreak, code injection, data exfiltration — hand-crafted but well-designed.
+- **PII detection** via named-capture regexes for email, phone, SSN, credit card, IP address, and API key patterns.
+- **HOMOGLYPH_MAP** with 8 Cyrillic-to-ASCII substitutions — real unicode normalization attack prevention.
+- **Input sanitization**: control character removal, homoglyph normalization, length limiting, null byte stripping.
+- **Middleware factory pattern** (`createAIDefenceMiddleware`): clean validateInput + validateOutput pipeline matching real dual-validation production patterns.
+- **Config factory helpers**: `createStrictConfig()` (blockThreshold=low) and `createPermissiveConfig()` (blockThreshold=critical) are correct and useful.
+
+**What is missing or broken:**
+- **`aidefence` npm dependency (^2.1.1) is never imported** (H56, INFO finding 9316) — the entire implementation is self-contained. The npm package is dead weight in package.json.
+- **`enablePolicyVerification` flag has NO implementation** (H55): zero policy verification code in the file; setting it true has no runtime effect.
+- **`behaviorBaseline` is stateless across sessions** (H54): in-memory `Map` with no persistence. `analyzeBehavior()` uses only 4 naive statistical features (length, punctuation count, caps ratio, digit ratio) with a hardcoded deviation threshold of 2.0 — no ML model, no trained classifier, easily gameable.
+- **PII regex `lastIndex` inconsistency** (MEDIUM 9310): `detectPII()` resets `pattern.lastIndex` before each call, but `sanitize()` does not — risks missed matches on repeated calls with the same `/g` flag patterns.
+- **AuditLog is in-memory only** (INFO 9318): capped at 1000 entries via `slice(-1000)`, survives only for process lifetime.
+
+**Integration gap with AgentDB:**
+The `aidefence-integration.ts` simulation scenario (166 LOC, 25%) documents the *intent* to wire AIDefence into AgentDB but is not a runtime integration:
+- All 5 threat patterns (sql_injection, xss_attack, etc.) are hardcoded with fixed severity scores 0.88-0.98, not detected from real system activity.
+- Causal links between threats and defenses are commented out (H57).
+- `CausalMemoryGraph` receives `graph DB` twice (copy-paste from another scenario) — never creates real causal links between threats and defenses.
+- `EmbeddingService` initialized (Xenova/all-MiniLM-L6-v2, dim=384) but never used in threat analysis or defense selection.
+- The scenario file is in `simulation/scenarios/` — it is a demonstration scaffold, not production code.
+
+**Test file** (aidefence-guard.test.ts, 235 LOC): 37 tests using vitest with clean beforeEach isolation. All tests verify regex-based outputs; none exercise the behavioral analysis path (`enableBehavioralAnalysis=true`) or `analyzeBehavior()`. Config tests create strict/permissive configs but never verify their effect on detection behavior. Tests give a misleadingly high quality impression for the untested subsystems.
+
+**AIDefence security classification**: The module provides genuine regex-based defense at the input/output boundary. It would function correctly if integrated — the code quality is real. The problem is organizational: it is architecturally isolated (ruvbot package), not called from AgentDB controllers, and the `aidefence` npm package it was intended to wrap is unused.
+
 ## 6. Cross-Domain Dependencies
 
 - **memory-and-learning domain**: LearningSystem, ReasoningBank, ReflexionMemory overlap heavily
@@ -524,3 +579,9 @@ Priority queue EMPTY. 89 sessions, 1,323 DEEP files, 9,121 findings. agentdb-int
 
 ### R91 (2026-02-17): AttentionService.ts + RuVectorBackend.ts deep-read
 2 files, 2,494 LOC, 25 findings (10 + 15). AttentionService.ts (1,523 LOC, 60-65%): 4 JS fallback implementations are mathematically genuine (FlashAttention Dao et al. 2022, HyperbolicAttention Poincaré, GraphRoPE, MoEAttention entropy). WASM/NAPI backends never compiled — no pkg/ dir, no .node file. All 39 mechanisms default to enabled:false. db parameter is dead code — zero SQL operations, completely fabricating "SQL-backed attention" claim (C18, C19). 3 real downstream consumers confirmed. RuVectorBackend.ts REVISED DOWN from 88-92% to 72-78%: updateAdaptiveParams() only adjusts efSearch, never rebuilds index; insertBatchParallel() creates local semaphore bypassing instance level; mmap not wired to hot paths; L2 similarity uncalibrated (H51, H52, H53). Genuine strengths (Semaphore, BufferPool, validatePath, prototype pollution defense) confirmed but are adapter-tier utilities, not HNSW implementation. Net result: AttentionService math is real, its SQL/WASM claims are fabricated; RuVectorBackend is a correct adapter with partial adaptive-tuning gaps.
+
+### R92 (2026-02-17): AIDefenceGuard + simulation scenario
+3 files, 1,164 LOC, 33 findings (3 CRITICAL on tests, 7 HIGH, 8 MEDIUM, 15 INFO). AIDefenceGuard.ts (763 LOC, 82-88%): 28 genuine regex patterns for injection/jailbreak/PII detection — real security utility. STANDALONE: `aidefence` npm dep (^2.1.1) is listed but never imported; entire implementation self-contained. enablePolicyVerification flag has zero implementation (H55). behaviorBaseline in-memory Map (H54) resets on restart. aidefence-guard.test.ts (235 LOC): 37 tests, all mock-based, never exercises behavioral analysis path. aidefence-integration.ts (166 LOC, 25%): simulation-only scaffold — hardcoded threat data, commented-out causal links, EmbeddingService loaded but unused in threat analysis (H56, H57). Key verdict: AIDefenceGuard is real code that would work if integrated, but is architecturally isolated from AgentDB's production runtime.
+
+### R96 (2026-02-17): MemoryController.ts deep-read
+1 file, 462 LOC, 14 findings (2 CRITICAL, 4 HIGH, 5 MEDIUM, 4 INFO). MemoryController.ts REVISED DOWN from 95% (R16) to 72%. Core finding: it is a PURE in-memory Map store — NOT a CRUD controller with SQL or persistence. Designated the **10th disconnected persistence layer** in the project. No EmbeddingService usage anywhere — callers must supply pre-computed embeddings, structurally embedding the R20 root cause. VectorBackend is OPTIONAL (defaults null); absent backend means search falls back to O(n) JS cosine similarity, making the "AgentDB RESCUED" path from R50 opt-in only. Critical delete() BUG: removes from Map but not VectorBackend — deleted memories resurface in ANN results (C21). CrossAttentionController initialized and populated but never consulted in search()/retrieveWithAttention() (H60). THREE attention controllers initialized unconditionally regardless of enableAttention config (H61). Attention score combination hardcoded at 0.5*base + 0.5*(attention/2) with unexplained /2 (H62). Confirms R48 three-layer architecture: MemoryController is Layer 3 but default wiring short-circuits Layer 2. File registry row updated; quality tier moved from Solid to Partial.
