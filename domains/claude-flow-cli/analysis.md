@@ -1,7 +1,7 @@
 # Claude Flow CLI Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~13.8% (45/326 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-14 (Session R17)
+> **Priority**: HIGH | **Coverage**: ~14.1% (46/326 DEEP) | **Status**: Complete (priority queue empty)
+> **Last updated**: 2026-02-17 (Session R89)
 
 ## 1. Current State Summary
 
@@ -53,6 +53,12 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | progress.js | cli | 259 | 100% | DEEP | Real MCP integration | R17 |
 | providers.js | cli | 232 | 30% | DEEP | Hardcoded provider data, simulated config | R17 |
 | categories.js | cli | 178 | 100% | DEEP | Clean DDD taxonomy | R17 |
+
+### Helpers
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| .claude/helpers/memory.js | claude-flow-cli | 84 | 72% | DEEP | **9th disconnected persistence layer**. Plain fs.writeFileSync/readFileSync with JSON. 5 commands (get/set/delete/clear/keys). No AgentDB, no better-sqlite3, no search/TTL/namespaces. Storage: .claude-flow/data/memory.json relative to cwd. Standalone from all other memory systems | R87 |
 
 ### RuVector PostgreSQL Bridge
 
@@ -135,6 +141,7 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | H14 | **codex integration depends on external tool** — Not self-contained | codex-integration.js | R17 | Open |
 | H15 | **ruvector-pg migrate dimensions hardcoded** — Uses vector(1536) regardless of config | migrate.js (pg) | R17 | Open |
 | H16 | **ruvector-pg import dimensions hardcoded** — Uses ruvector(384) regardless of config | import.js (pg) | R17 | Open |
+| H17 | **helpers/memory.js is 9th disconnected persistence layer** — plain JSON file-system store with zero connection to AgentDB, better-sqlite3, claude-flow memory CLI, or any other memory system. 5 commands (get/set/delete/clear/keys), no search, no TTL, no namespaces | .claude/helpers/memory.js | R87 | Open |
 
 ## 4. Positives Registry
 
@@ -275,3 +282,9 @@ Package structure, MCP server, HNSW, learning system, dependencies assessed. Thr
 
 ### R17 (2026-02-14): CLI command deep-read
 45 files, 33,929 LOC, 79 findings. All 37 command files + 8 init system files. Quality matrix established. RuVector PostgreSQL extension confusion discovered. Config command zero persistence confirmed.
+
+### R87 (2026-02-17): helpers/memory.js deep-read
+1 file, 84 LOC, 8 findings. helpers/memory.js confirmed as **9th disconnected persistence layer** — plain JSON file-system store, completely isolated from all other memory systems (AgentDB, better-sqlite3, claude-flow memory CLI, sql.js). Answers R17 knowledge gap about .claude/helpers/ wiring: they are standalone scripts, NOT integrated with MCP.
+
+### R89 (2026-02-17): Project closeout
+Priority queue EMPTY. All research tiers cleared. claude-flow-cli at 46 DEEP files (from 45). Final session — synthesis verification only.

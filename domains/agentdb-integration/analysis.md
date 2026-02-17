@@ -1,7 +1,7 @@
 # AgentDB Integration Domain Analysis
 
-> **Priority**: MEDIUM | **Coverage**: ~16.6% (86/517 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R50)
+> **Priority**: MEDIUM | **Coverage**: ~16.6% (87/517 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-17 (Session R88)
 
 ## 1. Current State Summary
 
@@ -17,6 +17,7 @@ AgentDB is a 507-file / 153K LOC vector database with agent learning capabilitie
 - **Systemic embedding degradation**: Hash-based embedding fallback silently breaks all semantic search features.
 - **Critical bugs in core controllers**: LearningSystem RL is cosmetic (9 algorithms → 1 implementation), CausalMemoryGraph statistics are mathematically wrong.
 - **Three parallel AgentDB systems**: Native standalone MCP server, agentic-flow wrapper, claude-flow patched bridge — only native works correctly.
+- **R20 root cause clarification (R88)**: RuVectorBackend accepts correct Float32Array vectors and performs genuine HNSW search. The R20 failure is upstream — EmbeddingService never initialized in claude-flow bridge means hash-based garbage vectors are fed in. The backend itself works correctly; it is the INPUT that is wrong.
 
 The integration gap is organizational, not technical. AgentDB quality exceeds the rest of the ruvnet ecosystem across search, quantization, security, and attention.
 
@@ -84,6 +85,7 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | enhanced-embeddings.ts | agentdb | 1,436 | 90% | DEEP | O(1) LRU, multi-provider. Falls back to hash mock at L1109 | R8, R22 |
 | RuVectorBackend.ts | agentdb | 971 | 90% | DEEP | Production-ready, correct distance conversion | R8 |
 | RuVectorBackend.js | agentdb | 776 | 88-92% | DEEP | GENUINE ruvector integration. Dynamic imports of `ruvector`/`@ruvector/core`. Real HNSW ops (insert/search/remove via VectorDB). Adaptive HNSW parameters. Production security (path validation, pollution protection). Parallel batch insert with semaphore. RESCUES AgentDB credibility. REVERSES R44 ruvector-backend.ts (12%) | R50 |
+| src/backends/ruvector/index.ts | agentdb | 10 | 88-92% | DEEP | 10-line barrel re-export of RuVectorBackend + RuVectorLearning. Entry point for ruvector backend package. See RuVectorBackend.ts (~500 LOC) for implementation detail | R88 |
 | simd-vector-ops.ts | agentdb | 1,287 | 0% SIMD | DEEP | NOT SIMD — scalar 8x loop unrolling. WASM detected but unused | R8, R22 |
 
 ### LLM & Intelligence
@@ -211,6 +213,10 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | H40 | **quic.ts full reconciliation protocol** — FullReconciliationRequest/Response with Merkle root verification, StateSummary per data type, ReconciliationReport tracking adds/updates/deletes/conflicts. JWT with 12 AuthScopes | quic.ts | R48 | Open (positive) |
 | H41 | **RuVectorBackend.js GENUINE ruvector integration** — REVERSES R44 ruvector-backend.ts (12%). Real dynamic imports, VectorDB.create(), real HNSW insert/search/remove. AgentDB's OWN backend succeeds where agentic-flow's failed | RuVectorBackend.js | R50 | Open (positive) |
 | H42 | **RuVectorBackend.js adaptive HNSW + production security** — Dynamically adjusts efSearch/M/efConstruction based on dataset size. Parallel batch insert with concurrency semaphore. Path validation and prototype pollution protection | RuVectorBackend.js | R50 | Open (positive) |
+| H43 | **ruvector/\@ruvector/core is a runtime optional dependency** — RuVectorBackend.ts dynamically imports `ruvector` first then falls back to `@ruvector/core`; if neither is installed, all HNSW operations fail silently at runtime. Package must be separately installed. | src/backends/ruvector/index.ts, RuVectorBackend.ts | R88 | Open |
+| H44 | **R20 root cause is upstream of RuVectorBackend** — Backend accepts Float32Array and performs genuine HNSW search with correct cosine/L2 distance. Failure is that EmbeddingService is never initialized in claude-flow bridge, so hash-based garbage vectors are passed in. Backend is correct; input is wrong. | src/backends/ruvector/index.ts, RuVectorBackend.ts | R88 | Open (positive) |
+| H45 | **RuVectorBackend.ts comprehensive path security** — FORBIDDEN_PATH_PATTERNS blocks /etc, /proc, /sys, /dev, path traversal sequences. validatePath() enforced on every file operation. MAX_METADATA_ENTRIES=10M and MAX_VECTOR_DIMENSION=4096 guard resource limits. | RuVectorBackend.ts | R88 | Open (positive) |
+| H46 | **mmap-io optional degradation lacks user warning** — RuVectorBackend.ts gracefully falls back when mmap-io is unavailable but emits no warning to operators, making memory-mapped file failures invisible in production. | RuVectorBackend.ts | R88 | Open |
 
 ## 4. Positives Registry
 
@@ -244,6 +250,9 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | **QUICClient genuine retry/batch algorithms** — Exponential backoff, connection pooling, batch processing with progress callbacks. Framework-ready despite zero network transport | QUICClient.ts | R48 |
 | **simulation-runner genuine metric normalization** — Adapts 3 different output formats, coherence via coefficient of variation, real statistical aggregation | simulation-runner.ts | R48 |
 | **RuVectorBackend.js GENUINE ruvector integration** — Real dynamic imports of native packages, VectorDB.create(), HNSW insert/search/remove. Adaptive parameters, parallel batch insert, production security. RESCUES AgentDB vector search credibility. REVERSES R44 | RuVectorBackend.js | R50 |
+| **RuVectorBackend.ts comprehensive input security** — FORBIDDEN_PATH_PATTERNS list, validatePath() on every file op, MAX_METADATA_ENTRIES and MAX_VECTOR_DIMENSION hard limits. Prototype pollution protection (Object.keys guard). Most thorough file-system security in AgentDB backends | RuVectorBackend.ts | R88 |
+| **RuVectorBackend.ts adaptive HNSW parameters** — Dynamically tunes M (8/16/32), efConstruction (100/200/400), and efSearch based on actual dataset size at query time. Semaphore concurrency control and BufferPool for Float32Array reuse. Performance-oriented design | RuVectorBackend.ts | R88 |
+| **R20 backend exonerated** — RuVectorBackend is functionally correct. R20 AgentDB search failure is entirely upstream (EmbeddingService not initialized). This means fixing the R20 bridge bug would make AgentDB search fully operational without any backend changes | src/backends/ruvector/index.ts, RuVectorBackend.ts | R88 |
 
 ## 5. Subsystem Sections
 
@@ -416,6 +425,20 @@ Tool coverage gap: User exposes 6/27 native tools, 2 work (stats), 3 are broken 
 - **BenchmarkSuite.ts** (1,361 LOC, 95%, R16, R22): Best-quality file in AgentDB. Complete framework with percentile latency, 5% regression threshold. Quantization benchmark would crash due to interface mismatch at L809 (C7).
 - **BenchmarkSuite.js** (984 LOC, 100%, R32): Compiled version with performance.now ×28, zero fake benchmarks across all 5 classes (H22).
 
+### 5j. RuVectorBackend — Entry Point & Implementation (R88)
+
+**src/backends/ruvector/index.ts** (10 LOC) is a minimal barrel re-export: `export { RuVectorBackend, RuVectorLearning } from './RuVectorBackend'`. It is the public entry point for the ruvector backend package within AgentDB.
+
+**RuVectorBackend.ts** (~500 LOC, 88-92%) is the implementation file read via R88. Key characteristics:
+
+- **Dynamic import with graceful degradation**: Tries `import('ruvector')` first, then falls back to `import('@ruvector/core')`. If neither is installed the backend fails at runtime — no user-facing warning (H46). This is a **runtime optional dependency** requiring separate installation (H43).
+- **Adaptive HNSW parameters**: Tunes `M` (8/16/32), `efConstruction` (100/200/400), and `efSearch` based on dataset size at query time. Chooses conservative parameters for small datasets and aggressive ones for large. `Semaphore` concurrency control limits parallel batch inserts. `BufferPool` reuses Float32Array allocations to reduce GC pressure.
+- **Path security**: `FORBIDDEN_PATH_PATTERNS` list blocks `/etc`, `/proc`, `/sys`, `/dev`, and path traversal sequences (`../`, `//`, null bytes). `validatePath()` is called on every file operation. `MAX_METADATA_ENTRIES=10M` and `MAX_VECTOR_DIMENSION=4096` guard against resource exhaustion. Prototype pollution protection via `Object.keys` guard.
+- **R20 exoneration**: RuVectorBackend accepts `Float32Array` vectors and performs genuine HNSW `insert`, `search`, and `remove` via `VectorDB`. The R20 search failure is entirely upstream — EmbeddingService is never initialized in the claude-flow bridge, so hash-based garbage vectors are supplied. The backend is functionally correct; fixing the bridge's EmbeddingService initialization would make AgentDB search fully operational without any backend changes (H44).
+- **mmap-io optional**: Memory-mapped I/O is tried via dynamic import; if unavailable, the backend continues without it and without logging a warning to operators (H46).
+
+This backend is the genuine implementation that validates R50's RuVectorBackend.js assessment. The `.ts` source and compiled `.js` are both production-quality (88-92% and 88-92% respectively).
+
 ## 6. Cross-Domain Dependencies
 
 - **memory-and-learning domain**: LearningSystem, ReasoningBank, ReflexionMemory overlap heavily
@@ -465,3 +488,9 @@ MultiDatabaseCoordinator sync simulation discovered (42% real) — health checks
 
 ### R50 (2026-02-15): RuVectorBackend.js deep-read
 1 file, 776 LOC, ~15 findings. RuVectorBackend.js (88-92%) is GENUINE ruvector integration — dynamic imports of `ruvector`/`@ruvector/core`, real VectorDB.create(), HNSW operations (insert/search/remove). Adaptive HNSW parameters adjust efSearch/M/efConstruction by dataset size. Production security (path validation, prototype pollution protection). Parallel batch insert with concurrency semaphore. **RESCUES AgentDB vector search credibility** — R44's ruvector-backend.ts (12%) was agentic-flow's COMPLETE FACADE (zero ruvector imports, hardcoded "125x speedup"), but AgentDB's OWN backend genuinely integrates ruvector. This is compiled `dist/` output from RuVectorBackend.ts (90%, R8), confirming TS source quality holds through compilation.
+
+### R88 (2026-02-17): ruvector backend entry point + R20 root cause clarification
+2 files examined (index.ts 10 LOC barrel, RuVectorBackend.ts ~500 LOC), 4 findings. Confirmed 88-92% genuine across both. R20 root cause is definitively upstream of the backend — RuVectorBackend accepts correct Float32Array and performs real HNSW search; the failure is that hash-based garbage vectors are fed in because EmbeddingService is never initialized in the claude-flow bridge. FORBIDDEN_PATH_PATTERNS security and adaptive HNSW parameter tuning confirmed in TS source. mmap-io fallback lacks user warning (H46). ruvector/\@ruvector/core is a separately-installed runtime optional dependency that causes silent runtime failure if absent (H43).
+
+### R89 (2026-02-17): Project closeout
+Priority queue EMPTY. 89 sessions, 1,323 DEEP files, 9,121 findings. agentdb-integration domain: 111 DEEP files, 54.7% LOC coverage. R20 arc COMPLETE — root cause confirmed at 3 levels (bridge R20, CLI R84, backend R88). Research phase CLOSED.

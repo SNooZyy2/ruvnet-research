@@ -898,3 +898,6 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R87 (2026-02-17): ruv-swarm npm test+config sweep + WASM crates
 6 swarm files, ~343 LOC, ~40 findings. **test-wasm-loading.js (95-98%) GENUINE** — real WebAssembly.instantiate(), validates R84 build.rs WASM compilation. **verify-db-updates.js (88-92%)** confirms real better-sqlite3 persistence. **test-pr34-local.js (0%) COMPLETE FACADE** — phantom imports, 9th test facade. **memory-config.js (~40%) 9th disconnected memory layer**. **env-template.js (~35%)** security-concerning: remote execution enabled by default. DEEP: 325 (from 319).
+
+### R89 (2026-02-17): Project closeout
+Priority queue EMPTY. All research tiers cleared (CONNECTED R82, PROXIMATE/NEARBY/DOMAIN_ONLY R88). 89 sessions, 1,323 DEEP files, 9,121 findings. Swarm-coordination domain: 332 DEEP files, 45.7% LOC coverage. Research phase CLOSED.
