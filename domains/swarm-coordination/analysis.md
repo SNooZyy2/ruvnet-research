@@ -7,6 +7,10 @@
 
 The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R83-R84 added the ruv-swarm WASM cascade layer and persistence analysis. **R85 adds 4 ruv-swarm npm runtime files (530 LOC)** exposing a split personality in the npm package: genuine build orchestration alongside fabricated runtime layers.
 
+**R87 key results:**
+
+- **test-pr34-local.js (0% COMPLETE FACADE)** — 118 LOC. PR#34 test for "Comprehensive Onboarding Integration" feature. Imports non-existent src/onboarding/index.js module. Declares 4 phantom classes (DefaultClaudeDetector, DefaultMCPConfigurator, MCPServerConfig, MCPConfig). File does not execute (import error). Test suite structured as 5 incremental checks but all assertions are smoke tests: class instantiation attempts (undefined), private method calls (_generateRuvSwarmConfig), unconditional pass if no errors thrown. Summary claims "All classes instantiate correctly" but instantiation is against undefined. **9th complete test facade** after benchmark.js deception. PR#34 intended onboarding framework (Claude detector + MCP config generation) but implementation was deferred/abandoned.
+
 **R85 key results:**
 
 - **build.js (90-95% GENUINE)** — 167 LOC WASM build orchestrator. Dual compilation (standard + SIMD-optimized), wasm-opt optimization pass, TypeScript definition generation. Real wasm-pack + rustc dependency validation at startup. Confirms pre-built WASM artifacts in npm/wasm/ are genuinely compiled from Rust. FIRST npm build script confirmed as genuine infrastructure.
@@ -14,7 +18,7 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 - **ruv-swarm-memory.js (0% PURE DEMO)** — 119 LOC CLI with fabricated metrics. Hardcoded claims (40% reduction, 2.8x faster, 84% less fragmentation). No SQLite, no AgentDB, no MCP. Confirms **8th disconnected persistence layer** (first confirmed R84, now formally classified R85).
 - **hooks/cli.js (75-80%)** — 82 LOC thin CLI wrapper delegating ALL business logic to index.js (1,899 LOC). 15+ hook types via JSON stdout protocol. Custom arg parser. Exit codes 0/1/2 signal result type to parent caller. Does not implement hook logic itself — pure routing layer.
 
-**WASM scoreboard**: 15 genuine vs 11 theatrical (58% genuine — unchanged R83). **Persistence layer fragmentation**: 8 disconnected layers confirmed. ruv-swarm npm build pipeline is REAL; npm runtime layer remains BIMODAL (genuine infra, fabricated intelligence).
+**WASM scoreboard**: 16 genuine vs 13 theatrical (55% genuine — R87 adds temporal-neural-solver-wasm 88-92% genuine, psycho-symbolic test-build.js 13th theatrical). **Persistence layer fragmentation**: 9 disconnected layers (R87: memory-config.js adds 9th). ruv-swarm npm build pipeline is REAL; npm runtime layer remains BIMODAL (genuine infra, fabricated intelligence). **test-wasm-loading.js (95-98%) VALIDATES R84 build.rs** — core WASM binary loads and executes real functions. **verify-db-updates.js (88-92%) GENUINE** — real DB queries confirm persistence layer works despite theatrical CLI metrics.
 
 **Top verdicts:**
 - **Best infrastructure**: sqlite-pool.js (92%), storage.rs (95-98%), in_process.rs (92%), service.rs (88-92%), config.rs (88-92%), models.rs (92-95%), build.js (90-95%).
@@ -150,6 +154,11 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | npm/src/hooks/cli.js | ruv-swarm | 82 | 75-80% | DEEP | Thin CLI wrapper delegating to index.js. 15+ hook types via JSON stdout protocol. Custom arg parser. Exit codes 0/1/2. | R85 |
 | validate-error-handling.js | ruv-swarm npm | 143 | 60-65% | DEEP | Smoke test masquerading as validation suite. Tests component existence (assertions) but 0% error recovery testing. No MCP/agent/memory failure simulation | R86 |
 | test-memory-storage.js | ruv-swarm npm | 57 | 88-92% | DEEP | Tests GENUINE SwarmPersistence backed by better-sqlite3. Multi-session memory with TTL. CONTRADICTS R84 single-session finding (test-mcp-persistence.js 40-50%) | R86 |
+| test-pr34-local.js | ruv-swarm npm | 118 | 0% | DEEP | COMPLETE FACADE — imports non-existent src/onboarding/index.js. Phantom classes (DefaultClaudeDetector, MCPServerConfig). File crashes on import. 9th test facade | R87 |
+| verify-db-updates.js | ruv-swarm npm | 57 | 88-92% | DEEP | GENUINE DB verification. Real better-sqlite3 queries against ruv-swarm.db (swarms, agents, tasks, agent_memory). Multi-session history. PARTIALLY REVERSES R85 0% assessment of ruv-swarm-memory.js — DB operations real, metrics reporting theatrical | R87 |
+| test-wasm-loading.js | ruv-swarm npm | 48 | 95-98% | DEEP | GENUINE WASM test. Real WebAssembly.instantiate(), actual export invocation (create_swarm_orchestrator), memory inspection. Core WASM binary functional. Validates R84 build.rs. 3-strategy WasmModuleLoader (eager/progressive/on-demand) | R87 |
+| memory-config.js | ruv-swarm npm | 42 | ~40% | DEEP | 9th DISCONNECTED MEMORY LAYER. Static config export with 6 hardcoded pattern profiles (250-300MB). No backend, no TTL, no lifecycle management. lazyLoading flag without implementation. In-memory only | R87 |
+| env-template.js | ruv-swarm npm | 39 | ~35% | DEEP | Security-concerning defaults: RUV_SWARM_REMOTE_EXECUTION=true, AUTO_COMMIT=true, no Claude API key (confirms R43 "setup toolkit not API"). All features enabled by default, no conservative-by-default design | R87 |
 
 ### ruv-fann Benchmarking (ruv-FANN)
 
@@ -196,6 +205,7 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | claude-simulator.js | ruv-swarm | 602 | 88% | DEEP | GENUINE MCP test client — WebSocket, Prometheus, chaos injection. PROVES self-contained demo loop | R45 |
 | diagnostics.js | ruv-swarm | 533 | 87% | DEEP | GENUINE system diagnostics — real process.memoryUsage/cpuUsage/performance.now, process._getActiveHandles/_getActiveRequests for event loop monitoring. Pattern detection, actionable recommendations (thresholds: >10% failure, >500MB memory, >50 handles). Self-test harness | R48 |
 | errors.js | ruv-swarm | 528 | 90% | DEEP | GENUINE error taxonomy — 11 typed error classes (Validation/Swarm/Agent/Task/Neural/Wasm/Network/Persistence/Resource/Concurrency + base). ErrorFactory pattern, ErrorContext enrichment. Used EXTENSIVELY by mcp-tools-enhanced.js (26 import sites). Context-aware getSuggestions() per error type | R48 |
+| test-pr34-local.js | ruv-swarm | 118 | 0% | DEEP | COMPLETE FACADE — Imports non-existent src/onboarding/index.js module. DefaultClaudeDetector, MCPServerConfig, MCPConfig phantom classes. File fails to execute. Test suite unconditional pass if no errors thrown (smoke test only). PR#34 feature stub w/o implementation. | R87 |
 
 ### ruv-swarm Neural Models JS (ruv-swarm)
 
@@ -466,6 +476,7 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | C59 | **R69 ghost model mismatch RESOLVED** — AgentType enum defines 5 agent ROLES (Researcher, Coder, Analyst, Coordinator, Specialist), NOT 27 neural models. Two separate type hierarchies never connected. NeuralNetworkManager is STUB | types.rs (ruv-swarm-daa) | R82 | Open (resolution) |
 | C60 | **monitor.rs NOT IMPLEMENTED** — display_monitoring_data() contains only placeholder message "Monitor functionality not yet implemented". Watch mode loop (sleep/clear) with zero data sources. _config parameter deliberately unused (underscore prefix). Confirms R31/R71 CLI = demo framework | monitor.rs (ruv-swarm-cli) | R86 | Open |
 | C61 | **6th MCP protocol discovered** — ruv-swarm-mcp uses Rust-native `rmcp` SDK v0.2.1 (Anthropic official), independent from npm @modelcontextprotocol/sdk. 7 modules disabled in lib.rs ("temporarily disabled"). Dual transport but only stdio functional. MCP protocol count: 6 | main.rs (ruv-swarm-mcp) | R86 | Open |
+| C62 | **test-pr34-local.js COMPLETE FACADE** — PR#34 test for "Comprehensive Onboarding Integration" feature. Imports non-existent src/onboarding/index.js. DefaultClaudeDetector, MCPServerConfig, MCPConfig phantom classes. File fails to execute. Test suite is smoke test: unconditional pass if no errors thrown. All assertions are instantiation attempts against undefined classes. Summary claims "All classes instantiate correctly" but they don't exist. 9th complete test facade | test-pr34-local.js | R87 | Open |
 
 ### 3b. HIGH Findings
 
@@ -884,3 +895,6 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R86 (2026-02-17): ruv-swarm Rust crate sweep + npm validation
 6 files, 395 LOC, 63 total session findings (across both domains). **6th MCP protocol** — ruv-swarm-mcp uses Rust rmcp SDK v0.2.1 (Anthropic official), independent from npm @modelcontextprotocol/sdk. stdio.rs (90-95%) GENUINE MCP binary; main.rs (35-45%) HTTP incomplete, 7 modules disabled. monitor.rs (5-10%) CLI skeleton confirms R31/R71. telemetry.rs (25-35%) DAA facade tier. test-memory-storage.js (88-92%) tests GENUINE persistence, CONTRADICTS R84 single-session. validate-error-handling.js (60-65%) smoke test only. DEEP: 319 (from 313).
+
+### R87 (2026-02-17): ruv-swarm npm test+config sweep + WASM crates
+6 swarm files, ~343 LOC, ~40 findings. **test-wasm-loading.js (95-98%) GENUINE** — real WebAssembly.instantiate(), validates R84 build.rs WASM compilation. **verify-db-updates.js (88-92%)** confirms real better-sqlite3 persistence. **test-pr34-local.js (0%) COMPLETE FACADE** — phantom imports, 9th test facade. **memory-config.js (~40%) 9th disconnected memory layer**. **env-template.js (~35%)** security-concerning: remote execution enabled by default. DEEP: 325 (from 319).
