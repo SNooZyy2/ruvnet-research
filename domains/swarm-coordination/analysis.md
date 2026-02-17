@@ -135,6 +135,7 @@ The swarm-coordination domain spans 267 DEEP files across multi-agent lifecycle,
 | performance.js (npm/src) | ruv-swarm | 458 | 25-30% | DEEP | THEATRICAL. All WASM/swarm/neural metrics = Math.random(). optimize() = console.log + setTimeout. R53 scheduler.ts pattern extended | R57 |
 | stream_parser.rs (swe-bench-adapter) | ruv-swarm | 439 | 75-80% | DEEP | COMPLETE MISLABELING. 0% SWE-bench — parses Claude Code CLI metrics. Genuine async streaming (tokio mpsc), multi-stream management. 4th mislabeled file | R57 |
 | benchmarking.rs (swe-bench-adapter) | ruv-swarm | 430 | 20-25% | DEEP | THEATRICAL. simulate_execution() = sleep(10ms). Hardcoded memory/profile data. Valid statistics on fake data. Extends R43 benchmark deception | R57 |
+| ruv-swarm-memory.js (bin) | ruv-swarm | 119 | 0% | DEEP | CLI DEMONSTRATION only, no persistent backend. Fabricated metrics. 8th DISCONNECTED PERSISTENCE LAYER | R84 |
 
 ### ruv-fann Benchmarking (ruv-FANN)
 
@@ -530,6 +531,16 @@ The swarm-coordination domain spans 267 DEEP files across multi-agent lifecycle,
 | H172 | **patterns.rs 67% undefined cognitive styles** — Defines 6 thinking styles (Convergent, Divergent, Lateral, Systems, Critical, Adaptive) but only 2 have metadata. Zero behavior: no selection, effectiveness tracking, or evolution | patterns.rs (ruv-swarm-daa) | R82 | Open |
 | H173 | **cascade.rs 15th GENUINE WASM** — Real cascade correlation algorithm via ruv_fann::CascadeTrainer. Proper wasm-bindgen, serde JsValue marshaling, 12 hyperparameters. Extends ruv-swarm-wasm BIMODAL: genuine modules (simd_tests, training, memory_pool, neural, cascade) vs theatrical (agent, swarm). WASM scoreboard: 15 genuine vs 11 theatrical (58% genuine) | cascade.rs (ruv-swarm-wasm) | R83 | Open (positive) |
 | H174 | **sqlite-worker.js 7th disconnected persistence layer** — Worker_threads real but DB opened readonly (line 23) while message handler accepts INSERT/UPDATE/DELETE. Functionally broken for declared purpose. WAL/mmap config wasted on readonly. Not connected to sqlite-pool.js (92%) or any npm runtime memory system. Unbounded prepared statement cache (memory leak risk) | sqlite-worker.js (ruv-swarm npm) | R83 | Open |
+
+### [R84] ruv-swarm-memory.js: 8th Disconnected Persistence Layer
+
+**MEDIUM | ARCHITECTURE | QUALITY**:
+- ruv-swarm-memory.js (119 LOC, 0-5%) is CLI demonstration interface to in-memory metrics, NOT persistent memory service
+- No SQLite, file I/O, AgentDB connection, MCP client. Calls neuralCLI.getPatternMemoryUsage() but mocked/in-process only
+- Memory pools ephemeral buffers (not persistent across restarts). Hardcoded claims (2.8x faster, 84% less fragmentation) are narrative demo values
+- Confirms 8th disconnected persistence layer: R45 sqlite-worker, R47 AgentDB mock, R48 three-layer AgentDB, R51 MCP server, R67 ReasoningBank, R81 npm BIMODAL, R82 WASM integration, R84 this file
+- **Impact**: Memory management architecturally fragmented across isolated subsystem layers. No integration point between layers and application runtime.
+
 ## 4. Positives Registry
 
 | Description | File(s) | Session |
@@ -830,3 +841,6 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 ### R84 (2026-02-17): ruv-swarm-ml complete deep-read
 1 file (complete crate), 2,750 LOC, 15 findings (1C, 4H, 10M). **ruv-swarm-ml is 85% FACADE** — forecasting framework publishing 27 time-series models (MLP, LSTM, NBEATS, Transformers, DeepAR, TCN, etc.) with full metadata (min_samples, memory, training_time, interpretability_score). Only 3 actually implemented (MLP, DLinear, MLPMultivariate). Remaining 24 models fall-through to generic MLP via lines 213-224 "gradual migration" comment. **Core methods are stubs**: predict() returns zeros (lines 98-100, "TODO in real impl"), load_parameters() is no-op, TimeSeriesProcessor (611L) is pure scaffolding with zero transformation logic, AgentForecastingManager (812L) is 80% stubs, EnsembleForecaster (1,005L) is method stubs with real structure. Training fixed 10 epochs + hardcoded 0.001 LR. WASM bindings expose a working API surface that internally calls broken code. neural_models.rs is 13-line pure forwarding with zero logic. Crate depends on ruv-fann (working layer, hidden behind facades). **Realness: 15-20%** (high metadata quality masking deep facade). Integration impact: agents cannot do adaptive time-series prediction, coordinator cannot optimize based on agent performance forecasts. **Strategic role**: positioning ruv-swarm for forecasting intelligence but actual intelligence layer missing. Ready for config APIs, not predictions. DEEP: 309 (from 308).
 
+
+
+- **R84** (2026-02-17): ruv-swarm-memory.js DEEP analysis. 119 LOC, 0% real implementation. CLI demonstration with fabricated metrics. 8th disconnected persistence layer identified. Memory management fragmentation pattern confirmed across 8+ isolated layers. DEEP: 1,262→1,263.
