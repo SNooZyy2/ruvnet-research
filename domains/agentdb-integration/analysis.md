@@ -1,23 +1,25 @@
 # AgentDB Integration Domain Analysis
 
-> **Priority**: MEDIUM | **Coverage**: ~16.6% (87/517 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-17 (Session R88)
+> **Priority**: MEDIUM | **Coverage**: ~16.6% (89/517 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-02-17 (Session R91)
 
 ## 1. Current State Summary
 
-AgentDB is a 507-file / 153K LOC vector database with agent learning capabilities. Despite claude-flow listing it as an optional dependency, **none of its 23 controllers are called** — 140K+ LOC of genuinely sophisticated code sits unused. The codebase is **~90% authentic** with production-grade search algorithms, real security implementation, and working neural attention mechanisms.
+AgentDB is a 507-file / 153K LOC vector database with agent learning capabilities. Despite claude-flow listing it as an optional dependency, **none of its 23 controllers are called** — 140K+ LOC of genuinely sophisticated code sits unused. The codebase is **~88% authentic** with production-grade search algorithms, real security implementation, and working neural attention mechanisms.
 
 **Top-level verdicts:**
 
 - **Best-in-ecosystem search implementation**: HybridSearch (BM25 + HNSW + fusion strategies) is production-ready and surpasses all other ruvnet search code.
 - **Production-grade quantization**: K-means++ PQ with 8/4-bit scalar quantization rivals standalone vector databases.
 - **Genuine neural attention**: MultiHead and CrossAttention controllers implement real transformer-style attention from scratch (inference-only, random weights).
+- **AttentionService.ts "39 mechanisms in SQL" claim is zero-backed**: The `db` parameter is dead code — zero SQL operations execute. 4 JS fallback math implementations are genuine (FlashAttention tiled online-softmax, HyperbolicAttention Poincaré ball, GraphRoPE, MoEAttention), but WASM/NAPI backends are never compiled. All mechanisms default to `enabled:false`. (R91)
 - **Solid security model**: Argon2id hashing, SQL injection whitelists, JWT tokens, brute-force protection — comprehensive and correct.
 - **Complete facade in MCP tools layer**: Goalie subsystem (856 LOC) imports GoapPlanner and reasoning engines but calls NONE of them.
 - **Systemic embedding degradation**: Hash-based embedding fallback silently breaks all semantic search features.
 - **Critical bugs in core controllers**: LearningSystem RL is cosmetic (9 algorithms → 1 implementation), CausalMemoryGraph statistics are mathematically wrong.
 - **Three parallel AgentDB systems**: Native standalone MCP server, agentic-flow wrapper, claude-flow patched bridge — only native works correctly.
 - **R20 root cause clarification (R88)**: RuVectorBackend accepts correct Float32Array vectors and performs genuine HNSW search. The R20 failure is upstream — EmbeddingService never initialized in claude-flow bridge means hash-based garbage vectors are fed in. The backend itself works correctly; it is the INPUT that is wrong.
+- **RuVectorBackend.ts revised down to 72-78% (R91)**: `updateAdaptiveParams()` only adjusts `efSearch` (not M/efConstruction despite incrementing `indexRebuildCount`). `insertBatchParallel()` creates a local semaphore bypassing the instance-level one. mmap wired in constructor but not used in hot paths. L2 similarity formula (Math.exp(-distance)) is uncalibrated.
 
 The integration gap is organizational, not technical. AgentDB quality exceeds the rest of the ruvnet ecosystem across search, quantization, security, and attention.
 
@@ -74,7 +76,7 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 |------|---------|-----|-------|-------|-------------|---------|
 | MultiHeadAttentionController.ts | agentdb | 494 | 98% | DEEP | Real scaled dot-product, Xavier init, 4 aggregation strategies | R16 |
 | CrossAttentionController.ts | agentdb | 467 | 98% | DEEP | Multi-context attention, namespace-based stores | R16 |
-| AttentionService.ts | agentdb | 771 | 80% | DEEP | NAPI→WASM→JS fallback. JS MHA is single-head | R22 |
+| AttentionService.ts | agentdb | 1,523 | 60-65% | DEEP | 4 genuine JS math fallbacks (FlashAttention, HyperbolicAttention, GraphRoPE, MoEAttention). WASM/NAPI never compiled. db param DEAD CODE — zero SQL ops. All mechanisms enabled:false by default. 3 real downstream consumers (NightlyLearner, CausalMemoryGraph, ExplainableRecall) | R22, R91 |
 | attention-fallbacks.ts | agentdb | 1,953 | 92% | DEEP | HyperbolicAttention correct Poincaré distance (TS source) | R22 |
 | attention-tools-handlers.ts | agentdb | 587 | 40% | DEEP | ALL metrics Math.random(), handlers are template strings | R40 |
 
@@ -83,7 +85,7 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
 | enhanced-embeddings.ts | agentdb | 1,436 | 90% | DEEP | O(1) LRU, multi-provider. Falls back to hash mock at L1109 | R8, R22 |
-| RuVectorBackend.ts | agentdb | 971 | 90% | DEEP | Production-ready, correct distance conversion | R8 |
+| RuVectorBackend.ts | agentdb | 971 | 72-78% | DEEP | Pure adapter, zero own HNSW code. Genuine: Semaphore (FIFO), BufferPool, validatePath, prototype pollution defense. Problems: updateAdaptiveParams() only adjusts efSearch (not M/efConstruction); insertBatchParallel() creates local semaphore bypassing instance-level; mmap not wired to hot paths; L2 similarity uncalibrated. REVISED DOWN from 88-92% (R88). | R8, R91 |
 | RuVectorBackend.js | agentdb | 776 | 88-92% | DEEP | GENUINE ruvector integration. Dynamic imports of `ruvector`/`@ruvector/core`. Real HNSW ops (insert/search/remove via VectorDB). Adaptive HNSW parameters. Production security (path validation, pollution protection). Parallel batch insert with semaphore. RESCUES AgentDB credibility. REVERSES R44 ruvector-backend.ts (12%) | R50 |
 | src/backends/ruvector/index.ts | agentdb | 10 | 88-92% | DEEP | 10-line barrel re-export of RuVectorBackend + RuVectorLearning. Entry point for ruvector backend package. See RuVectorBackend.ts (~500 LOC) for implementation detail | R88 |
 | simd-vector-ops.ts | agentdb | 1,287 | 0% SIMD | DEEP | NOT SIMD — scalar 8x loop unrolling. WASM detected but unused | R8, R22 |
@@ -166,6 +168,8 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | C15 | **MCP attention encoding is hash-based** — encodeQueryVector() uses charCodeAt, not semantic embeddings | attention-tools-handlers.ts | R40 | Open |
 | C16 | **Self-organizing HNSW recall fabricated** — 0.92 + Math.random()*0.05. MPC adaptation genuine but outcomes simulated | self-organizing-hnsw.ts | R41 | Open |
 | C17 | **RuVectorBackend.js uses dynamic require()** — `require('ruvector')` and `require('@ruvector/core')` will fail at runtime if native packages not installed. No graceful fallback like enhanced-embeddings.ts | RuVectorBackend.js | R50 | Open |
+| C18 | **AttentionService.ts "39 attention mechanisms in SQL" has ZERO backing** — `db` parameter is dead code; zero SQL operations execute in any code path. The claim of SQL-backed attention storage is completely fabricated. | AttentionService.ts | R91 | Open |
+| C19 | **AttentionService.ts WASM/NAPI backends never compiled** — No `pkg/` directory, no `.node` file. All 39 claimed mechanisms default to `enabled:false`. All computation falls through to JS fallbacks. The WASM/NAPI scaffolding is inert. | AttentionService.ts | R91 | Open |
 
 ### 3b. HIGH Findings
 
@@ -217,6 +221,13 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | H44 | **R20 root cause is upstream of RuVectorBackend** — Backend accepts Float32Array and performs genuine HNSW search with correct cosine/L2 distance. Failure is that EmbeddingService is never initialized in claude-flow bridge, so hash-based garbage vectors are passed in. Backend is correct; input is wrong. | src/backends/ruvector/index.ts, RuVectorBackend.ts | R88 | Open (positive) |
 | H45 | **RuVectorBackend.ts comprehensive path security** — FORBIDDEN_PATH_PATTERNS blocks /etc, /proc, /sys, /dev, path traversal sequences. validatePath() enforced on every file operation. MAX_METADATA_ENTRIES=10M and MAX_VECTOR_DIMENSION=4096 guard resource limits. | RuVectorBackend.ts | R88 | Open (positive) |
 | H46 | **mmap-io optional degradation lacks user warning** — RuVectorBackend.ts gracefully falls back when mmap-io is unavailable but emits no warning to operators, making memory-mapped file failures invisible in production. | RuVectorBackend.ts | R88 | Open |
+| H47 | **AttentionService.ts FlashAttention tiled online-softmax is mathematically genuine** — Implements Dao et al. (2022) blocking strategy with correct online softmax (running max + log-sum-exp). Real algorithmic content, not heuristic. | AttentionService.ts | R91 | Open (positive) |
+| H48 | **AttentionService.ts HyperbolicAttention genuine Poincaré ball approximation** — Uses correct Möbius addition formula for hyperbolic space projection. Consistent with attention-fallbacks.ts findings (R22). | AttentionService.ts | R91 | Open (positive) |
+| H49 | **AttentionService.ts GraphRoPE and MoEAttention genuine** — GraphRoPE applies rotary positional encoding with hop distance; MoEAttention uses cosine gating with entropy regularization. Both are algorithmically sound. | AttentionService.ts | R91 | Open (positive) |
+| H50 | **AttentionService.ts has 3 real downstream consumers** — NightlyLearner, CausalMemoryGraph, and ExplainableRecall actually instantiate AttentionService. Attention results flow into production AgentDB code paths (SQL path only, since WASM/NAPI absent). | AttentionService.ts | R91 | Open (positive) |
+| H51 | **RuVectorBackend.ts updateAdaptiveParams() only adjusts efSearch** — Increments `indexRebuildCount` but never rebuilds or adjusts M/efConstruction. Adaptive tuning is partial — only query-time parameter changed, not index structure. | RuVectorBackend.ts | R91 | Open |
+| H52 | **RuVectorBackend.ts insertBatchParallel() semaphore scope bug** — Creates a new local `Semaphore` per call, completely bypassing the instance-level semaphore. Concurrent batch inserts can exceed intended concurrency limits. | RuVectorBackend.ts | R91 | Open |
+| H53 | **RuVectorBackend.ts L2 similarity uncalibrated** — Uses `Math.exp(-distance)` which maps L2 distances nonlinearly to (0, 1] without dataset-specific normalization. Results are not comparable to cosine similarity scores or across datasets with different scale. | RuVectorBackend.ts | R91 | Open |
 
 ## 4. Positives Registry
 
@@ -253,6 +264,9 @@ The integration gap is organizational, not technical. AgentDB quality exceeds th
 | **RuVectorBackend.ts comprehensive input security** — FORBIDDEN_PATH_PATTERNS list, validatePath() on every file op, MAX_METADATA_ENTRIES and MAX_VECTOR_DIMENSION hard limits. Prototype pollution protection (Object.keys guard). Most thorough file-system security in AgentDB backends | RuVectorBackend.ts | R88 |
 | **RuVectorBackend.ts adaptive HNSW parameters** — Dynamically tunes M (8/16/32), efConstruction (100/200/400), and efSearch based on actual dataset size at query time. Semaphore concurrency control and BufferPool for Float32Array reuse. Performance-oriented design | RuVectorBackend.ts | R88 |
 | **R20 backend exonerated** — RuVectorBackend is functionally correct. R20 AgentDB search failure is entirely upstream (EmbeddingService not initialized). This means fixing the R20 bridge bug would make AgentDB search fully operational without any backend changes | src/backends/ruvector/index.ts, RuVectorBackend.ts | R88 |
+| **AttentionService.ts 4 genuine JS math implementations** — FlashAttention (Dao et al. 2022 tiled online-softmax), HyperbolicAttention (Poincaré ball), GraphRoPE (rotary PE with hop distance), MoEAttention (cosine gating + entropy regularization). These are algorithmically correct despite WASM/NAPI scaffolding being inert. | AttentionService.ts | R91 |
+| **AttentionService.ts real downstream consumers** — 3 genuine callers (NightlyLearner, CausalMemoryGraph, ExplainableRecall) confirm the attention service is integrated into AgentDB's production code paths | AttentionService.ts | R91 |
+| **RuVectorBackend.ts prototype pollution defense** — Object.keys guard prevents prototype chain pollution on metadata ingestion, one of the more careful security implementations in the backend tier | RuVectorBackend.ts | R91 |
 
 ## 5. Subsystem Sections
 
@@ -305,7 +319,12 @@ Security is architecturally sound but operationally limited by in-memory storage
 
 **CrossAttentionController.ts** (467 LOC, 98%): Multi-context attention, weighted sum output, namespace-based context stores.
 
-Both are inference-only with random weights (not trainable). AttentionService.ts (771 LOC, 80%) provides NAPI→WASM→JS fallback chain. JS MHA is single-head; Hyperbolic/MoE fallbacks reduce to standard MHA (R22).
+Both are inference-only with random weights (not trainable). **AttentionService.ts** (1,523 LOC, 60-65% — REVISED AND EXPANDED from R22's 771 LOC / 80% assessment) provides NAPI→WASM→JS fallback chain:
+
+- **JS fallback implementations are mathematically genuine** (R91): FlashAttention uses Dao et al. (2022) tiled online-softmax (correct blocking, running max, log-sum-exp); HyperbolicAttention uses Möbius addition for Poincaré ball projection; GraphRoPE applies rotary positional encoding scaled by hop distance; MoEAttention uses cosine gating with entropy regularization.
+- **WASM/NAPI backends are inert** (R91, C19): No `pkg/` directory and no `.node` file exist. All 39 mechanisms default to `enabled:false`. Every code path falls to JS fallbacks.
+- **`db` parameter is dead code** (R91, C18): Despite the advertised "39 attention mechanisms in SQL," zero SQL operations execute anywhere in the service. The SQL-backed storage claim has zero backing.
+- **3 real downstream consumers** (R91, H50): NightlyLearner, CausalMemoryGraph, and ExplainableRecall genuinely instantiate and call AttentionService.
 
 **attention-fallbacks.ts** (1,953 LOC, 92%) contains correct Poincaré ball distance in HyperbolicAttention TypeScript source — compilation degraded it to Euclidean approximation (R22). Flash backward pass is correct.
 
@@ -429,15 +448,23 @@ Tool coverage gap: User exposes 6/27 native tools, 2 work (stats), 3 are broken 
 
 **src/backends/ruvector/index.ts** (10 LOC) is a minimal barrel re-export: `export { RuVectorBackend, RuVectorLearning } from './RuVectorBackend'`. It is the public entry point for the ruvector backend package within AgentDB.
 
-**RuVectorBackend.ts** (~500 LOC, 88-92%) is the implementation file read via R88. Key characteristics:
+**RuVectorBackend.ts** (971 LOC, **72-78% — REVISED DOWN from 88-92% in R88**) is a pure adapter: zero own HNSW code, all vector logic delegated to external npm `ruvector`/`@ruvector/core`. R91 deep-read reveals both genuine strengths and significant implementation gaps:
 
-- **Dynamic import with graceful degradation**: Tries `import('ruvector')` first, then falls back to `import('@ruvector/core')`. If neither is installed the backend fails at runtime — no user-facing warning (H46). This is a **runtime optional dependency** requiring separate installation (H43).
-- **Adaptive HNSW parameters**: Tunes `M` (8/16/32), `efConstruction` (100/200/400), and `efSearch` based on dataset size at query time. Chooses conservative parameters for small datasets and aggressive ones for large. `Semaphore` concurrency control limits parallel batch inserts. `BufferPool` reuses Float32Array allocations to reduce GC pressure.
-- **Path security**: `FORBIDDEN_PATH_PATTERNS` list blocks `/etc`, `/proc`, `/sys`, `/dev`, and path traversal sequences (`../`, `//`, null bytes). `validatePath()` is called on every file operation. `MAX_METADATA_ENTRIES=10M` and `MAX_VECTOR_DIMENSION=4096` guard against resource exhaustion. Prototype pollution protection via `Object.keys` guard.
-- **R20 exoneration**: RuVectorBackend accepts `Float32Array` vectors and performs genuine HNSW `insert`, `search`, and `remove` via `VectorDB`. The R20 search failure is entirely upstream — EmbeddingService is never initialized in the claude-flow bridge, so hash-based garbage vectors are supplied. The backend is functionally correct; fixing the bridge's EmbeddingService initialization would make AgentDB search fully operational without any backend changes (H44).
-- **mmap-io optional**: Memory-mapped I/O is tried via dynamic import; if unavailable, the backend continues without it and without logging a warning to operators (H46).
+**Genuine strengths:**
+- **Dynamic import with graceful degradation**: Tries `import('ruvector')` first, then falls back to `import('@ruvector/core')`. Runtime optional dependency (H43). No user warning on failure (H46).
+- **Semaphore (FIFO promise queue)**: Instance-level concurrency control for batch insert ops.
+- **BufferPool (size-keyed pools, zeroed)**: Float32Array reuse to reduce GC pressure.
+- **validatePath + FORBIDDEN_PATH_PATTERNS**: Blocks `/etc`, `/proc`, `/sys`, `/dev`, traversal sequences. `MAX_METADATA_ENTRIES=10M`, `MAX_VECTOR_DIMENSION=4096` guard resource limits.
+- **Prototype pollution defense**: `Object.keys` guard on metadata ingestion.
+- **R20 exoneration (R88, H44)**: Accepts `Float32Array`, performs genuine HNSW insert/search/remove via VectorDB. Failure is upstream (EmbeddingService).
 
-This backend is the genuine implementation that validates R50's RuVectorBackend.js assessment. The `.ts` source and compiled `.js` are both production-quality (88-92% and 88-92% respectively).
+**Implementation gaps discovered in R91:**
+- **`updateAdaptiveParams()` only adjusts `efSearch`** (H51): Despite incrementing `indexRebuildCount`, M and efConstruction are never changed and the index is never rebuilt. Adaptive tuning is partial.
+- **`insertBatchParallel()` creates local semaphore** (H52): Bypasses instance-level semaphore entirely. Concurrent batch insert calls can exceed intended concurrency limits.
+- **mmap scaffolded but not wired to hot paths**: Constructor tries mmap-io import and stores the handle, but read/write paths do not use it.
+- **L2 similarity uncalibrated** (H53): `Math.exp(-distance)` maps L2 to (0,1] without normalization. Scores not comparable to cosine similarity or across datasets.
+
+The compiled `.js` (R50, 88-92%) holds up better than the `.ts` source, since the `.js` assessment focused on VectorDB integration correctness rather than adaptive parameter completeness.
 
 ## 6. Cross-Domain Dependencies
 
@@ -494,3 +521,6 @@ MultiDatabaseCoordinator sync simulation discovered (42% real) — health checks
 
 ### R89 (2026-02-17): Project closeout
 Priority queue EMPTY. 89 sessions, 1,323 DEEP files, 9,121 findings. agentdb-integration domain: 111 DEEP files, 54.7% LOC coverage. R20 arc COMPLETE — root cause confirmed at 3 levels (bridge R20, CLI R84, backend R88). Research phase CLOSED.
+
+### R91 (2026-02-17): AttentionService.ts + RuVectorBackend.ts deep-read
+2 files, 2,494 LOC, 25 findings (10 + 15). AttentionService.ts (1,523 LOC, 60-65%): 4 JS fallback implementations are mathematically genuine (FlashAttention Dao et al. 2022, HyperbolicAttention Poincaré, GraphRoPE, MoEAttention entropy). WASM/NAPI backends never compiled — no pkg/ dir, no .node file. All 39 mechanisms default to enabled:false. db parameter is dead code — zero SQL operations, completely fabricating "SQL-backed attention" claim (C18, C19). 3 real downstream consumers confirmed. RuVectorBackend.ts REVISED DOWN from 88-92% to 72-78%: updateAdaptiveParams() only adjusts efSearch, never rebuilds index; insertBatchParallel() creates local semaphore bypassing instance level; mmap not wired to hot paths; L2 similarity uncalibrated (H51, H52, H53). Genuine strengths (Semaphore, BufferPool, validatePath, prototype pollution defense) confirmed but are adapter-tier utilities, not HNSW implementation. Net result: AttentionService math is real, its SQL/WASM claims are fabricated; RuVectorBackend is a correct adapter with partial adaptive-tuning gaps.

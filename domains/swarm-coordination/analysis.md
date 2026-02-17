@@ -1,11 +1,20 @@
 # Swarm Coordination Domain Analysis
 
 > **Priority**: HIGH | **Coverage**: ~21.6% (313/1428 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-17 (Session R85)
+> **Last updated**: 2026-02-17 (Session R91)
 
 ## 1. Current State Summary
 
 The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle, topology, consensus, health monitoring, and inter-agent communication. R83-R84 added the ruv-swarm WASM cascade layer and persistence analysis. **R85 adds 4 ruv-swarm npm runtime files (530 LOC)** exposing a split personality in the npm package: genuine build orchestration alongside fabricated runtime layers.
+
+**R91 key results:**
+
+- **neural-presets-complete.js (52-58% BIMODAL, 1,306 LOC)** — ruv-swarm neural model presets "complete" version. Lines 1-774 (35-40%): `COMPLETE_NEURAL_PRESETS` object — 27 architecture families as nested config objects. Hyperparameter values are textbook-accurate (BERT 768/12/12/3072, EfficientNet-B0 scaling, DDPM timesteps:1000/cosine) but are LOOKUP TABLES ONLY — no forward pass, no weights, no tensors. Performance metadata (`expectedAccuracy`, `inferenceTime`, `memoryUsage`) are hardcoded paper benchmarks, not measured. `calculatePresetScore()` uses `parseInt`/`parseFloat` which returns NaN for range strings like "5ms/step". Lines 780-1305 (65-70%): `CognitivePatternSelector` + `NeuralAdaptationEngine` contain real algorithmic logic — branching for creativity/precision/adaptation contexts, diversity enforcement, top-5 scored recommendations. `NeuralAdaptationEngine` records adaptation histories, computes accuracy deltas, and suggests hyperparameters from successful past runs.
+- **9th disconnected persistence** — `crossSessionMemory` in `CognitivePatternSelector` is an in-memory Map that resets on every instantiation. Despite the name implying cross-session storage, there is zero DB write, zero file I/O, zero serialization.
+- **Dead imports confirmed** — `CognitivePatternEvolution` and `MetaLearningFramework` imported and instantiated but never called anywhere in the file.
+- **Integration is genuine**: neural-network-manager.js has 4 active call sites for this file (not orphaned).
+- **Confirms R69**: This file is the SOURCE of the "27 ghost models" count — 27 architectures defined as lookup-table configs, few actually implemented in the WASM backend.
+- **WASM scoreboard**: 15 genuine + 1 GHOST vs 12 theatrical (56% genuine). **Persistence layer fragmentation**: 9 disconnected layers confirmed.
 
 **R87 key results:**
 
@@ -215,6 +224,7 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | transformer.js | ruv-swarm | 515 | 83% | DEEP | Correct multi-head attention, sinusoidal PE. LR formula inverted | R40 |
 | gnn.js | ruv-swarm | 447 | 81% | DEEP | Genuine MPNN with GRU-gated updates. Hardcoded accuracy 0.96 | R40 |
 | base.js | ruv-swarm | 269 | 75% | DEEP | Float32Array tensor system, matmul, activations, dropout. backward() stub | R40 |
+| neural-presets-complete.js | ruv-swarm | 1,306 | 52-58% | DEEP | BIMODAL: 27 arch configs as lookup tables (35-40%) + real CognitivePatternSelector/NeuralAdaptationEngine (65-70%). 9th disconnected persistence (crossSessionMemory). Dead imports. SOURCE of R69 "27 ghost models" count | R91 |
 
 ### ruv-swarm-mcp Rust Crate (ruv-FANN)
 
@@ -573,6 +583,8 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | H183 | **test-memory-storage.js GENUINE persistence test (88-92%)** — Validates SwarmPersistence class with better-sqlite3 backend. Multi-session via agent_id foreign keys + TTL expiration (3600s). Direct DB verification with raw SQL. CONTRADICTS R84 single-session finding. Tests genuine sqlite-pool layer, NOT facade ruv-swarm-memory.js (positive) | test-memory-storage.js (npm) | R86 | Open (positive) |
 | H184 | **ruv-swarm-mcp dual transport architecture** — HTTP/WebSocket (main.rs via axum, 127.0.0.1:3000) INCOMPLETE/ABANDONED. Stdio (stdio.rs via rmcp) FUNCTIONAL. 7 disabled modules suggest HTTP was attempt, stdio is reality | main.rs, stdio.rs (ruv-swarm-mcp) | R86 | Open |
 | H185 | **ruv-swarm-mcp tool registry facade** — lib.rs documents 11 tools (spawn, orchestrate, query, monitor, optimize, memory.store/get, task.create, workflow.execute, agent.list, agent.metrics) but service.rs only defines parameter structs. Implementation stubs follow R84 tool-listing-without-implementation pattern | main.rs, lib.rs (ruv-swarm-mcp) | R86 | Open |
+| H186 | **neural-presets-complete.js 9th disconnected persistence layer** — `crossSessionMemory` in CognitivePatternSelector is an in-memory Map. Name implies cross-session storage but zero DB write, file I/O, or serialization. Resets on every class instantiation. Pattern matches R85 (ruv-swarm-memory.js) and R83 (sqlite-worker.js readonly) disconnected persistence anti-pattern. Integration impact: NeuralAdaptationEngine records adaptation histories in memory only — all cross-session learning is lost on restart | neural-presets-complete.js | R91 | Open |
+| H187 | **COMPLETE_NEURAL_PRESETS lookup table masquerades as implementation** — 27 architecture families defined as hyperparameter config objects. Lines 1-774 contain textbook-accurate values (BERT 768/12/12/3072, EfficientNet-B0 compound scaling, DDPM timesteps:1000/cosine, GPT-2 medium 1024-dim) but ZERO computation. Performance metadata (expectedAccuracy, inferenceTime, memoryUsage) are hardcoded paper benchmarks. `calculatePresetScore()` returns NaN for range strings via parseInt/parseFloat. Confirms R69: this file is the source of the "27 ghost models" count — configs exist, WASM implementation does not | neural-presets-complete.js | R91 | Open |
 
 ### [R84] ruv-swarm-memory.js: 8th Disconnected Persistence Layer
 
@@ -642,6 +654,8 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 | **training.rs 4/5 genuine ruv-fann algorithms** — IncrementalBackprop, BatchBackprop, Rprop, Quickprop real. Proper wasm-bindgen. Convergence loop yields to JS event loop | training.rs | R79 |
 | **neural_bridge.rs genuine ruv-fann bridge** — 87% real. Adam optimizer, sliding window time series, ModelType factory. Genuine training, broken inference | neural_bridge.rs | R79 |
 | **build.js GENUINE WASM build orchestrator** — 90-95% real. Dual SIMD compilation, wasm-opt optimization, TypeScript def generation. Validates wasm-pack + rustc. Confirms npm/wasm/ pre-built artifacts are real Rust→WASM compiled output. First confirmed npm build script as genuine infrastructure | build.js (npm/scripts) | R85 |
+| **NeuralAdaptationEngine real adaptation logic** — accuracy delta computation, hyperparameter suggestions drawn from successful past adaptation history. Top-5 scored recommendations with diversity enforcement in CognitivePatternSelector. 65-70% genuine algorithmic content despite surrounding config tables | neural-presets-complete.js | R91 |
+| **neural-presets-complete.js genuinely integrated** — 4 active call sites in neural-network-manager.js confirmed. Not orphaned like dead-import peers (CognitivePatternEvolution, MetaLearningFramework). CognitivePatternSelector branching for creativity/precision/adaptation contexts is real conditional logic | neural-presets-complete.js | R91 |
 
 ## 5. Subsystem Sections
 
@@ -741,6 +755,8 @@ These two files **complete the ruv-swarm npm source picture**. The genuine infra
 **JS neural models (R40)**: 4 files (lstm.js 85%, transformer.js 83%, gnn.js 81%, base.js 75%) implement genuine neural network algorithms — not facades. Correct 4-gate LSTM (Hochreiter 1997), multi-head attention with sinusoidal positional encoding (Vaswani 2017), MPNN with GRU-gated updates (Gilmer 2017). Math is correct for forward passes. However, **no file implements backpropagation**. Training runs forward passes and computes loss, but backward() inherited from base class is a console.log stub. Weights never update. Two files return hardcoded accuracy values (lstm.js 0.864, gnn.js 0.96). ZERO connection to Rust neural-network-implementation crate — no WASM, no NAPI, no FFI bindings. Pure standalone JS. The JS neural models are inference-only counterparts to production Rust implementations. Genuine algorithmic understanding but cannot train models.
 
 **Critical bug**: Transformer learning rate uses Math.sqrt(step) instead of 1/Math.sqrt(step) — training would diverge (transformer.js:321).
+
+**R91 neural preset layer (neural-presets-complete.js, 1,306 LOC, 52-58%)**: The "complete" presets file is BIMODAL at the file level. Lines 1-774 contain `COMPLETE_NEURAL_PRESETS` — 27 architecture families as nested config objects with textbook-accurate hyperparameters (BERT 768d/12H/12L/3072-FFN, EfficientNet-B0 compound scaling coefficients, DDPM 1000 timesteps cosine schedule, GPT-2 medium 1024-dim). These are LOOKUP TABLES ONLY: no forward pass, no weight initialization, no tensor operations. `expectedAccuracy`, `inferenceTime`, and `memoryUsage` are hardcoded paper benchmarks. `calculatePresetScore()` is broken: uses `parseInt`/`parseFloat` on range strings like "5ms/step" → NaN. Lines 780-1305 contain `CognitivePatternSelector` + `NeuralAdaptationEngine` with real algorithmic logic — multi-context branching (creativity/precision/adaptation), diversity enforcement, top-5 scored recommendations, and accuracy-delta-based hyperparameter suggestions drawn from adaptation history. The file is genuinely integrated (4 call sites in neural-network-manager.js) but `CognitivePatternEvolution` and `MetaLearningFramework` are imported and instantiated but never invoked — dead import anti-pattern. `crossSessionMemory` is an in-memory Map that resets on every instantiation, confirming the 9th disconnected persistence layer. **This file is the definitive source of the R69 "27 ghost models" count**: 27 architecture configs exist as data, but the WASM backend implements only a small fraction.
 
 **Rust neural (R21, R19)**: neural-network-implementation crate (90-98%, sublinear-time-solver) is BEST CODE IN ECOSYSTEM. Genuine GRU (9 weight matrices), causal dilated TCN, GELU. System B Temporal Solver: NN predicts residual over Kalman prior (not raw output), with solver gate verification and 4 fallback strategies. P99.9 latency budget ≤ 0.90ms. Uses proper rand::thread_rng(). swarm_coordinator_training.rs (25-35%, ruv-swarm-ml) has real GNN/attention/Q-learning/VAE algorithm skeletons, but ALL 5 training metrics hardcoded (GNN=0.95, Transformer=0.91). Fake rand via SystemTime::now().subsec_nanos().
 
@@ -901,3 +917,6 @@ CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual s
 
 ### R89 (2026-02-17): Project closeout
 Priority queue EMPTY. All research tiers cleared (CONNECTED R82, PROXIMATE/NEARBY/DOMAIN_ONLY R88). 89 sessions, 1,323 DEEP files, 9,121 findings. Swarm-coordination domain: 332 DEEP files, 45.7% LOC coverage. Research phase CLOSED.
+
+### R91 (2026-02-17): neural-presets-complete.js — 27 ghost models source confirmed
+1 file, 1,306 LOC, 7 findings (2H, 3M, 2I). BIMODAL at the file level: Lines 1-774 (35-40%) = `COMPLETE_NEURAL_PRESETS` lookup tables for 27 architectures — textbook hyperparameters, zero computation, broken `calculatePresetScore()` (NaN on range strings). Lines 780-1305 (65-70%) = `CognitivePatternSelector` + `NeuralAdaptationEngine` with real algorithmic logic (diversity enforcement, accuracy-delta hyperparameter suggestions, multi-context branching). **9th disconnected persistence layer**: `crossSessionMemory` is in-memory Map, resets on instantiation. Dead imports: `CognitivePatternEvolution` + `MetaLearningFramework` instantiated but never called. Integration confirmed genuine (4 call sites in neural-network-manager.js). **R69 "27 ghost models" SOURCE CONFIRMED** — 27 config objects define what the WASM backend should implement, not what it does. H186-H187 added. Positives: NeuralAdaptationEngine real adaptation logic, file genuinely integrated.

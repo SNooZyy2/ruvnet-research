@@ -1,7 +1,7 @@
 # Ruvector Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~8.5% (182/~2,150 DEEP est.) | **Status**: In Progress
-> **Last updated**: 2026-02-16 (Session R54)
+> **Priority**: HIGH | **Coverage**: ~9.2% (196/~2,150 DEEP est.) | **Status**: In Progress
+> **Last updated**: 2026-02-17 (Session R91)
 
 ## 1. Current State Summary
 
@@ -11,8 +11,10 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 
 - **Hash-based embeddings are systemic across Rust + JS.** 7+ files default to character-sum or FNV-1a hash, not semantic embeddings. All "semantic search" using defaults is character-frequency matching.
 - **Best code:** temporal-tensor (95%, production-ready), ruQu QEC (91→89% revised with subpoly_decoder drag), ruvllm kernels (90%, NEON SIMD), cognitum-gate-kernel (93%, rivals neural-network-impl), postgres SIMD (95-98%), ruqu-core (noise 96-98%, mitigation 95-98%, transpiler 95-98%).
-- **Worst code:** ruvector-graph has production parser but NO executor (30-35% complete), postgres HNSW `connect_node_to_neighbors()` completely empty, speculative decoding 2x SLOWER than vanilla, index_bench.rs (42%) theatrical benchmarking (HNSW search is brute-force O(n)), subpolynomial/mod.rs (45-50%) false complexity claims, **subpoly_decoder.rs (35-40%) 3rd FALSE subpolynomial** — O(n²) greedy under "provable" claims.
+- **Worst code:** ruvector-graph distributed module shows a new "transport-absent distributed protocol" pattern — algorithm state machines are correctly designed but no socket I/O exists (15-80% range). ruvector-graph Cypher parser has NO executor (30-35% overall). Postgres HNSW `connect_node_to_neighbors()` completely empty. Speculative decoding 2x SLOWER than vanilla. index_bench.rs (42%) theatrical benchmarking. subpolynomial/mod.rs (45-50%) false complexity claims. **subpoly_decoder.rs (35-40%) 3rd FALSE subpolynomial** — O(n²) greedy under "provable" claims.
 - **Edge AI confirmed production-grade** — lora.rs (90-95%) real dual-SIMD LoRA with Q4/Q8 quantization, federated.rs (95-98%) BEST federated learning in project (Byzantine-robust, differential privacy, TopK compression).
+- **ruvector-core advanced features confirmed genuine (85-93%):** product_quantization.rs (88-92%) real k-means++ and Lloyd's with ADC. conformal_prediction.rs (88-93%) valid split-conformal with Vovk et al. quantile. hypergraph.rs (85-90%) genuine bipartite incidence and k-hop BFS citing HyperGraphRAG (NeurIPS 2025). tda.rs (60-70%) MISLABELED — implements graph metrics, not persistent homology (11th mislabeled file).
+- **ruvector-graph distributed module (15-80% gradient):** shard.rs (70-80%) has real EdgeCutMinimizer multilevel Kernighan-Lin and xxh3/blake3 hashing. gossip.rs (45-55%) correct SWIM state machine, no transport. federation.rs (40-50%) real merge logic, execute_on_cluster always empty. coordinator.rs (30-35%) 2PC types defined, state machine frozen. rpc.rs (15-20%) all 4 RPC methods stubs, gRPC feature-gated out.
 - **TWO independent LoRA implementations**: micro_lora.rs (training-focused, EWC++, sona) vs edge-net lora.rs (inference-focused, quantized, WASM).
 - **Core HNSW wraps hnsw_rs** — vendored upstream v0.3.3 (NOT patched), but adds real value (SIMD, REDB, concurrency).
 - **Attention crate is real** — 18+ implementations (Flash, Hyperbolic, MoE, Graph, Sheaf, OT, PDE) across 66 files, ~9,200 LOC. SIMD/Rayon features are no-ops.
@@ -20,6 +22,7 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 - **TWO independent SIMD codebases:** ruvector-core (distance metrics for HNSW) and edge-net (NN inference — matmul, activations, quantization). Zero code sharing.
 - **DUAL query languages confirmed:** Cypher (parser only, no executor) AND SPARQL (93-95% parser + 92% executor). Both property graphs and RDF triple stores supported.
 - **AI co-authored explicitly** — commits credit "Claude Opus 4.5/4.6". Scope (GNN, quantum, FPGA, Raft, graph DB, 39 attention types, postgres ext) would take 2-3 years for experienced team.
+- **R91 additions (5 files, ~3,935 LOC):** mmap.rs (88-92%) genuine memmap2 file-backed mmap + AtomicBitmap, for GNN training only (no HNSW integration). compress.rs (55-65%) 12TH MISLABELED FILE — named "graph compression" but implements embedding/tensor quantization with fake IEEE f16. speculative.rs (88-92%) EAGLE-style tree speculative decoding with novel lambda-guided confidence; sequential path verification (not true parallel). rope.rs (88-92%) correct RoPE with NTK-aware scaling and partial YaRN. kv_cache/legacy.rs (82-88%) RotateKV with FWHT; per-head scale stomping bug; no eviction policy.
 
 ## 2. File Registry
 
@@ -27,13 +30,17 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
-| simd_intrinsics.rs | ruvector-core | 1,605 | 90% | DEEP | Real AVX-512/AVX2/NEON runtime detection. PQ incomplete | C |
+| simd_intrinsics.rs | ruvector-core | 1,605 | 90% | DEEP | Real AVX-512/AVX2/NEON runtime detection. PQ incomplete (RESOLVED by product_quantization.rs) | C |
 | agenticdb.rs | ruvector-core | 1,447 | 70% | DEEP | Metadata filtering integration. Hash embeddings CRITICAL | C |
 | lockfree.rs | ruvector-core | 591 | 85% | DEEP | Real lock-free structures via crossbeam | C |
 | hnsw.rs | hnsw_rs vendored | 1,873 | 98-100% | DEEP | NOT a patch — vendored upstream v0.3.3. Zero modifications. Complete Malkov & Yashunin | R52 |
 | hnswio.rs | hnsw_rs vendored | 1,704 | 95-98% | DEEP | Dual-file persistence, 4 format versions, hybrid mmap. No postgres/AgentDB connection | R52 |
 | libext.rs | hnsw_rs fork | 1,241 | 75-85% | DEEP | Julia FFI. CRIT: no bounds checking, std::mem::forget | R36 |
 | datamap.rs | hnsw_rs fork | 458 | 85-90% | DEEP | Zero-copy mmap. CRIT: use-after-free risk | R36 |
+| product_quantization.rs | ruvector-core | 551 | 88-92% | DEEP | Real k-means++ + Lloyd's + ADC with LUT. RESOLVES H1 | R90 |
+| conformal_prediction.rs | ruvector-core | 505 | 88-93% | DEEP | Valid split-conformal, Vovk et al. quantile, 3 nonconformity measures. 7 tests | R90 |
+| hypergraph.rs | ruvector-core | 551 | 85-90% | DEEP | Genuine bipartite incidence, k-hop BFS, causal memory utility fn. Cites HyperGraphRAG (NeurIPS 2025) | R90 |
+| tda.rs | ruvector-core | 497 | 60-70% | DEEP | MISLABELED — graph metrics only, no persistent homology. 11th mislabeled file | R90 |
 
 ### Attention & Neural
 
@@ -42,6 +49,16 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | ruvector-attention (66 files) | ruvector-attention | ~9,200 | 80% | DEEP | 18+ real implementations. SIMD/Rayon no-ops | B |
 | ruvector-gnn (~40 files) | ruvector-gnn | ~6,000 | 80% | DEEP | Custom hybrid GAT+GRU+edge, full EWC | C |
 | micro-hnsw-wasm | ruvector | 1,263 | 60-70% | DEEP | Novel `#![no_std]` HNSW. 6 neuromorphic features UNTESTED | R36 |
+| mmap.rs | ruvector-gnn (or ruvector) | 918 | 88-92% | DEEP | Real memmap2 file-backed mmap, AtomicBitmap lock-free, Linux madvise(MADV_WILLNEED), 17 tests. GNN training only — no HNSW integration. Pin count unused (no eviction) | R91 |
+
+### ruvector LLM Extensions
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| compress.rs | ruvector (graph compression module) | 679 | 55-65% | DEEP | **12th MISLABELED FILE** — named "graph compression" implements embedding/tensor quantization. 5-tier access-frequency tiers. Fake IEEE f16 (fixed-point ×1000). Trivial PQ codebook (linear interpolation). Binary quantization correct. Zero GNN graph types | R91 |
+| speculative.rs | ruvector | 788 | 88-92% | DEEP | EAGLE-style tree speculative decoding. Textbook rejection sampling. Novel lambda-guided confidence from mincut signal. Correct tree attention mask. Sequential path verification — not true parallel tree forward. Logit-processing only, no model objects | R91 |
+| rope.rs | ruvector | 777 | 88-92% | DEEP | Correct RoPE (Su et al. 2021). NTK-aware scaling (CodeLlama/Qwen formula). Partial YaRN (base+bands, missing attention scale factor). Q15 quantized path. 11 substantive tests. No false SIMD claims. Independent from ruvllm/kernels/rope.rs | R91 |
+| kv_cache/legacy.rs | ruvector | 773 | 82-88% | DEEP | RotateKV (IJCAI 2025) with Fast Walsh-Hadamard Transform. 2-bit/4-bit quantization with correct bit-packing. Per-head scale stomping bug (overwrites min/max on each new token). No eviction policy. 15 genuine tests | R91 |
 
 ### Temporal Tensor (Production-Grade)
 
@@ -146,6 +163,16 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | subpolynomial/mod.rs | ruvector-mincut | 1,385 | 45-50% | DEEP | FALSE subpolynomial complexity. Invalid arXiv citation. Same R39 pattern | R52 |
 | graph Cypher parser | ruvector-graph | 1,296 | 95% | DEEP | Production parser. CRIT: NO EXECUTOR | C |
 
+### ruvector-graph Distributed
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| distributed/shard.rs | ruvector-graph | 596 | 70-80% | DEEP | BEST distributed file. EdgeCutMinimizer multilevel KL, real xxh3/blake3. In-memory only | R90 |
+| distributed/gossip.rs | ruvector-graph | 624 | 45-55% | DEEP | Correct SWIM state machine + failure detector, no network transport (log-only) | R90 |
+| distributed/federation.rs | ruvector-graph | 583 | 40-50% | DEEP | Real merge/dedup logic + FederationStrategy dispatch, execute_on_cluster always returns empty Vec | R90 |
+| distributed/coordinator.rs | ruvector-graph | 536 | 30-35% | DEEP | 2PC types defined, state machine frozen at Active, no network layer, naive string-based query planner | R90 |
+| distributed/rpc.rs | ruvector-graph | 516 | 15-20% | DEEP | All 4 RPC methods stubs. gRPC (tonic) feature-gated out of default build | R90 |
+
 ### Edge-Net P2P Transport
 
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
@@ -192,6 +219,12 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | C21 | **subpoly_decoder.rs FALSE subpolynomial** — 3rd instance of false complexity. Claims "provable O(d^{2-ε} polylog d)" but ALL 3 decoders use O(n²) greedy_pair_and_correct. Zero citations, zero empirical validation | subpoly_decoder.rs | R54 | Open |
 | C22 | **filters.rs COMPLETE domain mislabeling** — Named "filters" in quantum crate but implements classical coherence quality gate. Zero connection to decoder.rs. Zero quantum error filtering | filters.rs | R54 | Open |
 | C23 | **ruQu contains two unrelated systems** — QEC (decoder/syndrome/surface_code) and coherence gate (filters/fabric/tile) share a crate name but have ZERO cross-references. "Qu" may mean "Quality" not "Quantum" | ruQu crate | R54 | Open |
+| C24 | **"Transport-absent distributed protocol" — new pattern class.** All 5 files in ruvector-graph/src/distributed/ share the same defect: algorithm logic and state machines are correctly designed, but every network send is replaced with a debug log comment "In production, send actual network message". Zero socket I/O anywhere in the module. The distributed graph system is a design doc rendered as code | distributed/ (5 files) | R90 | Open |
+| C25 | **tda.rs MISLABELED — 11th mislabeled file.** Named "Topological Data Analysis" but implements zero canonical TDA. No Vietoris-Rips complex, no boundary operators, no Betti numbers, no persistence diagrams. Implements graph metrics (connected components, clustering coefficient, diagonal-covariance degeneracy, multi-scale component counting). Misleading to any consumer expecting homology | tda.rs | R90 | Open |
+| C26 | **coordinator.rs 2PC never transitions from Active.** TransactionState enum has Active/Preparing/Committed/Aborted. commit_transaction() removes the entry and logs — no prepare phase, no participant coordination, no WAL, no rollback. 2PC is type-system scaffolding only; the state machine is frozen at creation | coordinator.rs | R90 | Open |
+| C27 | **rpc.rs all 4 RPC methods are stubs, gRPC feature-gated out.** RpcClient.execute_query() returns empty QueryResult with all-zero stats. RpcServer.start() logs a string. GraphRpcService and tonic::async_trait are gated behind cfg(feature="federation") absent from default Cargo.toml. In the standard build, zero gRPC code compiles | rpc.rs | R90 | Open |
+| C28 | **compress.rs 12th MISLABELED FILE — "graph compression" is actually embedding/tensor quantization.** Zero GNN graph types (GraphEdge, NodeFeature, etc.) are imported or referenced. The file implements 5-tier access-frequency compression (hot/warm/cool/cold/archive) for embedding vectors and tensors. No compression of graph topology, adjacency, or edge weights whatsoever. Consumers expecting graph compression will find tensor quantization routines | compress.rs | R91 | Open |
+| C29 | **compress.rs fake IEEE f16 — fixed-point *1000.0 substituted for real half-precision float.** WarmCompressor::compress_to_f16() multiplies by 1000.0 and stores as i16. This is lossy fixed-point with range ±32.767 (values ≥32.768 overflow silently). Real IEEE 754 binary16 has 5-bit exponent and full float semantics. Any consumer expecting f16 precision, exponent range, or NaN/Inf handling will get incorrect results | compress.rs | R91 | Open |
 
 ### 3b. HIGH Findings
 
@@ -221,6 +254,14 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | H22 | **TWO independent LoRA implementations** — micro_lora.rs (training, EWC++, sona) and lora.rs (inference, quantization, WASM, edge-net). Zero code sharing despite same algorithm | micro_lora.rs, lora.rs | R54 | Open |
 | H23 | **THREE independent noise/noise_model files** — ruQu noise_model.rs (R37), ruqu-core noise.rs (R54), plus surface_code.rs noise handling. No single noise source of truth | noise.rs, noise_model.rs | R54 | Open |
 | H24 | **subpoly_decoder.rs zero citations** — Unlike mod.rs (invalid arXiv), subpoly_decoder.rs has NO references, DOIs, or paper citations. Theoretical claims unsupported | subpoly_decoder.rs | R54 | Open |
+| H25 | **federation.rs execute_on_cluster always empty.** The scatter-gather framework (FederationStrategy: Parallel/Sequential/Fallback) dispatches tokio::spawn correctly but every work unit returns an empty stub QueryResult. No real cross-cluster data flows | federation.rs | R90 | Open |
+| H26 | **gossip.rs SWIM failure detector has no network transport.** join(), send_ping(), handle_ping(), handle_ack() correctly model SWIM with incarnation numbers and suspicion timeouts, but no socket write is ever made. Failure detection cannot fire across processes; protocol only works for in-process state tracking | gossip.rs | R90 | Open |
+| H27 | **H1 RESOLVED — PQ now complete in product_quantization.rs.** H1 ("PQ incomplete — codebook training partial, missing PQ distance computation") was recorded against simd_intrinsics.rs. R90 confirms product_quantization.rs (88-92%) has complete k-means++ codebook training, encode(), and ADC LookupTable. The capability exists; it is in a different module than H1 assumed | product_quantization.rs | R90 | Resolved |
+| H28 | **kv_cache/legacy.rs per-head scale stomping bug.** In the 4-bit quantization path, the per-head min and max scale values are recomputed and overwritten on every new-token append. Prior scale values are discarded, making it impossible to correctly dequantize previously quantized tokens after even one update. Dequantization of the full KV history is silently corrupted | kv_cache/legacy.rs | R91 | Open |
+| H29 | **kv_cache/legacy.rs no eviction policy.** The KV cache grows unboundedly with no LRU, sliding window, or capacity limit. For long-context inference this will exhaust memory without graceful degradation. Contrast with ruvllm/kv_cache.rs which has a hot/cold tiering strategy | kv_cache/legacy.rs | R91 | Open |
+| H30 | **mmap.rs pin count allocated but unused — no page eviction mechanism.** PinnedPage and pin_count fields are defined but pin_count is never incremented, checked, or used in any eviction guard. The mmap region is always available for unmapping regardless of whether callers have outstanding references | mmap.rs | R91 | Open |
+| H31 | **speculative.rs sequential path verification negates tree parallelism benefit.** EAGLE tree decoding produces a draft tree of candidate continuations intended for parallel verification. This implementation verifies accepted tokens sequentially along the accepted path only. No batch forward pass over tree branches occurs. The novelty is in tree construction (lambda-guided confidence) but the parallel verification that makes EAGLE fast is not implemented | speculative.rs | R91 | Open |
+| H32 | **compress.rs PQ codebook uses trivial linear interpolation, not k-means.** ColdCompressor::encode_pq() selects centroids by linear interpolation between min and max values (linspace). This produces uniform quantization, NOT vector quantization optimized to data distribution. Product quantization requires k-means or k-means++ training on representative data. The "PQ" labeling is misleading — this is uniform scalar quantization applied per subvector dimension | compress.rs | R91 | Open |
 
 ## 4. Positives Registry
 
@@ -265,6 +306,14 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 | **fabric.rs production orchestration** — 93-96%, 256-tile WASM fabric. Blake3 cryptographic audit trails, surface code topology generator, 2μs latency target, 23 tests | fabric.rs | R54 |
 | **edge-net federated.rs BEST federated learning** — 95-98%, Byzantine-robust MAD+median, (ε,δ)-DP Gaussian mechanism, TopK compression with error feedback (arXiv:1712.01887), reputation-weighted FedAvg with superlinear weighting, WASM cross-platform. Exceeds sona (85%) | federated.rs | R54 |
 | **edge-net lora.rs production edge LoRA** — 90-95%, complete Low-Rank Adaptation with dual SIMD (AVX2+WASM128), Q4/Q8 quantization (4-8× memory reduction), LRU adapter pool with task routing, online gradient accumulation, P2P serialization, 15 tests | lora.rs | R54 |
+| **product_quantization.rs genuine PQ** — 88-92%, real k-means++ initialization (D² weighting), Lloyd's algorithm (assignment + centroid update), asymmetric distance computation (ADC) with LookupTable per subspace. RESOLVES H1 | product_quantization.rs | R90 |
+| **conformal_prediction.rs valid statistical guarantees** — 88-93%, textbook split-conformal procedure (Vovk et al. 2005). Correct calibration/inference separation, Bonferroni-corrected quantile, 3 nonconformity measures (distance threshold, inverse rank, normalized distance), 7 tests | conformal_prediction.rs | R90 |
+| **hypergraph.rs genuine bipartite hypergraph** — 85-90%, correct incidence representation (entity_to_hyperedges + hyperedge_to_entities HashMaps), real k-hop BFS over hyperedge-mediated paths, causal utility function with log1p uplift, temporal expiry. Cites HyperGraphRAG (NeurIPS 2025) | hypergraph.rs | R90 |
+| **shard.rs EdgeCutMinimizer multilevel KL** — 70-80%, genuine 3-phase multilevel k-way partitioning: heavy-edge coarsening, greedy initial partition, Kernighan-Lin local search (10 iterations). Real xxh3_64 + blake3 hashing, RangePartitioner with binary search | shard.rs (distributed) | R90 |
+| **mmap.rs production memmap2 with lock-free AtomicBitmap** — 88-92%, real memmap2 file-backed memory mapping, Linux madvise(MADV_WILLNEED) prefetch, AtomicBitmap with CAS-based lock-free bit set/clear, RwLock granularity for MmapGradientAccumulator. 17 genuine tests. Clean `#![cfg(not(wasm32))]` gating | mmap.rs | R91 |
+| **speculative.rs novel lambda-guided confidence from mincut signal** — 88-92%, EAGLE-style tree speculative decoding with textbook rejection sampling (min(1, target/draft)), adaptive tree width controlled by confidence threshold, correct tree attention mask generation. Unique integration of mincut boundary signal as lambda-guided confidence weight not seen in reference EAGLE implementations | speculative.rs | R91 |
+| **rope.rs correct NTK-aware scaling with Q15 quantized path** — 88-92%, faithful implementation of Su et al. 2021 RoPE with CodeLlama/Qwen NTK-aware scaling formula, Q15 fixed-point quantized inference path for edge deployment, 11 substantive tests. No inflated SIMD claims | rope.rs | R91 |
+| **kv_cache/legacy.rs RotateKV with Fast Walsh-Hadamard Transform** — 82-88%, genuine RotateKV rotation (IJCAI 2025 paper), correct 2-bit and 4-bit quantization with proper bit-packing, FWHT rotation for key diversity. 15 genuine tests | kv_cache/legacy.rs | R91 |
 
 ## 5. Subsystem Sections
 
@@ -272,7 +321,7 @@ The ruvector domain is a 76-crate Rust monorepo with 50+ npm packages providing 
 
 Three distinct HNSW implementations exist, each serving different use cases (confirmed Phases B+C):
 
-**ruvector-core (Primary)** wraps the third-party `hnsw_rs` crate, NOT a from-scratch implementation. Adds real value: SIMD intrinsics (AVX-512/AVX2/NEON with runtime CPU detection, 1,605 LOC), REDB persistent storage, lock-free concurrency (parking_lot, DashMap, crossbeam). **CRITICAL issues**: placeholder embeddings (sums character bytes, not semantic), HNSW deletions broken (hnsw_rs limitation), PQ incomplete (codebook training partial), ID translation overhead (u64↔string).
+**ruvector-core (Primary)** wraps the third-party `hnsw_rs` crate, NOT a from-scratch implementation. Adds real value: SIMD intrinsics (AVX-512/AVX2/NEON with runtime CPU detection, 1,605 LOC), REDB persistent storage, lock-free concurrency (parking_lot, DashMap, crossbeam). **CRITICAL issues**: placeholder embeddings (sums character bytes, not semantic), HNSW deletions broken (hnsw_rs limitation), ID translation overhead (u64↔string). **PQ NOTE (H1 RESOLVED by R90)**: simd_intrinsics.rs had partial PQ; product_quantization.rs (advanced_features/) has complete k-means++ codebook training + ADC. PQ capability exists; it is in the advanced_features module, not simd_intrinsics.
 
 **micro-hnsw-wasm** is genuinely novel, from-scratch HNSW for ultra-constrained WASM: `#![no_std]`, fixed capacity (32 vectors/core, 16 dims max, 6 neighbors/node), static memory (all in `static mut` arrays, no heap), 256-core sharding (8K total vectors), Quake III fast inverse sqrt, SNN integration (LIF neurons, STDP learning), target <12KB binary. R36 deep-read revealed 6 novel neuromorphic features (spike encoding, homeostatic plasticity, 40Hz resonance, WTA, dendritic computation, temporal patterns) ALL UNVALIDATED with ZERO tests (CRITICAL).
 
@@ -376,7 +425,15 @@ These systems have ZERO cross-references. "Qu" may mean "Quality" not "Quantum" 
 
 ### 5i. Graph Database
 
-**ruvector-graph (30-35% complete, C)**: Cypher parser is production-quality (1,296-line recursive descent, correct lexer). **CRITICAL**: NO query executor — AST generated but never executed. MVCC incomplete (no conflict detection/GC), ALL optimizations 0% stubs, hybrid features type-defs only, distributed system blueprint-only. Hyperedge support unique but partial. "Working Cypher queries" claim is FALSE.
+**ruvector-graph (30-35% complete, C)**: Cypher parser is production-quality (1,296-line recursive descent, correct lexer). **CRITICAL**: NO query executor — AST generated but never executed. MVCC incomplete (no conflict detection/GC), ALL optimizations 0% stubs, hybrid features type-defs only. Hyperedge support unique but partial. "Working Cypher queries" claim is FALSE.
+
+**Distributed module (R90, ~2,855 LOC, 5 files) — "transport-absent distributed protocol" (new pattern class):** Every file in ruvector-graph/src/distributed/ shares the same defect: algorithm logic and state machines are correctly designed, but actual network sends are replaced with debug log comments ("In production, send actual network message"). No socket I/O exists anywhere in the module. Quality gradient spans from 15-80%:
+
+- **shard.rs (70-80%, BEST):** Three genuine partitioners — HashPartitioner (xxh3_64 + blake3 dual hashing), RangePartitioner (binary search with dynamic repartitioning), EdgeCutMinimizer (3-phase multilevel k-way: heavy-edge coarsening, greedy initial partition, Kernighan-Lin local search over 10 iterations). GraphShard data container is in-memory DashMap only; no persistence, replication, or split/merge.
+- **gossip.rs (45-55%):** Complete SWIM state machine (GossipMessage, MembershipEvent, NodeHealth, incarnation numbers, suspicion timeout). join(), send_ping(), handle_ping(), handle_ack() model SWIM correctly. All send operations are debug logs only. emit_event() never calls registered listeners. Failure detection cannot fire across processes.
+- **federation.rs (40-50%):** FederationStrategy dispatch (Parallel/Sequential/Fallback via tokio::spawn) is real. merge_results() performs real node/edge deduplication and stats aggregation. execute_on_cluster() always returns empty QueryResult stub. health_check() hardcodes Healthy. discover_clusters() always returns empty Vec (DNS-SD, Consul, etcd all TODO).
+- **coordinator.rs (30-35%):** DashMap concurrency and UUID generation solid. ShardCoordinator fan-out is in-process only (Arc<GraphShard>, no inter-node routing). Query planner is naive string search (contains "match"/"count"/"limit"), not AST-based. 2PC state machine frozen at Active — commit_transaction() removes HashMap entry and logs; no prepare phase, no WAL, no rollback (CRITICAL C26). execute_query() is O(steps × shards) sequential, defeating sharding.
+- **rpc.rs (15-20%):** All 4 RPC methods (execute_query, broadcast, health_check, get_shard_info) return hardcoded stubs. RpcServer.start() logs a debug message. GraphRpcService (tonic) feature-gated behind cfg(feature="federation") absent from Cargo.toml defaults — zero gRPC compiles in standard builds (CRITICAL C27). RpcConnectionPool infrastructure (DashMap, get_client()) is correct but connects only to stub clients.
 
 **Contrast**: ruvector-postgres has COMPLETE SPARQL 1.1 system (R34+R52) — BOTH production parser (93-95%, 2,496 LOC) AND executor (92%, 1,884 LOC). Total 7,421 LOC across 7 files. Property paths, all 7 aggregates, full algebra execution, 33+ built-in functions. Cypher has parser only, SPARQL has parser AND executor. ruvector is a **multi-model database** supporting both property graph (Cypher) and RDF triple store (SPARQL) paradigms, though only SPARQL has end-to-end query capability.
 
@@ -426,6 +483,53 @@ Scope (GNN, quantum, FPGA, distributed consensus, graph DB, 39 attention types, 
 
 **Bulk feature pattern**: Feb 8, 2026 — temporal tensor store ~4,000 lines, 170+ tests. Feb 8 — quantum simulation 306 tests, 11 improvements. Feb 6 — exotic quantum-classical 8 modules, 99 tests.
 
+### 5n. ruvector-core Advanced Features (R90)
+
+**R90 deep-read confirmed a quality gradient within ruvector-core**: core algorithms (HNSW, SIMD) 90-98%, advanced_features/ module 85-93%, advanced/ module 60-90%. Total 4 files, ~2,104 LOC, avg 80-87% real.
+
+**product_quantization.rs (88-92%, 551 LOC)**: Complete Product Quantization implementation resolving H1. k-means++ initialization (distance-weighted D² random sampling), Lloyd's algorithm (assignment step + centroid update), Asymmetric Distance Computation (ADC) with LookupTable (query-to-centroid distances computed once at creation, distance() sums via table lookup). encode() finds nearest centroid via exhaustive scan — O(k × subspace_dim) per subspace, no SIMD acceleration. Minor logic bug in k-means++ fallback (tautological condition line 384, harmless). Test suite covers creation, training, encoding, lookup table accuracy, compression ratio.
+
+**conformal_prediction.rs (88-93%, 505 LOC)**: Valid split-conformal prediction (Vovk et al. 2005). calibrate() computes nonconformity scores from held-out calibration set, compute_threshold() sets (1-alpha) quantile with correct finite-sample Bonferroni-style correction — ceil((1-alpha)*(n+1)/n) formula. Three nonconformity measures: distance threshold, inverse rank (1/(rank+1)), normalized distance with per-query average normalization. predict() implements all three and returns sets of candidates exceeding threshold. adaptive_top_k() delegates to predict().results.len() (pragmatic). 7 tests using mock search functions.
+
+**hypergraph.rs (85-90%, 551 LOC)**: Genuine bipartite hypergraph index. Correct incidence representation via entity_to_hyperedges (HashMap<VectorId, HashSet<String>>) and hyperedge_to_entities (HashMap<String, HashSet<VectorId>>). k_hop_neighbors() implements BFS over hyperedge-mediated paths correctly (node→hyperedge→all other nodes in hyperedge, not pairwise edges). CausalMemory computes utility function U = alpha*similarity + beta*causal_uplift - gamma*latency_penalty, with causal_uplift using log1p of co-occurrence counts (prevents outlier domination). Temporal index with four granularities (hourly/daily/monthly/yearly) via floor division. Cites HyperGraphRAG (NeurIPS 2025). Tests verify 2-hop reachability and causal utility queries.
+
+**tda.rs (60-70%, 497 LOC) — MISLABELED (CRITICAL C25)**: Named "Topological Data Analysis" but implements ZERO canonical TDA algorithms. No Vietoris-Rips complex, no boundary operators, no Betti numbers, no persistence diagrams. Implements: kNN graph construction (all-pairs O(n²) epsilon-neighborhood), connected components (recursive DFS), clustering coefficient (triangle counting via shared neighbors), degeneracy detection (covariance matrix then diagonal-element singular value approximation — NOT a real SVD, invalid for non-axis-aligned manifolds), persistence approximation (component count at 5 fixed scales [0.1, 0.5, 1.0, 2.0, 5.0] — not birth/death pairs). mode_collapse detection (coefficient of variation of pairwise distances) is a reasonable heuristic. This is an embedding quality analyzer, not TDA.
+
+**Quality gradient confirmed (R90)**:
+```
+ruvector-core algorithms (HNSW, SIMD): 92-98% — production-ready
+ruvector-core advanced_features/ (PQ, conformal): 88-93% — production-ready
+ruvector-core advanced/ (hypergraph): 85-90% — production-ready
+ruvector-core advanced/ (tda.rs mislabeled): 60-70% — functional but misleading
+ruvector-graph distributed protocols: 40-55% — correct design, no transport
+ruvector-graph distributed transport: 15-20% — stubs only
+```
+
+### 5o. ruvector LLM Extensions (R91)
+
+Five files (3,935 LOC) from ruvector that implement LLM inference primitives as standalone modules independent of ruvllm. These are lower-level building blocks (speculative decoding, RoPE, KV cache, mmap, compression) that can be composed into inference pipelines.
+
+**Quality gradient (R91, weighted avg ~83%):**
+```
+rope.rs:             88-92% — production-ready RoPE (independent from ruvllm/kernels/rope.rs)
+speculative.rs:      88-92% — EAGLE tree decoding (sequential verification, not parallel)
+mmap.rs:             88-92% — production memmap2 for GNN training (not HNSW)
+kv_cache/legacy.rs:  82-88% — RotateKV with scale stomping bug; no eviction
+compress.rs:         55-65% — MISLABELED + fake f16; binary quantization correct
+```
+
+**mmap.rs (918 LOC, 88-92%)**: Production memmap2 file-backed memory mapping for gradient accumulation in GNN training. AtomicBitmap with CAS-based lock-free bit set/clear operations (dirty page tracking). Linux madvise(MADV_WILLNEED) for prefetching. MmapGradientAccumulator wraps the mmap region with RwLock granularity for concurrent readers. `#![cfg(not(wasm32), feature = "mmap")]` compile-time gating is clean. Seventeen tests cover bitmap ops, mmap creation, and gradient accumulation. **No HNSW integration** — only GNN training callsites. Pin count fields allocated but pin_count never used (no eviction guard, H30).
+
+**compress.rs (679 LOC, 55-65%) — CRITICAL C28+C29**: Named "graph compression" but implements embedding/tensor quantization across 5 temperature tiers. HotCompressor (identity pass-through), WarmCompressor (fake f16: val*1000 → i16, CRITICAL C29), CoolCompressor (Q8 scalar quantization, correct), ColdCompressor (labelled PQ but uses trivial linear interpolation centroids, not k-means, HIGH H32), ArchiveCompressor (binary quantization by sign — correct). PQ4 outlier handling is genuine: z-score detection (> 3σ), sparse storage for outliers vs packed storage for inliers. 12 unit tests, none covering overflow or precision edge cases for fake f16.
+
+**speculative.rs (788 LOC, 88-92%)**: EAGLE-style tree speculative decoding. Builds speculative draft trees with branching factor controlled by lambda-guided confidence (novel: lambda derived from mincut boundary signal, not standard confidence scoring). Standard textbook rejection sampling: accept token i if u ≤ min(1, p_target(x_i) / p_draft(x_i)). Tree attention mask is correctly computed. **Limitation (H31)**: path verification is sequential along the accepted prefix — no batch forward pass over all tree branches simultaneously. The architectural innovation is in tree construction; EAGLE's parallel verification speedup is not realized. Logit-processing layer only — no model weights or KV cache objects embedded; composable with external model runners. 9 genuine tests.
+
+**rope.rs (777 LOC, 88-92%)**: Correct RoPE rotary embeddings per Su et al. 2021. NTK-aware scaling uses the CodeLlama/Qwen formula (scale = (max_seq_len / base_seq_len)^(d/(d-2)) per frequency pair). Partial YaRN: base frequency scaling and frequency bands (ramp_up) implemented; the attention scale factor (√(1 + 0.1·log(scale))) from the YaRN paper is absent. Q15 fixed-point quantized path for edge inference. 11 substantive tests covering rotation correctness, NTK scaling, and quantization round-trips. No false SIMD claims. Independent from ruvllm/kernels/rope.rs (R35, 95%) — that file targets Apple Silicon NEON; this one is platform-agnostic.
+
+**kv_cache/legacy.rs (773 LOC, 82-88%)**: Implements RotateKV rotation (IJCAI 2025) using Fast Walsh-Hadamard Transform for key diversity before caching. 2-bit quantization uses correct bit-packing (4 values per byte). 4-bit quantization uses correct 2-nibble packing. **Scale stomping bug (H28)**: per-head min/max scales recomputed on each append, discarding prior scale; dequantization of full history silently corrupted after first update. No eviction or capacity limit (H29) — unbounded growth. 15 genuine tests, but none cover multi-token dequantization correctness across appends (would expose H28). Labeled "legacy" but no replacement file observed.
+
+**R91 ruvector LLM extensions verdict**: rope.rs and speculative.rs are production-quality standalone modules. mmap.rs is solid infrastructure for GNN. kv_cache/legacy.rs has a correctness bug and lacks eviction. compress.rs is mislabeled, has fake f16, and should not be used for real graph or tensor compression without significant fixes.
+
 ## 6. Cross-Domain Dependencies
 
 - **memory-and-learning domain**: ReasoningBank implementations (4 distinct), SONA, EWC++, embeddings, attention mechanisms
@@ -436,9 +540,12 @@ Scope (GNN, quantum, FPGA, distributed consensus, graph DB, 39 attention types, 
 
 ## 7. Knowledge Gaps
 
-- **76 crates total** — only ~22 crates deep-read across 174 files
+- **76 crates total** — only ~23 crates deep-read across 196 files (R91: +5 files)
 - **ruvllm remaining** — 309 files, ~197K LOC unread
-- **ruvector-graph** — query executor investigation (why SPARQL has one, Cypher doesn't)
+- **ruvector-graph distributed** — ADDRESSED by R90 (all 5 distributed files DEEP). Verdict: transport-absent protocol. Remaining gap: MVCC, optimizer, hybrid features.
+- **ruvector-core advanced_features/** — ADDRESSED by R90 (PQ + conformal confirmed genuine). Remaining: other files in module.
+- **ruvector-core advanced/** — ADDRESSED by R90 (hypergraph + tda.rs). Remaining: other files.
+- **ruvector LLM extensions** — PARTIALLY ADDRESSED by R91 (mmap, compress, speculative, rope, kv_cache/legacy). Other files in same cluster (e.g., kv_cache non-legacy, additional compression tiers) unread.
 - **npm packages** — 50+ packages, most unread
 - **WASM targets** — 15+ WASM crates, only micro-hnsw-wasm deep-read
 - **router crate** — 4 crates (router-core, router-cli, router-ffi, router-wasm)
@@ -490,3 +597,9 @@ Phase C Rust source examination. CRITICAL placeholder embeddings discovered. HNS
 
 ### R52 (2026-02-16): Algorithmic Infrastructure Deep-Dive
 6 files, ~10,271 LOC, 118 findings (26C, 30H, 31M, 31I). DEEP: 955→970. **Cluster A (HNSW patches)**: hnsw.rs (98-100%) is vendored upstream hnsw_rs v0.3.3, NOT a patch — zero ruvector modifications. CORRECTS R36 "fork" assessment. hnswio.rs (95-98%) BEST-IN-CLASS persistence — dual-file format, hybrid mmap, 4 versions, zero-copy. No postgres/AgentDB integration. All SIMD delegated to anndists crate. **Cluster B (Graph query)**: SPARQL parser.rs (93-95%) PRODUCTION W3C SPARQL 1.1 — all 4 query forms, property paths, 33+ functions, proper AST. Total SPARQL module 7,421 LOC. ruvector confirmed as multi-model DB (Cypher parser + SPARQL parser+executor). index_bench.rs (42%) THEATRICAL — HNSW search is brute-force O(n), zero postgres despite location. New facade category: "algorithmic mislabeling". **Cluster C (Subpoly+SIMD)**: subpolynomial/mod.rs (45-50%) FALSE complexity claims — invalid arXiv citation, O(log n) not O(n^{o(1)}), deterministic open problem. Same R39 false sublinearity pattern. simd.rs (92-95%) COMPLETE independent SIMD for NN inference — real AVX2/WASM/SSE4.1, Q4/Q8 quantization, numerically stable. TWO independent SIMD codebases in ruvector (core=distance, edge-net=inference).
+
+### R90 (2026-02-17): ruvector Blind Spot — Distributed Graph + Core Advanced Features
+9 files, ~4,959 LOC, 50 findings. DEEP: 1,323→1,332. Two clusters addressed long-standing gaps. **Cluster A (ruvector-graph distributed, 5 files, ~2,855 LOC)**: Establishes new "transport-absent distributed protocol" pattern class — algorithm state machines are correctly designed throughout, but all network sends are replaced with debug log comments. shard.rs (70-80%, BEST) has genuine EdgeCutMinimizer (multilevel Kernighan-Lin) and real xxh3/blake3 hashing. gossip.rs (45-55%) has correct SWIM type system and state tracking but no socket I/O. federation.rs (40-50%) real scatter-gather and merge logic but execute_on_cluster always returns empty. coordinator.rs (30-35%) 2PC state machine frozen at Active, naive string-based query planner. rpc.rs (15-20%) all 4 methods stubs, gRPC feature-gated out of default build. **Cluster B (ruvector-core advanced features, 4 files, ~2,104 LOC)**: product_quantization.rs (88-92%) RESOLVES H1 — complete k-means++ + Lloyd's + ADC LookupTable. conformal_prediction.rs (88-93%) valid split-conformal with Vovk et al. quantile, 3 nonconformity measures. hypergraph.rs (85-90%) genuine bipartite incidence, k-hop BFS, causal utility function, cites HyperGraphRAG (NeurIPS 2025). tda.rs (60-70%) MISLABELED (C25, 11th mislabeled file) — graph metrics masquerading as persistent homology. Quality gradient confirmed: core algorithms 92-98% > advanced_features 88-93% > graph distributed protocols 40-55% > graph transport 15-20%.
+
+### R91 (2026-02-17): ruvector LLM Extensions — mmap, compress, speculative, rope, kv_cache/legacy
+5 files, ~3,935 LOC, 9 findings (2C, 5H, positives). DEEP: 1,332→1,337. Cluster covers standalone LLM inference primitives in ruvector (distinct from ruvllm crate). mmap.rs (88-92%) genuine memmap2 + lock-free AtomicBitmap for GNN training; no HNSW integration; pin count unused (no eviction, H30). compress.rs (55-65%) is the 12th MISLABELED FILE (C28) — "graph compression" is embedding/tensor quantization; fake IEEE f16 by ×1000 fixed-point (C29); PQ codebook is trivial linear interpolation not k-means (H32); binary quantization correct. speculative.rs (88-92%) EAGLE-style tree decoding with novel lambda-guided confidence from mincut signal; textbook rejection sampling correct; sequential path verification negates parallel tree benefit (H31). rope.rs (88-92%) faithful RoPE + NTK-aware scaling + partial YaRN; Q15 path; independent from ruvllm/kernels/rope.rs. kv_cache/legacy.rs (82-88%) RotateKV + FWHT + correct 2/4-bit quantization; per-head scale stomping bug corrupts multi-token dequantization (H28); no eviction policy (H29). Weighted avg ~83%. Cumulative mislabeled files: 12.
