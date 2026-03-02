@@ -1,0 +1,173 @@
+R140 COMPILATION AUDIT: sublinear-time-solver
+Generated: 2026-03-02
+Session ID: 141 | Package ID: 11
+Toolchain: rustc 1.93.1
+===============================================================
+
+CRATE                          | CHECK             | TEST              | WARNINGS | LOC
+-------------------------------|-------------------|-------------------|----------|-------
+sublinear (root)               | PASS              | FAIL (7 errors)   | 413      | 35136
+bit-parallel-search            | PASS              | PASS (4 tests)    | 0        | 197
+psycho-symbolic-reasoner ws    | PASS              | PASS (0 tests)    | 12 (ws)  | 14708
+  - graph_reasoner             | PASS              | PASS (0 tests)    | 1        | -
+  - extractors                 | PASS              | PASS (0 tests)    | 1        | -
+  - planner                    | PASS              | PASS (0 tests)    | 10       | -
+neural-network-implementation  | FAIL (106 errors) | FAIL (126 errors) | 24       | 17294
+temporal-compare               | PASS              | PASS (3 tests)    | 26/44    | 3841
+temporal-lead-solver           | FAIL (21 errors)  | FAIL (21 errors)  | 6        | 2337
+rustc-hyperopt                 | FAIL (3 errors)   | FAIL (3 errors)   | 5        | 1175
+temporal-neural-solver-wasm    | PASS (WASM)       | N/A (cdylib)      | 1        | 274
+wasm-solver                    | PASS (WASM)       | N/A (cdylib)      | 6        | 425
+-------------------------------|-------------------|-------------------|----------|-------
+TOTALS                         | 7 PASS / 4 FAIL   | 3 PASS / 4 FAIL   | ~500+    | ~75,387
+
+Note: psycho-symbolic-reasoner PASS counts as the workspace; 3 sub-crates all empty tests.
+WASM crates verified with --target wasm32-unknown-unknown (no lib tests possible for cdylib).
+
+
+===============================================================
+DETAILED ERROR ANALYSIS
+===============================================================
+
+--- sublinear (root) [CHECK: PASS | TEST: FAIL] ---
+  Error count: 7
+  Error types:
+    E0277 (2x): f64 does not satisfy Ord bound — used in sort/max operations
+    E0599 (5x): methods called on EntanglementValidator that do not exist:
+      - analyze_consciousness_time_scales()
+      - model_consciousness_network()
+      - calculate_quantum_fisher_information()
+  Impact: lib test binary cannot compile. cargo check (library only) passes.
+  Conclusion: Tests were NEVER RUN. 413 check warnings suggest accumulated dead code.
+  File IDs in DB: 13841 | file_reads ID: 2057
+
+--- bit-parallel-search [CHECK: PASS | TEST: PASS] ---
+  Tests: 4 passing (test_count, test_edge_cases, test_find, test_find_all)
+  Warnings: 0
+  LOC: 197 (single lib.rs)
+  Conclusion: Only fully clean crate. Genuine TIER 1 bit-parallel search (confirmed R89).
+  File IDs in DB: 13851 | file_reads ID: 2058
+
+--- psycho-symbolic-reasoner workspace [CHECK: PASS | TEST: PASS (hollow)] ---
+  Workspace members: graph_reasoner, extractors, planner
+  Warnings: graph_reasoner 1w, extractors 1w, planner 10w (total 12)
+  Tests run: 0 tests in each crate (test suites written but empty)
+  LOC: 14,708 total across all 3 crates
+  Conclusion: Workspace compiles but has zero test assertions. HOLLOW pass.
+  File IDs in DB: 13972 | file_reads ID: 2059
+
+--- neural-network-implementation [CHECK: FAIL | TEST: FAIL] ---
+  Error count (check): 106
+  Error count (test): 126
+  Critical error types:
+    E0038 (many): ModelParams trait is not dyn-compatible
+      - Trait has associated types / generics that break object safety
+      - Box<dyn ModelParams> used extensively but trait cannot be used as dyn trait
+      - ARCHITECTURAL DEFECT — requires redesign of ModelParams interface
+    E0432: unresolved import `sublinear`
+      - neural-network-implementation depends on root sublinear crate
+      - Path resolution may be broken due to standalone vs workspace structure
+    E0277: various type constraint failures (sparse matrix ops)
+    E0282: type annotations needed (inference failures)
+    E0308: mismatched types
+    E0369: binary operator trait not implemented
+    E0502: borrow checker violations (immutable + mutable borrow)
+  LOC: 17,294 — largest crate in sublinear-time-solver universe
+  Conclusion: NEVER COMPILED. Requires substantial refactoring to fix.
+  File IDs in DB: 13873 | file_reads ID: 2060
+
+--- temporal-compare [CHECK: PASS | TEST: PASS] ---
+  Tests: 3 passing
+    - quantization::tests::test_compression_ratio
+    - quantization::tests::test_quantization_round_trip
+    - mlp_quantized::tests::test_quantized_mlp
+  Warnings: 26 (lib), 44 (bin, 25 duplicates)
+  LOC: 3,841
+  Conclusion: Solid. Genuine passing tests. Optional ruv-fann feature (not enabled).
+  File IDs in DB: 14140 | file_reads ID: 2061
+
+--- temporal-lead-solver [CHECK: FAIL | TEST: FAIL] ---
+  Error count: 21 (both check and test stages fail identically)
+  Error types:
+    E0616 (7x): field `data` of nalgebra core::Vector is private
+      - Code directly accesses .data field: e.g. `vector.data[i]`
+      - Fix: use .as_slice()[i] or .iter().nth(i)
+      - nalgebra has never exposed .data as public in any stable version
+      - INDICATES: code written without running cargo check at all
+    E0277: cannot multiply sprs sparse matrix by ndarray view
+      - sprs and ndarray types are not interoperable without explicit conversion
+    E0382: use after move on Vector (value moved in match arm, then borrowed)
+    E0282: type annotations needed (float literal ambiguity)
+    E0689: method abs() on ambiguous numeric type
+  LOC: 2,337
+  Conclusion: NEVER COMPILED. Low effort to fix (~20 targeted edits) but never attempted.
+  File IDs in DB: 14164 | file_reads ID: 2062
+
+--- rustc-hyperopt [CHECK: FAIL | TEST: FAIL] ---
+  Error count: 3
+  Error types:
+    E0277 (2x): blake3::Hash does not implement std::fmt::LowerHex
+      - Code uses format!("{:x}", hash) which requires LowerHex trait
+      - blake3::Hash implements Display and Debug but NOT LowerHex
+      - Fix: use format!("{}", hash.to_hex()) or use hex encoding crate
+    E0502 (1x): borrow conflict in performance.rs:77
+      - history.drain(0..history.len() - 1000) — len() borrows immutably
+      - while drain() borrows mutably
+      - Fix: let keep = history.len() - 1000; history.drain(0..keep);
+  LOC: 1,175
+  Notes:
+    - Crate description claims "AI-powered Rust compiler optimizer: 3x faster cold starts,
+      10-100x faster incremental builds" — marketing claims with zero benchmark evidence
+    - Also imports `sublinear` (circular?) — unresolved import noted
+  Conclusion: NEVER COMPILED. All 3 errors are trivially fixable (1-2 line changes each).
+  File IDs in DB: 14084 | file_reads ID: 2063
+
+--- temporal-neural-solver-wasm [CHECK: PASS WASM] ---
+  Target: wasm32-unknown-unknown (cdylib, no lib tests applicable)
+  Warnings: 1 (unused import: std::sync::Arc)
+  LOC: 274 (single lib.rs)
+  Conclusion: GENUINE WASM artifact. Builds cleanly for WASM target.
+  File IDs in DB: 14178 | file_reads ID: 2064
+
+--- wasm-solver [CHECK: PASS WASM] ---
+  Target: wasm32-unknown-unknown (cdylib, no lib tests applicable)
+  Warnings: 6 (dead_code: FastCSRMatrix.cols/rows/nnz fields, FastConjugateGradient.b field)
+  LOC: 425 (single lib.rs)
+  Conclusion: GENUINE WASM artifact. Builds cleanly for WASM target.
+  File IDs in DB: 14180 | file_reads ID: 2065
+
+
+===============================================================
+SUMMARY & FINDINGS
+===============================================================
+
+PASS  (cargo check + cargo test passing): 3 crates
+  - bit-parallel-search       4 real tests
+  - temporal-compare          3 real tests
+  - psycho-symbolic-reasoner  0 tests (hollow — passes but no assertions)
+
+PASS  (WASM check only, no testable): 2 crates
+  - temporal-neural-solver-wasm
+  - wasm-solver
+
+FAIL  (check fails, tests never reached): 3 crates  [CRITICAL severity]
+  - neural-network-implementation   106 errors (E0038 dyn-incompatible trait ARCHITECTURAL)
+  - temporal-lead-solver            21 errors  (E0616 private field access SYSTEMIC)
+  - rustc-hyperopt                  3 errors   (E0277 blake3 LowerHex, E0502 borrow)
+
+PARTIAL (check passes, test-compile fails): 1 crate  [HIGH severity]
+  - sublinear (root)                7 errors in test build (E0277, E0599 missing methods)
+
+TOTAL CRATES TESTED: 9 (11 counting psycho sub-members)
+TOTAL LOC AUDITED:   75,387 (root:35136, psycho:14708, neural:17294, rest:8249)
+CRATES NEVER COMPILED: 3 (neural-net, temporal-lead, rustc-hyperopt)
+TESTS NEVER RUN: 4 (root+3 failing check crates)
+REAL TEST COVERAGE: 7 tests across 2 crates out of 9 audited
+
+KEY PATTERN: Code written without running cargo check. The most common error class
+(E0616 private fields, E0277 missing trait impls, E0599 missing methods) indicates
+code that was written speculatively — possibly by an LLM — and never validated
+against the actual Rust compiler. This matches the facade pattern identified across
+the ruvnet universe.
+
+DB RECORDS: 9 file_reads + 13 findings inserted for session_id=141

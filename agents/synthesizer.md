@@ -246,6 +246,24 @@ db.close();
 "
 ```
 
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
+
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
+If a finding doesn't fit cleanly, use the closest canonical category.
+Put specific details in the `description` field, not in the category.
+
 ## Success Criteria
 
 - Analysis document follows standard structure

@@ -1,0 +1,2046 @@
+[
+  {
+    "relationship": "imports",
+    "cnt": 503
+  },
+  {
+    "relationship": "uses",
+    "cnt": 128
+  },
+  {
+    "relationship": "module-sibling",
+    "cnt": 59
+  },
+  {
+    "relationship": "IMPORTS",
+    "cnt": 31
+  },
+  {
+    "relationship": "exports",
+    "cnt": 31
+  },
+  {
+    "relationship": "re-exports",
+    "cnt": 29
+  },
+  {
+    "relationship": "USES",
+    "cnt": 25
+  },
+  {
+    "relationship": "pub_module_declaration",
+    "cnt": 23
+  },
+  {
+    "relationship": "compiles",
+    "cnt": 20
+  },
+  {
+    "relationship": "imports_from",
+    "cnt": 20
+  },
+  {
+    "relationship": "calls",
+    "cnt": 18
+  },
+  {
+    "relationship": "pub_mod",
+    "cnt": 15
+  },
+  {
+    "relationship": "used_by",
+    "cnt": 15
+  },
+  {
+    "relationship": "BARREL_EXPORT",
+    "cnt": 14
+  },
+  {
+    "relationship": "implements",
+    "cnt": 12
+  },
+  {
+    "relationship": "declares_module",
+    "cnt": 10
+  },
+  {
+    "relationship": "USED_BY",
+    "cnt": 9
+  },
+  {
+    "relationship": "declares",
+    "cnt": 9
+  },
+  {
+    "relationship": "sibling",
+    "cnt": 9
+  },
+  {
+    "relationship": "DEPENDS_ON",
+    "cnt": 8
+  },
+  {
+    "relationship": "mod-declaration",
+    "cnt": 8
+  },
+  {
+    "relationship": "requires",
+    "cnt": 8
+  },
+  {
+    "relationship": "used-by",
+    "cnt": 8
+  },
+  {
+    "relationship": "EXPORTS",
+    "cnt": 7
+  },
+  {
+    "relationship": "internal_usage",
+    "cnt": 7
+  },
+  {
+    "relationship": "peer",
+    "cnt": 7
+  },
+  {
+    "relationship": "co-module",
+    "cnt": 6
+  },
+  {
+    "relationship": "module-declares",
+    "cnt": 6
+  },
+  {
+    "relationship": "sibling-module",
+    "cnt": 6
+  },
+  {
+    "relationship": "type-definitions",
+    "cnt": 6
+  },
+  {
+    "relationship": "GENERATES",
+    "cnt": 5
+  },
+  {
+    "relationship": "TESTS",
+    "cnt": 5
+  },
+  {
+    "relationship": "consumed_by",
+    "cnt": 5
+  },
+  {
+    "relationship": "depends_on",
+    "cnt": 5
+  },
+  {
+    "relationship": "imports_type",
+    "cnt": 5
+  },
+  {
+    "relationship": "imports_types",
+    "cnt": 5
+  },
+  {
+    "relationship": "instantiates",
+    "cnt": 5
+  },
+  {
+    "relationship": "missing_config_for",
+    "cnt": 5
+  },
+  {
+    "relationship": "parallel-implementation",
+    "cnt": 5
+  },
+  {
+    "relationship": "pub mod",
+    "cnt": 5
+  },
+  {
+    "relationship": "pub_use",
+    "cnt": 5
+  },
+  {
+    "relationship": "tests",
+    "cnt": 5
+  },
+  {
+    "relationship": "CONSUMED_BY",
+    "cnt": 4
+  },
+  {
+    "relationship": "INDIRECT_EXPORT",
+    "cnt": 4
+  },
+  {
+    "relationship": "calls_method",
+    "cnt": 4
+  },
+  {
+    "relationship": "exported_by",
+    "cnt": 4
+  },
+  {
+    "relationship": "extends",
+    "cnt": 4
+  },
+  {
+    "relationship": "imports_class",
+    "cnt": 4
+  },
+  {
+    "relationship": "module-reexport",
+    "cnt": 4
+  },
+  {
+    "relationship": "parallel_implementation",
+    "cnt": 4
+  },
+  {
+    "relationship": "pub_mod_reexport",
+    "cnt": 4
+  },
+  {
+    "relationship": "re-export",
+    "cnt": 4
+  },
+  {
+    "relationship": "registers_tools_from",
+    "cnt": 4
+  },
+  {
+    "relationship": "submodule",
+    "cnt": 4
+  },
+  {
+    "relationship": "type_consumer",
+    "cnt": 4
+  },
+  {
+    "relationship": "uses_types",
+    "cnt": 4
+  },
+  {
+    "relationship": "wasm_binding",
+    "cnt": 4
+  },
+  {
+    "relationship": "wraps_native",
+    "cnt": 4
+  },
+  {
+    "relationship": "DEFINES",
+    "cnt": 3
+  },
+  {
+    "relationship": "IMPORTED_BY",
+    "cnt": 3
+  },
+  {
+    "relationship": "RE_EXPORTS_MODULE",
+    "cnt": 3
+  },
+  {
+    "relationship": "SIBLING_MODULE",
+    "cnt": 3
+  },
+  {
+    "relationship": "bypasses",
+    "cnt": 3
+  },
+  {
+    "relationship": "delegates_to",
+    "cnt": 3
+  },
+  {
+    "relationship": "error type dependency",
+    "cnt": 3
+  },
+  {
+    "relationship": "includes",
+    "cnt": 3
+  },
+  {
+    "relationship": "loads compiled WASM",
+    "cnt": 3
+  },
+  {
+    "relationship": "parallel-system",
+    "cnt": 3
+  },
+  {
+    "relationship": "parallel_to",
+    "cnt": 3
+  },
+  {
+    "relationship": "reimplements",
+    "cnt": 3
+  },
+  {
+    "relationship": "related",
+    "cnt": 3
+  },
+  {
+    "relationship": "trait_impl",
+    "cnt": 3
+  },
+  {
+    "relationship": "uses_type",
+    "cnt": 3
+  },
+  {
+    "relationship": "CONDITIONAL_EXPORT",
+    "cnt": 2
+  },
+  {
+    "relationship": "PARALLEL_IMPLEMENTATION",
+    "cnt": 2
+  },
+  {
+    "relationship": "RELATED_IMPLEMENTATION",
+    "cnt": 2
+  },
+  {
+    "relationship": "SIBLING_SCENARIO",
+    "cnt": 2
+  },
+  {
+    "relationship": "cfg_module",
+    "cnt": 2
+  },
+  {
+    "relationship": "configures",
+    "cnt": 2
+  },
+  {
+    "relationship": "consumes",
+    "cnt": 2
+  },
+  {
+    "relationship": "cross-lang-api",
+    "cnt": 2
+  },
+  {
+    "relationship": "declares-submodule",
+    "cnt": 2
+  },
+  {
+    "relationship": "delegates-to",
+    "cnt": 2
+  },
+  {
+    "relationship": "direct-import",
+    "cnt": 2
+  },
+  {
+    "relationship": "dynamic-import",
+    "cnt": 2
+  },
+  {
+    "relationship": "executor uses AST from parser",
+    "cnt": 2
+  },
+  {
+    "relationship": "feeds",
+    "cnt": 2
+  },
+  {
+    "relationship": "import",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports - uses super::NEON_LANE_WIDTH",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports - uses super::{NEON_LANE_WIDTH, UNROLL_FACTOR}",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports-and-calls",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports-facade",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports-types",
+    "cnt": 2
+  },
+  {
+    "relationship": "imports-unused",
+    "cnt": 2
+  },
+  {
+    "relationship": "mirrors",
+    "cnt": 2
+  },
+  {
+    "relationship": "module-member",
+    "cnt": 2
+  },
+  {
+    "relationship": "module:exported",
+    "cnt": 2
+  },
+  {
+    "relationship": "optimizes_hyperparams_for",
+    "cnt": 2
+  },
+  {
+    "relationship": "orchestrates",
+    "cnt": 2
+  },
+  {
+    "relationship": "parallel-impl",
+    "cnt": 2
+  },
+  {
+    "relationship": "part-of",
+    "cnt": 2
+  },
+  {
+    "relationship": "potential-integration",
+    "cnt": 2
+  },
+  {
+    "relationship": "pub_reexport_indirect",
+    "cnt": 2
+  },
+  {
+    "relationship": "reads",
+    "cnt": 2
+  },
+  {
+    "relationship": "references",
+    "cnt": 2
+  },
+  {
+    "relationship": "sibling-kernel",
+    "cnt": 2
+  },
+  {
+    "relationship": "solver_family",
+    "cnt": 2
+  },
+  {
+    "relationship": "supersedes",
+    "cnt": 2
+  },
+  {
+    "relationship": "test_imports",
+    "cnt": 2
+  },
+  {
+    "relationship": "tests_via_spawn",
+    "cnt": 2
+  },
+  {
+    "relationship": "uses-types",
+    "cnt": 2
+  },
+  {
+    "relationship": "uses_prompt_templates",
+    "cnt": 2
+  },
+  {
+    "relationship": "uses_struct",
+    "cnt": 2
+  },
+  {
+    "relationship": "ALGORITHM_COMPLEMENT",
+    "cnt": 1
+  },
+  {
+    "relationship": "ALTERNATIVE_LOADER",
+    "cnt": 1
+  },
+  {
+    "relationship": "ARCHITECTURAL_CONTRAST",
+    "cnt": 1
+  },
+  {
+    "relationship": "BASELINE_FOR",
+    "cnt": 1
+  },
+  {
+    "relationship": "CALLS_FROM",
+    "cnt": 1
+  },
+  {
+    "relationship": "COMPLEMENTARY",
+    "cnt": 1
+  },
+  {
+    "relationship": "COMPLEMENTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "CONTAINS",
+    "cnt": 1
+  },
+  {
+    "relationship": "CONTRADICTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "CONTRASTS_WITH",
+    "cnt": 1
+  },
+  {
+    "relationship": "COPY_OF_REFACTORED",
+    "cnt": 1
+  },
+  {
+    "relationship": "Configuration + data structures",
+    "cnt": 1
+  },
+  {
+    "relationship": "DEPENDS_ON_TYPES",
+    "cnt": 1
+  },
+  {
+    "relationship": "Delegates learning cycle orchestration",
+    "cnt": 1
+  },
+  {
+    "relationship": "Drains trajectories for background processing",
+    "cnt": 1
+  },
+  {
+    "relationship": "EXPORTED_FROM",
+    "cnt": 1
+  },
+  {
+    "relationship": "EXPORTS_AS_NAMESPACE",
+    "cnt": 1
+  },
+  {
+    "relationship": "EXPORTS_TO",
+    "cnt": 1
+  },
+  {
+    "relationship": "EXTENDS",
+    "cnt": 1
+  },
+  {
+    "relationship": "EdgeFullSonaEngine fallback stores training state via IntelligenceStore persistence layer",
+    "cnt": 1
+  },
+  {
+    "relationship": "Exported via mod.rs pub use exporter::{MetricsExporter, ExportFormat, ExportConfig, MetricsSummary} (lines 33-38). Also depends on type aliases ConsciousnessLevel=f64, TemporalAdvantage=u64, PrecisionNanos=u64 defined in mod.rs.",
+    "cnt": 1
+  },
+  {
+    "relationship": "FACADE_OF",
+    "cnt": 1
+  },
+  {
+    "relationship": "HONEST_ALTERNATIVE_TO",
+    "cnt": 1
+  },
+  {
+    "relationship": "IMPLEMENTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "IMPLEMENTS_FOR",
+    "cnt": 1
+  },
+  {
+    "relationship": "IMPORTS_AND_REEXPORTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "IMPORTS_TYPE",
+    "cnt": 1
+  },
+  {
+    "relationship": "INTEGRATES",
+    "cnt": 1
+  },
+  {
+    "relationship": "ISOLATED_FROM",
+    "cnt": 1
+  },
+  {
+    "relationship": "Initialization + read/write cycles",
+    "cnt": 1
+  },
+  {
+    "relationship": "Initialized, shared, fed from background",
+    "cnt": 1
+  },
+  {
+    "relationship": "JS fallback alternative when native unavailable",
+    "cnt": 1
+  },
+  {
+    "relationship": "LOADS_WASM_INTERFACE",
+    "cnt": 1
+  },
+  {
+    "relationship": "Loader calls dequantize_tensor() for F32 weights",
+    "cnt": 1
+  },
+  {
+    "relationship": "MISSING_INTEGRATION",
+    "cnt": 1
+  },
+  {
+    "relationship": "MODULE_EXPORT",
+    "cnt": 1
+  },
+  {
+    "relationship": "MODULE_IMPORT",
+    "cnt": 1
+  },
+  {
+    "relationship": "Model loading uses tokenizer for vocab",
+    "cnt": 1
+  },
+  {
+    "relationship": "NAME_COLLISION",
+    "cnt": 1
+  },
+  {
+    "relationship": "OPTIMIZES",
+    "cnt": 1
+  },
+  {
+    "relationship": "ORCHESTRATED_BY",
+    "cnt": 1
+  },
+  {
+    "relationship": "PEER",
+    "cnt": 1
+  },
+  {
+    "relationship": "PROVIDES_NEURAL_API",
+    "cnt": 1
+  },
+  {
+    "relationship": "Predictor::predict dispatches to SolverGate for SystemB verification",
+    "cnt": 1
+  },
+  {
+    "relationship": "RECEIVES_DATA_FROM",
+    "cnt": 1
+  },
+  {
+    "relationship": "REIMPLEMENTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "REPORTS_FOR",
+    "cnt": 1
+  },
+  {
+    "relationship": "RE_EXPORTS",
+    "cnt": 1
+  },
+  {
+    "relationship": "RE_EXPORTS_ALL",
+    "cnt": 1
+  },
+  {
+    "relationship": "RE_EXPORTS_TYPE",
+    "cnt": 1
+  },
+  {
+    "relationship": "RuVectorGunOptimizer attempts to use edge-full WASM for HNSW vector search (falls back to hash-based)",
+    "cnt": 1
+  },
+  {
+    "relationship": "SHARED_TYPE",
+    "cnt": 1
+  },
+  {
+    "relationship": "SHOULD_INTEGRATE",
+    "cnt": 1
+  },
+  {
+    "relationship": "SIBLING",
+    "cnt": 1
+  },
+  {
+    "relationship": "SONA learning can optimize Metal kernel selection",
+    "cnt": 1
+  },
+  {
+    "relationship": "Shared via Arc<RwLock<>>",
+    "cnt": 1
+  },
+  {
+    "relationship": "TESTED_BY",
+    "cnt": 1
+  },
+  {
+    "relationship": "TESTS_VARIANT_OF",
+    "cnt": 1
+  },
+  {
+    "relationship": "TEST_SUITE",
+    "cnt": 1
+  },
+  {
+    "relationship": "Trainer::train_epoch_system_b_active uses PageRankSelector for sample selection",
+    "cnt": 1
+  },
+  {
+    "relationship": "Training produces model used by Predictor for inference",
+    "cnt": 1
+  },
+  {
+    "relationship": "USES_EXTERNAL_CRATE",
+    "cnt": 1
+  },
+  {
+    "relationship": "USES_LOADER",
+    "cnt": 1
+  },
+  {
+    "relationship": "USES_TYPE",
+    "cnt": 1
+  },
+  {
+    "relationship": "VALIDATES_AGAINST",
+    "cnt": 1
+  },
+  {
+    "relationship": "VIOLATES",
+    "cnt": 1
+  },
+  {
+    "relationship": "WRAPS",
+    "cnt": 1
+  },
+  {
+    "relationship": "algorithmic-parallel",
+    "cnt": 1
+  },
+  {
+    "relationship": "alternative-implementation",
+    "cnt": 1
+  },
+  {
+    "relationship": "alternative_to",
+    "cnt": 1
+  },
+  {
+    "relationship": "always-on submodule",
+    "cnt": 1
+  },
+  {
+    "relationship": "architectural",
+    "cnt": 1
+  },
+  {
+    "relationship": "architectural-alternative",
+    "cnt": 1
+  },
+  {
+    "relationship": "architectural-mismatch",
+    "cnt": 1
+  },
+  {
+    "relationship": "attempts-import",
+    "cnt": 1
+  },
+  {
+    "relationship": "auto-dispatch - gelu_auto→activations::batch_gelu (line 749), silu_auto→batch_silu (line 763)",
+    "cnt": 1
+  },
+  {
+    "relationship": "auto-dispatch - layer_norm_auto→norm::batched_layer_norm_neon (line 798), rms_norm_auto→batched_rms_norm_neon (line 812)",
+    "cnt": 1
+  },
+  {
+    "relationship": "auto-dispatch - matmul_auto falls back to matmul::gemm_neon (line 734)",
+    "cnt": 1
+  },
+  {
+    "relationship": "benchmarks",
+    "cnt": 1
+  },
+  {
+    "relationship": "bidirectional solver combines with ForwardPushSolver",
+    "cnt": 1
+  },
+  {
+    "relationship": "both implement plasticity rules for same neuron types",
+    "cnt": 1
+  },
+  {
+    "relationship": "build.rs (defined in Cargo.toml) downloads jj binary consumed by wrapper.rs include_bytes!",
+    "cnt": 1
+  },
+  {
+    "relationship": "calls RemediationEngine.heal() in health check loop",
+    "cnt": 1
+  },
+  {
+    "relationship": "calls_broken",
+    "cnt": 1
+  },
+  {
+    "relationship": "cli_indirect",
+    "cnt": 1
+  },
+  {
+    "relationship": "client-server",
+    "cnt": 1
+  },
+  {
+    "relationship": "co-located",
+    "cnt": 1
+  },
+  {
+    "relationship": "cohomology-sibling",
+    "cnt": 1
+  },
+  {
+    "relationship": "compared-to",
+    "cnt": 1
+  },
+  {
+    "relationship": "comparison",
+    "cnt": 1
+  },
+  {
+    "relationship": "competes_with",
+    "cnt": 1
+  },
+  {
+    "relationship": "complementary-types",
+    "cnt": 1
+  },
+  {
+    "relationship": "complements",
+    "cnt": 1
+  },
+  {
+    "relationship": "composes: SystemB uses KalmanFilter for prior predictions",
+    "cnt": 1
+  },
+  {
+    "relationship": "composes: SystemB uses PageRankSelector for active sample selection",
+    "cnt": 1
+  },
+  {
+    "relationship": "composes: SystemB uses SolverGate for verification",
+    "cnt": 1
+  },
+  {
+    "relationship": "composes: SystemB wraps SystemA as base_network",
+    "cnt": 1
+  },
+  {
+    "relationship": "conceptual-parallel",
+    "cnt": 1
+  },
+  {
+    "relationship": "consumes TrainingTriplets",
+    "cnt": 1
+  },
+  {
+    "relationship": "consumes backward() gradients for parameter updates",
+    "cnt": 1
+  },
+  {
+    "relationship": "contains",
+    "cnt": 1
+  },
+  {
+    "relationship": "contrasts_with",
+    "cnt": 1
+  },
+  {
+    "relationship": "crate_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "creates-via",
+    "cnt": 1
+  },
+  {
+    "relationship": "cross-lang-impl",
+    "cnt": 1
+  },
+  {
+    "relationship": "cross_crate_counterpart",
+    "cnt": 1
+  },
+  {
+    "relationship": "cross_crate_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "cross_repo_comparable",
+    "cnt": 1
+  },
+  {
+    "relationship": "daa-service.js loads WASM modules exposed via ruv_swarm_wasm.js bindings",
+    "cnt": 1
+  },
+  {
+    "relationship": "data_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "database-schema",
+    "cnt": 1
+  },
+  {
+    "relationship": "declared-in",
+    "cnt": 1
+  },
+  {
+    "relationship": "declared_in",
+    "cnt": 1
+  },
+  {
+    "relationship": "declares_dependency_but_never_uses",
+    "cnt": 1
+  },
+  {
+    "relationship": "defines-backends-for",
+    "cnt": 1
+  },
+  {
+    "relationship": "defines-interface-for",
+    "cnt": 1
+  },
+  {
+    "relationship": "defines_module",
+    "cnt": 1
+  },
+  {
+    "relationship": "defines_types_for",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates - gelu_ane→gelu_scalar (line 500), silu_ane→silu_scalar (line 515), softmax_ane→softmax_scalar (line 530)",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates to EdgeFeatured, GraphRoPE, DualSpace",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates to InfoNCE, SGD, Adam, AdamW, CurriculumScheduler, HardNegativeMiner",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates to core ScaledDotProduct, MultiHead",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates-storage",
+    "cnt": 1
+  },
+  {
+    "relationship": "delegates_to_via_npx",
+    "cnt": 1
+  },
+  {
+    "relationship": "depends",
+    "cnt": 1
+  },
+  {
+    "relationship": "depends-on",
+    "cnt": 1
+  },
+  {
+    "relationship": "depends-on-fallback",
+    "cnt": 1
+  },
+  {
+    "relationship": "depends_via_bootstrap",
+    "cnt": 1
+  },
+  {
+    "relationship": "duplicate_of",
+    "cnt": 1
+  },
+  {
+    "relationship": "duplicates_logic",
+    "cnt": 1
+  },
+  {
+    "relationship": "embeds_schema",
+    "cnt": 1
+  },
+  {
+    "relationship": "equivalent_algorithm",
+    "cnt": 1
+  },
+  {
+    "relationship": "error_handling",
+    "cnt": 1
+  },
+  {
+    "relationship": "expects_integration",
+    "cnt": 1
+  },
+  {
+    "relationship": "expert_cache could integrate with rlm_embedder NeighborRetriever for MoE routing",
+    "cnt": 1
+  },
+  {
+    "relationship": "exported-by",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports - lib.rs re-exports PagedAttention",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports - lib.rs re-exports RuvLtraModel",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports - lib.rs re-exports ServingEngine",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports-to",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports_from",
+    "cnt": 1
+  },
+  {
+    "relationship": "exports_to",
+    "cnt": 1
+  },
+  {
+    "relationship": "exposed_by_sql_wrapper",
+    "cnt": 1
+  },
+  {
+    "relationship": "extends - RuvLtraMediumConfig extends RuvLtraConfig patterns",
+    "cnt": 1
+  },
+  {
+    "relationship": "extends_learning_from",
+    "cnt": 1
+  },
+  {
+    "relationship": "facade-of",
+    "cnt": 1
+  },
+  {
+    "relationship": "fallback_chain",
+    "cnt": 1
+  },
+  {
+    "relationship": "feature-gated submodule",
+    "cnt": 1
+  },
+  {
+    "relationship": "feature-gated-uses",
+    "cnt": 1
+  },
+  {
+    "relationship": "ffi-interface",
+    "cnt": 1
+  },
+  {
+    "relationship": "fixes",
+    "cnt": 1
+  },
+  {
+    "relationship": "implements-api",
+    "cnt": 1
+  },
+  {
+    "relationship": "implements-for",
+    "cnt": 1
+  },
+  {
+    "relationship": "implements-interface",
+    "cnt": 1
+  },
+  {
+    "relationship": "implements-trait",
+    "cnt": 1
+  },
+  {
+    "relationship": "import-Pattern-StorageStats",
+    "cnt": 1
+  },
+  {
+    "relationship": "imported-but-unused",
+    "cnt": 1
+  },
+  {
+    "relationship": "imported-by",
+    "cnt": 1
+  },
+  {
+    "relationship": "imported_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports (type)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports - implicit - activations module",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports - uses PagedAttention, PageTable",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports - uses RopeTables, apply_rope_neon from kernels/rope.rs",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports - uses activation functions from kernels/activations.rs",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports @ruvector/attention native addon",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ChatMessage, ChatTemplate, RuvTokenizer (line 53). Uses chat templates (lines 286-305), streaming decode (lines 308-332)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ClaudeModel for routing",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports CognitivePatternEvolution",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports Config/ModelConfig/InferenceConfig",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ConsciousnessMetrics struct via use super::ConsciousnessMetrics (line 10). All export methods take &[ConsciousnessMetrics] history and &ConsciousnessMetrics current as parameters.",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports CoreMLBackend for ANE operations (placeholder integration)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports CoreMLBackend for ANE operations (placeholder)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ErrorPatternLearner + RecoverySuggestion",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ExecutionContext",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports Hnsw, PointIndexation, Point, PointId, Neighbour",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports JJOperation/JJOperationLog/OperationType for operation tracking and logging",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports JJOperation/OperationType — trajectories are sequences of JJ operations",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports JJResult for operation execution results",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports LlmBackend, GenerateParams, GeneratedToken, ModelArchitecture, ModelConfig (lines 41-44)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports LlmBackend, GenerateParams, GeneratedToken, ModelArchitecture, ModelConfig (lines 47-50)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports LlmBackend, GenerateParams, GeneratedToken, StreamEvent, TokenStream (lines 66-69)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports MetaLearningFramework",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports PagedAttention, PagedAttentionConfig (line 46). Initializes in with_config (lines 745-755)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports Pattern type",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports Perspective trait + CritiqueResult + UnifiedCritique",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports PushGraph, WorkQueue, VisitedTracker data structures",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ReasoningBank for trajectory tracking and pattern-based decision suggestions",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports Reflection struct",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports ReflexionMemory controller, calls storeEpisode() and retrieveRelevant()",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports SimilarityMetrics, VectorEmbedding",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports SonaConfig, SonaIntegration, Trajectory (line 52). Records trajectories in generate() (lines 1294-1327)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports StreamMetrics, FileOperationStats types",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports all JJ type definitions (JJResult, JJCommit, JJBranch, JJConflict, JJDiff)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports and delegates all intelligence operations to RuVectorIntelligence singleton",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports and initializes EmbeddingService with Xenova/all-MiniLM-L6-v2, passes to all controllers",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports and uses VectorEmbedding, SimilarityMetrics",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports apply_rope_neon from kernels/rope.rs for SuRoPE",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports apply_rope_neon, precompute_rope_tables_with_config, RopeConfig from kernels/rope.rs",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports bitnet::{TernaryTensor, pack_ternary, absmean_ternary} from parent module",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports cognitive pattern evolution",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports crate::tokenizer::RuvTokenizer (line 639, 861-862)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports error types",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports flash_attention_neon from kernels/attention.rs (line 352)",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports flash_attention_neon, AttentionConfig from kernels/attention.rs",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports meta-learning framework",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports types",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports-domain-model",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports-extensively",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports-for-initialization",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports-uses",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_all: use crate::* (line 6). Imports DAAAgent trait, CognitivePattern, DAAResult, DAAError, Task, TaskResult, Feedback, CoordinationResult, Knowledge, AgentMetrics, Priority, etc.",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_all: use crate::gpu_learning_engine::* (line 7). Heavy dependency - GPULearningEngine, GPULearningConfig, OperationRecord, GPUOperationType, WorkloadDescription, ResourceConstraints, OptimalGPUConfiguration, ThermalState, KnowledgeTransferResult, PerformancePredictions, OptimizationRecommendation, LearningEngineMetrics, PredictionHorizon, NeuralModelConfig, KnowledgeSharingConfig, PerformanceThresholds, WorkloadSize",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_broken",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_config",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_csr_storage",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_error_type",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_error_types",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_gnn_service",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_persistence",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_precision_type",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_simd_ops",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_solver",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_spawns",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_trait",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_wasm_bridge",
+    "cnt": 1
+  },
+  {
+    "relationship": "imports_wasm_loader",
+    "cnt": 1
+  },
+  {
+    "relationship": "improved_version_of",
+    "cnt": 1
+  },
+  {
+    "relationship": "incomplete_port",
+    "cnt": 1
+  },
+  {
+    "relationship": "indirect",
+    "cnt": 1
+  },
+  {
+    "relationship": "indirect_via_server",
+    "cnt": 1
+  },
+  {
+    "relationship": "initialization_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "initializes-episodic",
+    "cnt": 1
+  },
+  {
+    "relationship": "instantiated_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "instantiation_bridge",
+    "cnt": 1
+  },
+  {
+    "relationship": "integrates",
+    "cnt": 1
+  },
+  {
+    "relationship": "integrates AgentBoosterEnhanced for request preprocessing with confidence threshold before proxy dispatch",
+    "cnt": 1
+  },
+  {
+    "relationship": "integration-target",
+    "cnt": 1
+  },
+  {
+    "relationship": "internal-validation",
+    "cnt": 1
+  },
+  {
+    "relationship": "js_fallback_for",
+    "cnt": 1
+  },
+  {
+    "relationship": "lazy_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "lib.rs calls CypherEngine.execute()",
+    "cnt": 1
+  },
+  {
+    "relationship": "lib.rs calls execute_sparql()",
+    "cnt": 1
+  },
+  {
+    "relationship": "lib.rs calls parse_sparql()",
+    "cnt": 1
+  },
+  {
+    "relationship": "loads",
+    "cnt": 1
+  },
+  {
+    "relationship": "loads-config-from",
+    "cnt": 1
+  },
+  {
+    "relationship": "loads_wasm_module",
+    "cnt": 1
+  },
+  {
+    "relationship": "manages - scheduler uses KV cache from paged_attention",
+    "cnt": 1
+  },
+  {
+    "relationship": "member-of",
+    "cnt": 1
+  },
+  {
+    "relationship": "member_of",
+    "cnt": 1
+  },
+  {
+    "relationship": "mirrors_architecture",
+    "cnt": 1
+  },
+  {
+    "relationship": "missing_integration",
+    "cnt": 1
+  },
+  {
+    "relationship": "mod-wasm",
+    "cnt": 1
+  },
+  {
+    "relationship": "mod_use_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "module-definition",
+    "cnt": 1
+  },
+  {
+    "relationship": "module-export",
+    "cnt": 1
+  },
+  {
+    "relationship": "module-parent",
+    "cnt": 1
+  },
+  {
+    "relationship": "module_declaration",
+    "cnt": 1
+  },
+  {
+    "relationship": "module_export",
+    "cnt": 1
+  },
+  {
+    "relationship": "mutates via add_fact() in apply_rules()",
+    "cnt": 1
+  },
+  {
+    "relationship": "naming-conflict",
+    "cnt": 1
+  },
+  {
+    "relationship": "native_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "npm-module",
+    "cnt": 1
+  },
+  {
+    "relationship": "npm_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "operates on preprocessed data",
+    "cnt": 1
+  },
+  {
+    "relationship": "optional-dep",
+    "cnt": 1
+  },
+  {
+    "relationship": "optional-dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "optional-integration",
+    "cnt": 1
+  },
+  {
+    "relationship": "optional_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "optional_integration",
+    "cnt": 1
+  },
+  {
+    "relationship": "orphaned-module",
+    "cnt": 1
+  },
+  {
+    "relationship": "orphaned_from",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel implementation",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel_api",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel_impl",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel_simulation_pattern",
+    "cnt": 1
+  },
+  {
+    "relationship": "parallel_system",
+    "cnt": 1
+  },
+  {
+    "relationship": "patched_version_of",
+    "cnt": 1
+  },
+  {
+    "relationship": "potentially_uses",
+    "cnt": 1
+  },
+  {
+    "relationship": "produces",
+    "cnt": 1
+  },
+  {
+    "relationship": "produces TileReport and WitnessFragment",
+    "cnt": 1
+  },
+  {
+    "relationship": "produces_for",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub mod operations — declares and re-exports JJOperation, JJOperationLog, OperationType",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub mod reasoning_bank — declares and re-exports ReasoningBank, Trajectory, Pattern, etc.",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub mod types — declares and re-exports JJCommit, JJBranch, JJConflict, JJResult",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub mod wrapper — declares and re-exports JJWrapper",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use gemma2::{...} - exports Gemma2 types (line 93-96)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use gemma2::{Gemma2Attention, Gemma2Config, ...} (lines 93-96)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use hybrid_pipeline::{...} - exports hybrid types when hybrid-ane feature enabled (line 84-87)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use hybrid_pipeline::{...} when hybrid-ane feature enabled (lines 84-87)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use phi3::{...} - exports Phi3 types (line 97)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub use phi3::{Phi3Attention, Phi3Config, ...} (line 97)",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub_mod_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "pub_re_export",
+    "cnt": 1
+  },
+  {
+    "relationship": "queries",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exported by crate root",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports Entity+Fact+Relationship",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports InferenceEngine+InferenceResult",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports KnowledgeGraph",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports Query+QueryResult",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports Rule+RuleEngine",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports: pub use kalman::KalmanFilter",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports: pub use layers::{GruLayer, TcnLayer, DenseLayer}",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports: pub use pagerank_selector::PageRankSelector",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports: pub use system_a::SystemA",
+    "cnt": 1
+  },
+  {
+    "relationship": "re-exports: pub use system_b::SystemB",
+    "cnt": 1
+  },
+  {
+    "relationship": "reads-writes",
+    "cnt": 1
+  },
+  {
+    "relationship": "receives EmbeddingService via constructor, calls embed() for episode storage and query preparation",
+    "cnt": 1
+  },
+  {
+    "relationship": "records worker execution results as trajectory steps via intelligence bridge",
+    "cnt": 1
+  },
+  {
+    "relationship": "reexported_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "referenced_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "related-benchmark",
+    "cnt": 1
+  },
+  {
+    "relationship": "related_to",
+    "cnt": 1
+  },
+  {
+    "relationship": "replaced-by",
+    "cnt": 1
+  },
+  {
+    "relationship": "replaces",
+    "cnt": 1
+  },
+  {
+    "relationship": "requires_embedding_service_initialized_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "ruv-swarm-clean.js routes DAA tool calls to daa-service.js",
+    "cnt": 1
+  },
+  {
+    "relationship": "same-package",
+    "cnt": 1
+  },
+  {
+    "relationship": "should-import-but-reimplements",
+    "cnt": 1
+  },
+  {
+    "relationship": "should_call_but_doesnt",
+    "cnt": 1
+  },
+  {
+    "relationship": "should_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "should_integrate_but_orphaned",
+    "cnt": 1
+  },
+  {
+    "relationship": "sibling-cli-mcp",
+    "cnt": 1
+  },
+  {
+    "relationship": "sibling_impl",
+    "cnt": 1
+  },
+  {
+    "relationship": "sibling_module",
+    "cnt": 1
+  },
+  {
+    "relationship": "signature_mirror",
+    "cnt": 1
+  },
+  {
+    "relationship": "spawns-process",
+    "cnt": 1
+  },
+  {
+    "relationship": "spawns_mcp_subprocess",
+    "cnt": 1
+  },
+  {
+    "relationship": "supports_but_facades",
+    "cnt": 1
+  },
+  {
+    "relationship": "systemic_pattern",
+    "cnt": 1
+  },
+  {
+    "relationship": "test-dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "tested-by integration tests",
+    "cnt": 1
+  },
+  {
+    "relationship": "tested_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "tests_performance",
+    "cnt": 1
+  },
+  {
+    "relationship": "transitive",
+    "cnt": 1
+  },
+  {
+    "relationship": "transitive_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "transpiled-from",
+    "cnt": 1
+  },
+  {
+    "relationship": "type-imports",
+    "cnt": 1
+  },
+  {
+    "relationship": "type_alignment",
+    "cnt": 1
+  },
+  {
+    "relationship": "type_definition",
+    "cnt": 1
+  },
+  {
+    "relationship": "type_import",
+    "cnt": 1
+  },
+  {
+    "relationship": "type_provider",
+    "cnt": 1
+  },
+  {
+    "relationship": "used_by_conversion",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses - engine calls scheduler.schedule()",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses BTSPAssociativeMemory for one-shot learning",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses ClaudeModel enum",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses CompactGraph for graph storage",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses DataMap for mmap support",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses Delta types for message parsing",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses EmbeddingCache for 3-tier caching of computed embeddings (native SQLite > WASM > memory)",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses EmbeddingService for fuzzy cache matching via cosine similarity on embeddings",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses EmbeddingService for generating agent/task embeddings for HNSW index and similarity search",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses EvidenceAccumulator for hypothesis tracking",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses Fact type for rule conclusions",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses GrpoFeedback for reinforcement loop",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses HnswIo/load_description for reload",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses IntelligenceStore for SQLite persistence of trajectories, patterns, routings, stats",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses KnowledgeGraph for pattern matching",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses MAGICDATAP/load_description for dump format",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses MetalContext for flash_attention, gemm_f32, rms_norm (lines 614-818)",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses MetalContext.flash_attention/gemm_f32/rms_norm (lines 614-818)",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses Observation from delta types",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses OutcomeTracker for weight updates",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses Problem/ProblemType/Severity from detector",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses Problem/SystemMetrics for remediation context",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses ProblemDetector for metric collection/detection",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses ReasoningBank for pattern storage",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses RestrictionMap for energy",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses SheafGraph for memory coherence",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses StrategyRegistry for strategy selection/execution",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses TierConfig for adaptive tiering",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses VectorBackend (same interface) for retrieveFromVectorBackend(), HybridSearch not directly used but same pattern",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses backends::{GenerateParams, LlmBackend, Tokenizer} - depends on backend abstraction",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses crate::kernels::gelu_vec() from kernels/activations.rs for GeGLU",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses crate::kernels::silu_vec() from kernels/activations.rs (line 589)",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses error::RuvLLMError trait",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses restriction in SheafEdge",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses scoring logic (divergent formula)",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses-concept",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses-for-embeddings",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses-impl",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses: SystemA builds architectures from GruLayer, TcnLayer, DenseLayer",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses_api",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses_constant",
+    "cnt": 1
+  },
+  {
+    "relationship": "uses_wrapper",
+    "cnt": 1
+  },
+  {
+    "relationship": "validated data feeds into preprocessing pipeline",
+    "cnt": 1
+  },
+  {
+    "relationship": "variant_of",
+    "cnt": 1
+  },
+  {
+    "relationship": "wasm-bindgen generated JS glue (bundler target) for compiled Rust crate",
+    "cnt": 1
+  },
+  {
+    "relationship": "wasm-bindgen generated JS glue (deno target) for compiled Rust crate",
+    "cnt": 1
+  },
+  {
+    "relationship": "wasm-bindgen generated JS glue (node target) for compiled Rust crate",
+    "cnt": 1
+  },
+  {
+    "relationship": "wasm-bindgen generated JS glue (web target) for compiled Rust crate",
+    "cnt": 1
+  },
+  {
+    "relationship": "wasm_variant",
+    "cnt": 1
+  },
+  {
+    "relationship": "worker_thread_dependency",
+    "cnt": 1
+  },
+  {
+    "relationship": "wrapped_by",
+    "cnt": 1
+  },
+  {
+    "relationship": "wraps",
+    "cnt": 1
+  },
+  {
+    "relationship": "wraps Hnsw via AnnT trait for FFI",
+    "cnt": 1
+  },
+  {
+    "relationship": "wraps_deprecated",
+    "cnt": 1
+  }
+]

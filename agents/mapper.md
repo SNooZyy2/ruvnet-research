@@ -93,7 +93,7 @@ if (sourceId && targetId) {
   db.prepare(\`
     INSERT OR IGNORE INTO dependencies (source_file_id, target_file_id, relationship)
     VALUES (?, ?, ?)
-  \`).run(sourceId, targetId, 'delegates-to');
+  \`).run(sourceId, targetId, 'WRAPS');
   console.log('Dependency inserted:', source, '->', target);
 } else {
   console.log('File not found in database:', !sourceId ? source : target);
@@ -297,18 +297,33 @@ db.close();
 "
 ```
 
-## Relationship Types
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
 
-Use these standardized relationship values:
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
 
-- **imports**: ES6 import or CommonJS require
-- **triggers**: Hook configuration triggers script execution
-- **delegates-to**: CLI command delegates to MCP tool handler
-- **extends**: Class inheritance
-- **implements**: Interface implementation
-- **calls**: Function/method invocation (runtime, not static)
-- **configures**: Configuration file controls behavior
-- **generates**: Code generation or template expansion
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+Use these canonical values in all dependency inserts:
+- **IMPORTS**: ES6 import, CommonJS require, Rust use
+- **USES**: Function calls, class instantiation, API usage
+- **EXPORTS**: Module exports, re-exports, pub use
+- **DECLARES**: Module declarations (pub mod), defines
+- **SIBLINGS**: Co-modules at same level, peers
+- **COMPETES**: Parallel implementations, duplicates, alternatives
+- **WRAPS**: Delegations, facades, higher-level wrappers
+- **FEEDS**: Data flow (produces, loads, spawns, generates)
+- **TESTS**: Test/benchmark/validation relationships
+- **BROKEN**: Should-integrate-but-doesn't, bypasses, orphaned
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
 
 ## Evidence Format
 

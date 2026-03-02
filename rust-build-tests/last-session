@@ -1,0 +1,135 @@
+❯ '/home/snoozyy/ruvnet-research/rust-build-tests/plan.md' execute fully 
+
+● Read 1 file (ctrl+o to expand)
+
+● I'll execute this plan fully. Starting with Phase 0 (environment + session creation), then spawning 4 workspace agents in
+  parallel.
+
+  Phase 0: Environment Record + Session Setup
+
+● Bash(rustc --version && cargo --version && rustup target list --installed)
+  ⎿  rustc 1.93.1 (01f6ddf75 2026-02-11)
+     cargo 1.93.1 (083ac5135 2025-12-15)
+     x86_64-unknown-linux-gnu
+
+● Read 1 file (ctrl+o to expand)
+
+● Bash(node -e "
+      const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');…)
+  ⎿  Session ID: 141
+
+● Session ID: 141. Toolchain: rustc 1.93.1, cargo 1.93.1. Only x86_64-unknown-linux-gnu installed — need to add wasm32 target.
+
+● Bash(rustup target add wasm32-unknown-unknown 2>&1)
+  ⎿  info: downloading component 'rust-std' for 'wasm32-unknown-unknown'
+     info: installing component 'rust-std' for 'wasm32-unknown-unknown'
+
+● Good. Now I need to confirm workspace locations and prepare agent prompts. Let me verify the actual Cargo workspace roots.
+
+● Bash(for repo in ruvector agentic-flow ruv-FANN sublinear-time-solver; do
+        root="/home/snoozyy/repos/$repo"…)
+  ⎿  === ruvector ===
+     [workspace]
+     exclude = ["crates/micro-hnsw-wasm", "crates/ruvector-hyperbolic-hnsw", "crates/ruvector-hyperbolic-hnsw-wasm", "examples
+     … +21 lines (ctrl+o to expand)
+
+● Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Bash(node -e "
+      const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');…)
+  ⎿  [
+       {
+         "id": 7,
+     … +59 lines (ctrl+o to expand)
+
+● Searched for 1 pattern (ctrl+o to expand)
+
+● Bash(node -e "
+      const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');…)
+  ⎿  [
+       {
+         "id": 4,
+     … +67 lines (ctrl+o to expand)
+
+● Bash(node -e "
+      const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');…)
+  ⎿  FILES: id INTEGER, package_id INTEGER NOT NULL, relative_path TEXT NOT NULL, loc INTEGER, depth TEXT NOT NULL DEFAULT 'NO
+     T_TOUCHED', lines_read INTEGER DEFAULT 0, last_read_date TEXT, notes TEXT, file_type TEXT, knowability TEXT
+     FILE_READS: id INTEGER, file_id INTEGER, session_id INTEGER, depth TEXT, lines_read INTEGER, line_ranges TEXT, notes TEXT
+     … +2 lines (ctrl+o to expand)
+
+● Environment recorded. Session R140 = DB session ID 141. Now spawning 4 workspace agents in parallel.
+
+● Now spawning all 4 workspace agents in parallel with run_in_background: true:
+
+● 4 Agent agents launched (ctrl+o to expand)
+   ├─ R140 ruvector compilation audit
+   │  ⎿  Running in the background
+   ├─ R140 agentic-flow compilation audit
+   │  ⎿  Running in the background
+   ├─ R140 ruv-FANN compilation audit
+   │  ⎿  Running in the background
+   └─ R140 sublinear compilation audit
+      ⎿  Running in the background
+
+● All 4 workspace agents are running in background:
+
+  ┌─────────┬───────────────────────┬─────────────┬─────────┐
+  │  Agent  │       Workspace       │ Crate Count │ Status  │
+  ├─────────┼───────────────────────┼─────────────┼─────────┤
+  │ Agent 1 │ ruvector (long pole)  │ ~100+       │ Running │
+  ├─────────┼───────────────────────┼─────────────┼─────────┤
+  │ Agent 2 │ agentic-flow          │ ~10         │ Running │
+  ├─────────┼───────────────────────┼─────────────┼─────────┤
+  │ Agent 3 │ ruv-FANN              │ ~15         │ Running │
+  ├─────────┼───────────────────────┼─────────────┼─────────┤
+  │ Agent 4 │ sublinear-time-solver │ ~10         │ Running │
+  └─────────┴───────────────────────┴─────────────┴─────────┘
+
+  R140 execution plan:
+  - Phase 0 (Environment): Done — rustc 1.93.1, wasm32 target added, session 141 created
+  - Phases 1-5 (Compilation): Running in parallel across 4 agents
+  - Phase 6 (Synthesis): Blocked on all agents completing
+
+  Each agent will: inventory crates → cargo check/test per tier → workspace-wide check → WASM/NAPI → record results in DB → write
+  summary file. Expected wall-clock: 30-60 minutes (ruvector is the bottleneck).
+
+  I'll process results and run Phase 6 synthesis once all agents return.
+
+✻ Churned for 9m 44s · 4 background tasks still running (↓ to manage)
+
+● Agent "R140 agentic-flow compilation audit" completed
+                                                 
+● Agentic-flow agent completed (11 crates, ~14 min). Key results:
+                                                 
+  - 9/11 check PASS, 156/167 tests pass (93.4%), 19,935 LOC
+  - CRITICAL: reasoningbank-mcp — dual StorageConfig structs + missing Deserialize derive
+  - HIGH: agent-booster has 6/25 test failures (strategy selection, similarity, template detection bugs)
+  - HIGH: agentic-jujutsu — ML-DSA crypto verify returns true for invalid signatures (security broken)                             
+  - MEDIUM: agent-booster-wasm test compile error (unwrapped Result), reasoningbank-wasm native-only failure (WASM-only crate works
+   on wasm32)                                                                                                                      
+  - Both WASM cross-compiles PASS                               
+                                                                                                                                   
+  Waiting on the 3 remaining agents (ruvector, ruv-FANN, sublinear)... 
+                                           
+● Agent "R140 sublinear compilation audit" completed      
+                                                 
+● Sublinear agent completed (9 crates, ~17 min). Key results:
+                                                 
+  - 7/9 check PASS, 3/9 test PASS across 75,387 LOC 
+  - CRITICAL: neural-network-implementation (17,294 LOC, 106 errors) — never compiled. ModelParams trait not dyn-compatible
+  (architectural defect)                            
+  - CRITICAL: temporal-lead-solver — accesses private nalgebra::Vector.data field (never public in any release)                    
+  - CRITICAL: rustc-hyperopt — trivial blake3::Hash format bug, never compiled despite easy fix
+  - HIGH: Root sublinear — check passes but tests fail (7 errors: f64 lacking Ord, nonexistent methods)                            
+  - Clean: bit-parallel-search (0 warnings, 4 tests), temporal-compare (3 tests), both WASM crates build
+  - Pattern: 3/4 failing crates have errors proving code was never compiled — consistent with LLM-generated facade pattern         
+                                                                        
+  Still waiting on ruvector (long pole, ~100+ crates) and ruv-FANN (~15 crates)...
+
+  5 tasks (0 done, 4 in progress, 1 open)                 
+  ◼ R140: ruvector workspace compilation audit   
+  ◼ R140: agentic-flow compilation audit   
+  ◼ R140: ruv-FANN compilation audit   
+  ◼ R140: sublinear-time-solver compilation audit   
+  ◻ R140: Phase 6 synthesis — cross-workspace analysis › blocked by #1, #2, #3, #4  

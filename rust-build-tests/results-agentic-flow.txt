@@ -1,0 +1,215 @@
+================================================================================
+R140 COMPILATION AUDIT: AGENTIC-FLOW REPOSITORY
+Session: 141 | Date: 2026-03-02 | Toolchain: rustc 1.93.1
+================================================================================
+
+FORMAT: CRATE | SUB-WORKSPACE | CHECK | TEST (--lib) | WARNINGS | LOC
+
+--------------------------------------------------------------------------------
+WORKSPACE 1: agent-booster (packages/agent-booster/)
+--------------------------------------------------------------------------------
+
+agent-booster         | agent-booster     | PASS | FAIL 19p/6f/0i  | 1 warning  | 2292 LOC
+agent-booster-native  | agent-booster     | PASS | PASS 0p/0f/0i   | 0 warnings |  187 LOC
+agent-booster-wasm    | agent-booster     | PASS | FAIL (compile)  | 2 warnings |  470 LOC
+
+agent-booster test failures (6/25):
+  merge::tests::test_select_strategy
+    -> assertion: FuzzyReplace != InsertAfter (strategy selection logic wrong)
+       merge.rs:243
+  similarity::tests::test_normalized_match
+    -> assertion: SimilarityMatcher::is_exact_match(code1, code2) failed
+       similarity.rs:206
+  templates::tests::test_detect_try_catch_async
+    -> assertion: "try-catch-function" != "try-catch-async-function"
+       templates.rs:366
+  tests::test_empty_file
+    -> Result::unwrap() on Err: LowConfidence(0.055384617)
+       lib.rs:304
+  tests::test_class_method_edit
+    -> assertion: result.merged_code.contains("subtract") failed
+       lib.rs:212
+  tests::test_typescript_interface
+    -> assertion: result.merged_code.contains("User") failed
+       lib.rs:243
+
+agent-booster-wasm compile error (1 error in test binary):
+  error[E0599]: no method named `get_config` found for enum `Result<T, E>`
+    lib.rs:435: let config = booster.get_config();
+    (booster is Result<AgentBoosterWasm, JsValue> — missing .unwrap() or .expect())
+
+agent-booster-wasm WASM cross-compile:
+  cargo check --target wasm32-unknown-unknown: PASS (2 warnings, no errors)
+
+--------------------------------------------------------------------------------
+WORKSPACE 2: reasoningbank (reasoningbank/)
+--------------------------------------------------------------------------------
+
+reasoningbank-core    | reasoningbank     | PASS | PASS 12p/0f/0i  | 0 warnings |  773 LOC
+reasoningbank-storage | reasoningbank     | PASS | PASS  9p/0f/0i  | 2 warnings | 1403 LOC
+reasoningbank-learning| reasoningbank     | PASS | PASS  7p/0f/0i  | 8 warnings |  788 LOC
+reasoningbank-network | reasoningbank     | PASS | PASS 18p/0f/0i  | 2 warnings | 2647 LOC
+reasoningbank-mcp     | reasoningbank     | FAIL | NOT RUN         | 4 warnings | 1037 LOC
+reasoningbank-wasm    | reasoningbank     | FAIL*| NOT RUN         | 2 warnings |  201 LOC
+
+* reasoningbank-wasm: native check FAILS; wasm32-unknown-unknown check PASSES
+
+reasoningbank-mcp check failures (6 errors):
+  error[E0308] mismatched types at server.rs:65:
+    AsyncStorage::new() received reasoningbank_storage::StorageConfig
+    expected local StorageConfig variant
+    Root cause: two distinct StorageConfig structs in workspace — local and
+    reasoningbank_storage::StorageConfig — used interchangeably in server.rs
+  error[E0277] (x3): StorageConfig missing serde::Deserialize derive
+    server.rs:20 (#[derive(Serialize, Deserialize)] on ServerConfig struct
+    that embeds StorageConfig — but StorageConfig lacks Deserialize)
+  + 2 additional E0308/E0277 propagation errors
+
+reasoningbank-wasm native check failures (6 errors):
+  error[E0432]: unresolved import `reasoningbank_storage::adapters::wasm`
+    lib.rs:10 — module is #[cfg(target_family = "wasm")] gated
+    Note: adapters/mod.rs:39-40 gating confirmed
+  error[E0282] (x3): type annotations needed for Storage::new() calls
+    lib.rs:49, 54, 59 — inference fails without wasm module types available
+  wasm32-unknown-unknown cross-compile: PASS (2 warnings, no errors)
+
+reasoningbank-learning warnings (8):
+  deprecated: AsyncLearner struct (use AsyncLearnerV2 instead)
+  still exported in lib.rs:15 pub use async_learner::AsyncLearner
+  self-references in async_learner.rs:18,26,32,37,42,47
+
+--------------------------------------------------------------------------------
+WORKSPACE 3: standalone crates
+--------------------------------------------------------------------------------
+
+agentic-flow-quic     | standalone (crates/)    | PASS | PASS 8p/0f/0i  | 0 warnings |  999 LOC
+agentic-jujutsu       | standalone (packages/)  | PASS | FAIL 83p/5f/0i | 16 warnings| 9138 LOC
+
+agentic-flow-quic:
+  All 8 lib tests pass (error, client, server, config, message types).
+  Note: Prior run used `cargo test` (not --lib) and hit SIGABRT in integration
+  test harness. With --lib only: clean pass.
+
+agentic-jujutsu test failures (5/88):
+  agent_coordination::tests::test_conflict_detection
+    -> assertion failed: conflicts[0].severity >= 2
+       agent_coordination.rs:456
+  config::tests::test_default_config
+    -> assertion: "/home/snoozyy/.cache/agentic-jujutsu/jj" != "jj"
+       config.rs:164
+       (build.rs downloads jj binary to ~/.cache at build time, test expects "jj")
+  crypto::tests::test_verify_invalid_signature      [SECURITY]
+    -> assertion failed: !valid
+       crypto.rs:341
+       (ML-DSA verify() accepts an invalid signature — should return false)
+  crypto::tests::test_verify_wrong_public_key       [SECURITY]
+    -> assertion failed: !valid
+       crypto.rs:354
+       (ML-DSA verify() accepts wrong public key — should return false)
+  operations::tests::test_operation_creation
+    -> assertion: "describe" != "Describe" (case mismatch)
+       operations.rs:1204
+
+agentic-jujutsu warnings (16):
+  - constant ML_DSA_SECURITY_LEVEL never used (crypto.rs:29)
+  - function batch_verify_signatures never used (crypto.rs:288)
+  - field wrapper never read (hooks.rs:103)
+  - field endpoint never read (mcp/sse.rs:100)
+  - field id never read (mcp/sse.rs:145)
+  - method set_operation_type_enum never used (operations.rs:331)
+  - missing_docs warnings (multiple: agent_coordination module, SSEConfig fields,
+    quantum_signing and wrapper NAPI methods)
+
+================================================================================
+SUMMARY TOTALS
+================================================================================
+
+Sub-workspace          : agent-booster (3 crates)
+Sub-workspace          : reasoningbank  (6 crates)
+Standalone             : agentic-flow-quic (1 crate)
+Standalone             : agentic-jujutsu  (1 crate)
+TOTAL CRATES TESTED    : 11
+
+CHECK RESULTS:
+  PASS    : 9 crates
+  FAIL    : 2 crates (reasoningbank-mcp, reasoningbank-wasm native)
+  PASS*   : reasoningbank-wasm WASM-target only
+
+TEST RESULTS:
+  PASS (all)   : 5 crates (agent-booster-native 0 tests, reasoningbank-core,
+                  reasoningbank-storage, reasoningbank-learning, reasoningbank-network,
+                  agentic-flow-quic)
+  FAIL (logic) : 3 crates (agent-booster 6/25, agentic-jujutsu 5/88)
+  FAIL (compile): 1 crate (agent-booster-wasm test binary — 1 error)
+  NOT RUN      : 2 crates (reasoningbank-mcp, reasoningbank-wasm — check failed)
+
+TOTAL TESTS RUN    : 25 + 0 + 12 + 9 + 7 + 18 + 8 + 88 = 167
+TOTAL PASSED       : 19 + 0 + 12 + 9 + 7 + 18 + 8 + 83 = 156
+TOTAL FAILED       : 6 + 0 + 0 + 0 + 0 + 0 + 0 + 5     = 11
+PASS RATE          : 156/167 = 93.4%
+
+TOTAL SOURCE LOC   : 2292 + 187 + 470 + 773 + 1403 + 788 + 2647 + 1037 + 201 + 999 + 9138
+                   = 19,935 LOC
+
+TOTAL WARNINGS     : 1 + 0 + 2 + 0 + 2 + 8 + 2 + 4 + 2 + 0 + 16 = 37 warnings
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+CRITICAL (1):
+  reasoningbank-mcp — COMPILE FAILURE
+  Two StorageConfig types in workspace with same name; server.rs uses wrong one.
+  StorageConfig in reasoningbank-storage lacks serde::Deserialize. Crate is
+  completely unusable until fixed.
+
+HIGH (2):
+  agent-booster — 6/25 lib tests fail
+  Core Tier 1 token-optimization logic has broken strategy selection, similarity
+  matching, and template detection. Tier 1 routing claims are undermined by
+  failing algorithmic tests.
+
+  agentic-jujutsu — 5/88 lib tests fail including 2 SECURITY failures
+  ML-DSA signature verification accepts invalid signatures and wrong public keys.
+  The quantum-signing feature is advertised as a key differentiator but the
+  cryptographic rejection property (invalid input → false) does not hold.
+
+MEDIUM (2):
+  agent-booster-wasm — test binary compile error (not the WASM bindings)
+  lib.rs:435 missing .unwrap() on Result — 1-line fix.
+
+  reasoningbank-wasm — native cargo check fails (correct behaviour for WASM-only
+  crate, but cargo check without --target wasm32 will always fail). No WASM
+  target guard in Cargo.toml to communicate this constraint.
+
+INFO (5):
+  5 crates fully clean: reasoningbank-core, reasoningbank-storage,
+  reasoningbank-learning, reasoningbank-network, agentic-flow-quic.
+  agentic-flow-quic previously reported as SIGABRT — confirmed false alarm
+  (integration test harness issue, not --lib code).
+
+================================================================================
+WASM CROSS-COMPILE RESULTS
+================================================================================
+
+agent-booster-wasm  --target wasm32-unknown-unknown : PASS (2 warnings)
+reasoningbank-wasm  --target wasm32-unknown-unknown : PASS (2 warnings)
+
+Both WASM crates compile correctly for the wasm32 target. Failures above are
+native-target only.
+
+================================================================================
+DB RECORDS INSERTED (Session 141)
+================================================================================
+
+file_reads : 11 records (ids 2046-2056)
+findings   : 11 records
+packages   : package_id 10 (agentic-flow-rust)
+
+FINDING SEVERITIES:
+  CRITICAL : 1 (reasoningbank-mcp)
+  HIGH     : 2 (agent-booster, agentic-jujutsu)
+  MEDIUM   : 2 (agent-booster-wasm, reasoningbank-wasm)
+  INFO     : 6 (agent-booster-native, reasoningbank-core, reasoningbank-storage,
+                reasoningbank-learning, reasoningbank-network, agentic-flow-quic)
+================================================================================

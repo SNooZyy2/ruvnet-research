@@ -1,0 +1,19 @@
+{
+  "transcript": "ai-hackerspace-march-01",
+  "sourceFile": "/home/snoozyy/ruvnet-research/ruv-vods/inbox/ai-hackerspace-march-01.txt",
+  "totalLines": 1176,
+  "chunkSize": 3000,
+  "overlap": 200,
+  "chunkCount": 1,
+  "createdAt": "2026-03-01T13:03:38.941Z",
+  "chunks": [
+    {
+      "id": 1,
+      "file": "chunk-001.txt",
+      "path": "/home/snoozyy/ruvnet-research/ruv-vods/chunks/ai-hackerspace-march-01/chunk-001.txt",
+      "startLine": 1,
+      "endLine": 1176,
+      "lineCount": 1176
+    }
+  ]
+}

@@ -1,0 +1,9690 @@
+[
+  {
+    "category": "QUALITY",
+    "cnt": 1899,
+    "critical": 85,
+    "high": 372,
+    "medium": 687,
+    "info": 747
+  },
+  {
+    "category": "ARCHITECTURE",
+    "cnt": 1869,
+    "critical": 252,
+    "high": 577,
+    "medium": 390,
+    "info": 650
+  },
+  {
+    "category": "architecture",
+    "cnt": 734,
+    "critical": 113,
+    "high": 191,
+    "medium": 179,
+    "info": 251
+  },
+  {
+    "category": "INTEGRATION",
+    "cnt": 478,
+    "critical": 72,
+    "high": 172,
+    "medium": 101,
+    "info": 133
+  },
+  {
+    "category": "implementation",
+    "cnt": 391,
+    "critical": 31,
+    "high": 124,
+    "medium": 110,
+    "info": 126
+  },
+  {
+    "category": "PERFORMANCE",
+    "cnt": 366,
+    "critical": 20,
+    "high": 125,
+    "medium": 138,
+    "info": 82
+  },
+  {
+    "category": "quality",
+    "cnt": 248,
+    "critical": 5,
+    "high": 58,
+    "medium": 40,
+    "info": 145
+  },
+  {
+    "category": "ALGORITHM",
+    "cnt": 227,
+    "critical": 3,
+    "high": 14,
+    "medium": 20,
+    "info": 190
+  },
+  {
+    "category": "DOCUMENTATION",
+    "cnt": 205,
+    "critical": 7,
+    "high": 8,
+    "medium": 68,
+    "info": 121
+  },
+  {
+    "category": "FACADE",
+    "cnt": 135,
+    "critical": 60,
+    "high": 40,
+    "medium": 33,
+    "info": 2
+  },
+  {
+    "category": "STUB",
+    "cnt": 134,
+    "critical": 32,
+    "high": 55,
+    "medium": 46,
+    "info": 1
+  },
+  {
+    "category": "IMPLEMENTATION",
+    "cnt": 129,
+    "critical": 0,
+    "high": 25,
+    "medium": 31,
+    "info": 72
+  },
+  {
+    "category": "correctness",
+    "cnt": 129,
+    "critical": 12,
+    "high": 44,
+    "medium": 42,
+    "info": 29
+  },
+  {
+    "category": "integration",
+    "cnt": 123,
+    "critical": 27,
+    "high": 39,
+    "medium": 19,
+    "info": 38
+  },
+  {
+    "category": "algorithm",
+    "cnt": 115,
+    "critical": 8,
+    "high": 34,
+    "medium": 24,
+    "info": 49
+  },
+  {
+    "category": "testing",
+    "cnt": 110,
+    "critical": 1,
+    "high": 19,
+    "medium": 28,
+    "info": 61
+  },
+  {
+    "category": "SECURITY",
+    "cnt": 100,
+    "critical": 33,
+    "high": 26,
+    "medium": 30,
+    "info": 11
+  },
+  {
+    "category": "PLACEHOLDER",
+    "cnt": 99,
+    "critical": 36,
+    "high": 31,
+    "medium": 28,
+    "info": 4
+  },
+  {
+    "category": "performance",
+    "cnt": 97,
+    "critical": 8,
+    "high": 22,
+    "medium": 42,
+    "info": 25
+  },
+  {
+    "category": "GENUINE",
+    "cnt": 89,
+    "critical": 0,
+    "high": 0,
+    "medium": 5,
+    "info": 84
+  },
+  {
+    "category": "facade",
+    "cnt": 80,
+    "critical": 42,
+    "high": 25,
+    "medium": 12,
+    "info": 1
+  },
+  {
+    "category": "security",
+    "cnt": 71,
+    "critical": 13,
+    "high": 25,
+    "medium": 26,
+    "info": 7
+  },
+  {
+    "category": "BUG",
+    "cnt": 69,
+    "critical": 15,
+    "high": 16,
+    "medium": 37,
+    "info": 1
+  },
+  {
+    "category": "design",
+    "cnt": 55,
+    "critical": 0,
+    "high": 9,
+    "medium": 27,
+    "info": 19
+  },
+  {
+    "category": "stub",
+    "cnt": 54,
+    "critical": 6,
+    "high": 23,
+    "medium": 23,
+    "info": 2
+  },
+  {
+    "category": "documentation",
+    "cnt": 49,
+    "critical": 1,
+    "high": 2,
+    "medium": 11,
+    "info": 35
+  },
+  {
+    "category": "INNOVATION",
+    "cnt": 45,
+    "critical": 1,
+    "high": 14,
+    "medium": 1,
+    "info": 29
+  },
+  {
+    "category": "code-quality",
+    "cnt": 38,
+    "critical": 1,
+    "high": 12,
+    "medium": 23,
+    "info": 2
+  },
+  {
+    "category": "fabrication",
+    "cnt": 38,
+    "critical": 9,
+    "high": 17,
+    "medium": 12,
+    "info": 0
+  },
+  {
+    "category": "optimization",
+    "cnt": 37,
+    "critical": 7,
+    "high": 9,
+    "medium": 5,
+    "info": 16
+  },
+  {
+    "category": "CORRECTNESS",
+    "cnt": 36,
+    "critical": 1,
+    "high": 9,
+    "medium": 9,
+    "info": 15
+  },
+  {
+    "category": "positive",
+    "cnt": 34,
+    "critical": 0,
+    "high": 5,
+    "medium": 5,
+    "info": 24
+  },
+  {
+    "category": "bug",
+    "cnt": 30,
+    "critical": 5,
+    "high": 14,
+    "medium": 11,
+    "info": 0
+  },
+  {
+    "category": "completeness",
+    "cnt": 29,
+    "critical": 2,
+    "high": 3,
+    "medium": 12,
+    "info": 12
+  },
+  {
+    "category": "incomplete",
+    "cnt": 29,
+    "critical": 1,
+    "high": 12,
+    "medium": 16,
+    "info": 0
+  },
+  {
+    "category": "REAL",
+    "cnt": 28,
+    "critical": 5,
+    "high": 14,
+    "medium": 6,
+    "info": 3
+  },
+  {
+    "category": "POSITIVE",
+    "cnt": 27,
+    "critical": 0,
+    "high": 2,
+    "medium": 6,
+    "info": 19
+  },
+  {
+    "category": "Quality",
+    "cnt": 26,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 25
+  },
+  {
+    "category": "error-handling",
+    "cnt": 25,
+    "critical": 0,
+    "high": 4,
+    "medium": 7,
+    "info": 14
+  },
+  {
+    "category": "fabricated",
+    "cnt": 24,
+    "critical": 11,
+    "high": 7,
+    "medium": 6,
+    "info": 0
+  },
+  {
+    "category": "configuration",
+    "cnt": 23,
+    "critical": 0,
+    "high": 1,
+    "medium": 9,
+    "info": 13
+  },
+  {
+    "category": "dead-code",
+    "cnt": 23,
+    "critical": 6,
+    "high": 7,
+    "medium": 9,
+    "info": 1
+  },
+  {
+    "category": "dependency",
+    "cnt": 23,
+    "critical": 4,
+    "high": 4,
+    "medium": 7,
+    "info": 8
+  },
+  {
+    "category": "deception",
+    "cnt": 22,
+    "critical": 10,
+    "high": 6,
+    "medium": 5,
+    "info": 1
+  },
+  {
+    "category": "test-coverage",
+    "cnt": 22,
+    "critical": 1,
+    "high": 2,
+    "medium": 9,
+    "info": 10
+  },
+  {
+    "category": "FABRICATION",
+    "cnt": 21,
+    "critical": 7,
+    "high": 10,
+    "medium": 3,
+    "info": 1
+  },
+  {
+    "category": "TESTING",
+    "cnt": 21,
+    "critical": 0,
+    "high": 2,
+    "medium": 9,
+    "info": 9
+  },
+  {
+    "category": "DESIGN",
+    "cnt": 20,
+    "critical": 1,
+    "high": 3,
+    "medium": 11,
+    "info": 4
+  },
+  {
+    "category": "REAL_IMPLEMENTATION",
+    "cnt": 20,
+    "critical": 0,
+    "high": 1,
+    "medium": 4,
+    "info": 15
+  },
+  {
+    "category": "FEATURE",
+    "cnt": 19,
+    "critical": 0,
+    "high": 2,
+    "medium": 9,
+    "info": 8
+  },
+  {
+    "category": "REAL_CODE",
+    "cnt": 19,
+    "critical": 0,
+    "high": 0,
+    "medium": 6,
+    "info": 13
+  },
+  {
+    "category": "api-design",
+    "cnt": 19,
+    "critical": 1,
+    "high": 2,
+    "medium": 6,
+    "info": 10
+  },
+  {
+    "category": "metrics",
+    "cnt": 19,
+    "critical": 0,
+    "high": 8,
+    "medium": 4,
+    "info": 7
+  },
+  {
+    "category": "api",
+    "cnt": 18,
+    "critical": 0,
+    "high": 0,
+    "medium": 9,
+    "info": 9
+  },
+  {
+    "category": "pattern",
+    "cnt": 18,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 14
+  },
+  {
+    "category": "placeholder",
+    "cnt": 18,
+    "critical": 7,
+    "high": 7,
+    "medium": 4,
+    "info": 0
+  },
+  {
+    "category": "Architecture",
+    "cnt": 16,
+    "critical": 5,
+    "high": 6,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "DEPENDENCY",
+    "cnt": 16,
+    "critical": 1,
+    "high": 3,
+    "medium": 4,
+    "info": 8
+  },
+  {
+    "category": "dependencies",
+    "cnt": 16,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 13
+  },
+  {
+    "category": "limitation",
+    "cnt": 16,
+    "critical": 0,
+    "high": 0,
+    "medium": 12,
+    "info": 4
+  },
+  {
+    "category": "reliability",
+    "cnt": 16,
+    "critical": 4,
+    "high": 8,
+    "medium": 4,
+    "info": 0
+  },
+  {
+    "category": "config",
+    "cnt": 15,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 13
+  },
+  {
+    "category": "incomplete-implementation",
+    "cnt": 15,
+    "critical": 1,
+    "high": 6,
+    "medium": 8,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_IMPLEMENTATION",
+    "cnt": 14,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 14
+  },
+  {
+    "category": "PATTERN",
+    "cnt": 14,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 11
+  },
+  {
+    "category": "fabricated-data",
+    "cnt": 14,
+    "critical": 10,
+    "high": 3,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "genuine",
+    "cnt": 14,
+    "critical": 1,
+    "high": 7,
+    "medium": 6,
+    "info": 0
+  },
+  {
+    "category": "real-implementation",
+    "cnt": 14,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 14
+  },
+  {
+    "category": "validation",
+    "cnt": 14,
+    "critical": 1,
+    "high": 4,
+    "medium": 3,
+    "info": 6
+  },
+  {
+    "category": "INCOMPLETE",
+    "cnt": 13,
+    "critical": 0,
+    "high": 0,
+    "medium": 13,
+    "info": 0
+  },
+  {
+    "category": "algorithm-quality",
+    "cnt": 13,
+    "critical": 0,
+    "high": 6,
+    "medium": 5,
+    "info": 2
+  },
+  {
+    "category": "correct-implementation",
+    "cnt": 13,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 13
+  },
+  {
+    "category": "realness",
+    "cnt": 12,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 8
+  },
+  {
+    "category": "type-safety",
+    "cnt": 12,
+    "critical": 2,
+    "high": 5,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "algorithm-real",
+    "cnt": 11,
+    "critical": 0,
+    "high": 6,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "concurrency",
+    "cnt": 11,
+    "critical": 0,
+    "high": 2,
+    "medium": 7,
+    "info": 2
+  },
+  {
+    "category": "misleading",
+    "cnt": 11,
+    "critical": 1,
+    "high": 5,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "observability",
+    "cnt": 11,
+    "critical": 0,
+    "high": 1,
+    "medium": 7,
+    "info": 2
+  },
+  {
+    "category": "ASSESSMENT",
+    "cnt": 10,
+    "critical": 2,
+    "high": 0,
+    "medium": 5,
+    "info": 3
+  },
+  {
+    "category": "LIMITATION",
+    "cnt": 10,
+    "critical": 0,
+    "high": 2,
+    "medium": 6,
+    "info": 1
+  },
+  {
+    "category": "feature",
+    "cnt": 10,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 8
+  },
+  {
+    "category": "functionality",
+    "cnt": 10,
+    "critical": 0,
+    "high": 3,
+    "medium": 4,
+    "info": 3
+  },
+  {
+    "category": "INCOMPLETE_IMPL",
+    "cnt": 9,
+    "critical": 1,
+    "high": 7,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TEST_QUALITY",
+    "cnt": 9,
+    "critical": 0,
+    "high": 5,
+    "medium": 2,
+    "info": 2
+  },
+  {
+    "category": "fabricated-metrics",
+    "cnt": 9,
+    "critical": 5,
+    "high": 4,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "implementation-quality",
+    "cnt": 9,
+    "critical": 1,
+    "high": 4,
+    "medium": 3,
+    "info": 1
+  },
+  {
+    "category": "real",
+    "cnt": 9,
+    "critical": 0,
+    "high": 0,
+    "medium": 6,
+    "info": 3
+  },
+  {
+    "category": "CODE_QUALITY",
+    "cnt": 8,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 5
+  },
+  {
+    "category": "ERROR_HANDLING",
+    "cnt": 8,
+    "critical": 1,
+    "high": 1,
+    "medium": 4,
+    "info": 2
+  },
+  {
+    "category": "Implementation",
+    "cnt": 8,
+    "critical": 1,
+    "high": 2,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "MISLEADING",
+    "cnt": 8,
+    "critical": 3,
+    "high": 3,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "OPTIMIZATION",
+    "cnt": 8,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 8
+  },
+  {
+    "category": "Performance",
+    "cnt": 8,
+    "critical": 3,
+    "high": 2,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "QUANTUM_FACADE",
+    "cnt": 8,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 4
+  },
+  {
+    "category": "accuracy",
+    "cnt": 8,
+    "critical": 0,
+    "high": 3,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "algorithm-correctness",
+    "cnt": 8,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "infrastructure",
+    "cnt": 8,
+    "critical": 0,
+    "high": 2,
+    "medium": 3,
+    "info": 3
+  },
+  {
+    "category": "interface",
+    "cnt": 8,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 5
+  },
+  {
+    "category": "ARCHITECTURE_FACADE",
+    "cnt": 7,
+    "critical": 0,
+    "high": 0,
+    "medium": 7,
+    "info": 0
+  },
+  {
+    "category": "DATA_STRUCTURE",
+    "cnt": 7,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 4
+  },
+  {
+    "category": "Demonstration",
+    "cnt": 7,
+    "critical": 0,
+    "high": 3,
+    "medium": 2,
+    "info": 2
+  },
+  {
+    "category": "GAP",
+    "cnt": 7,
+    "critical": 2,
+    "high": 2,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_ALGORITHM",
+    "cnt": 7,
+    "critical": 0,
+    "high": 5,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_SIGNAL",
+    "cnt": 7,
+    "critical": 0,
+    "high": 3,
+    "medium": 3,
+    "info": 1
+  },
+  {
+    "category": "INCOMPLETE_IMPLEMENTATION",
+    "cnt": 7,
+    "critical": 1,
+    "high": 2,
+    "medium": 3,
+    "info": 1
+  },
+  {
+    "category": "Integration",
+    "cnt": 7,
+    "critical": 1,
+    "high": 1,
+    "medium": 2,
+    "info": 3
+  },
+  {
+    "category": "architectural-finding",
+    "cnt": 7,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 5
+  },
+  {
+    "category": "benchmark-quality",
+    "cnt": 7,
+    "critical": 0,
+    "high": 2,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "comparison",
+    "cnt": 7,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 4
+  },
+  {
+    "category": "data-generation",
+    "cnt": 7,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 4
+  },
+  {
+    "category": "data-structures",
+    "cnt": 7,
+    "critical": 0,
+    "high": 1,
+    "medium": 4,
+    "info": 2
+  },
+  {
+    "category": "memory",
+    "cnt": 7,
+    "critical": 0,
+    "high": 4,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "orchestration",
+    "cnt": 7,
+    "critical": 1,
+    "high": 5,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "protocols",
+    "cnt": 7,
+    "critical": 0,
+    "high": 2,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "real-wasm",
+    "cnt": 7,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 3
+  },
+  {
+    "category": "reporting",
+    "cnt": 7,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 3
+  },
+  {
+    "category": "types",
+    "cnt": 7,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 6
+  },
+  {
+    "category": "CONFIG_GAP",
+    "cnt": 6,
+    "critical": 0,
+    "high": 4,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "LEGITIMATE_ALGORITHM",
+    "cnt": 6,
+    "critical": 0,
+    "high": 0,
+    "medium": 5,
+    "info": 1
+  },
+  {
+    "category": "ROADMAP",
+    "cnt": 6,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 4
+  },
+  {
+    "category": "Stub",
+    "cnt": 6,
+    "critical": 1,
+    "high": 2,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "api-mismatch",
+    "cnt": 6,
+    "critical": 4,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "api-surface",
+    "cnt": 6,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "best-practice",
+    "cnt": 6,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 6
+  },
+  {
+    "category": "data-structure",
+    "cnt": 6,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 6
+  },
+  {
+    "category": "genuine-implementation",
+    "cnt": 6,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "logic",
+    "cnt": 6,
+    "critical": 0,
+    "high": 4,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "naming",
+    "cnt": 6,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "orphaned",
+    "cnt": 6,
+    "critical": 3,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "portability",
+    "cnt": 6,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 2
+  },
+  {
+    "category": "API_DESIGN",
+    "cnt": 5,
+    "critical": 1,
+    "high": 2,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "CONFIG",
+    "cnt": 5,
+    "critical": 1,
+    "high": 1,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "FACADE_PATTERN",
+    "cnt": 5,
+    "critical": 3,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FALSE_COMPLEXITY",
+    "cnt": 5,
+    "critical": 5,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FUNCTIONALITY",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 3
+  },
+  {
+    "category": "Genuine",
+    "cnt": 5,
+    "critical": 0,
+    "high": 2,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "HELPER",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 5
+  },
+  {
+    "category": "PHANTOM_WRAPPER",
+    "cnt": 5,
+    "critical": 2,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TEST_COVERAGE",
+    "cnt": 5,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 2
+  },
+  {
+    "category": "analysis-quality",
+    "cnt": 5,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "anti-pattern",
+    "cnt": 5,
+    "critical": 3,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "broken",
+    "cnt": 5,
+    "critical": 2,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "broken-dep",
+    "cnt": 5,
+    "critical": 1,
+    "high": 4,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "data-flow",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 1
+  },
+  {
+    "category": "data-quality",
+    "cnt": 5,
+    "critical": 0,
+    "high": 4,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "design-pattern",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 5
+  },
+  {
+    "category": "facade-deception",
+    "cnt": 5,
+    "critical": 5,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fallback",
+    "cnt": 5,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "genuine-algorithms",
+    "cnt": 5,
+    "critical": 0,
+    "high": 5,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-infrastructure",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 5
+  },
+  {
+    "category": "heuristic",
+    "cnt": 5,
+    "critical": 0,
+    "high": 3,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "misrepresentation",
+    "cnt": 5,
+    "critical": 0,
+    "high": 3,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "missing-implementation",
+    "cnt": 5,
+    "critical": 1,
+    "high": 3,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "production-quality",
+    "cnt": 5,
+    "critical": 0,
+    "high": 5,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "stub-implementation",
+    "cnt": 5,
+    "critical": 2,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "theatrical",
+    "cnt": 5,
+    "critical": 0,
+    "high": 0,
+    "medium": 5,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURE_MISMATCH",
+    "cnt": 4,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ASYMPTOTIC_MISLABELING",
+    "cnt": 4,
+    "critical": 0,
+    "high": 4,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "AgentDB",
+    "cnt": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "BEHAVIORAL_DIFF",
+    "cnt": 4,
+    "critical": 0,
+    "high": 3,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "CAPABILITY",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "COMPUTATION",
+    "cnt": 4,
+    "critical": 0,
+    "high": 4,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CONFIGURATION",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "CROSS_REFERENCE",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "Code Quality",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 3
+  },
+  {
+    "category": "DEAD_CODE",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "Design",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "FALLBACK",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "FEATURES",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "INTERFACE_DESIGN",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "MISSING_FEATURE",
+    "cnt": 4,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISSING_IMPLEMENTATION",
+    "cnt": 4,
+    "critical": 3,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ORCHESTRATION",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 1
+  },
+  {
+    "category": "RELIABILITY",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "SIMPLIFICATION",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 0
+  },
+  {
+    "category": "SYNTHETIC_MEASUREMENT",
+    "cnt": 4,
+    "critical": 0,
+    "high": 4,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture-gap",
+    "cnt": 4,
+    "critical": 1,
+    "high": 2,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "broken-api",
+    "cnt": 4,
+    "critical": 3,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "chaos-theory",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 0
+  },
+  {
+    "category": "code-organization",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "codegen",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "core-algorithm",
+    "cnt": 4,
+    "critical": 2,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "data-integrity",
+    "cnt": 4,
+    "critical": 0,
+    "high": 3,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "data-model",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "demonstration",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "disconnected",
+    "cnt": 4,
+    "critical": 1,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hardcoded-logic",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 4,
+    "info": 0
+  },
+  {
+    "category": "inconsistency",
+    "cnt": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "missing-integration",
+    "cnt": 4,
+    "critical": 3,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "networking",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "numerical-stability",
+    "cnt": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "observation",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "persistence",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "protocol",
+    "cnt": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "resilience",
+    "cnt": 4,
+    "critical": 1,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "robustness",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "security-genuine",
+    "cnt": 4,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "serialization",
+    "cnt": 4,
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "simulated-work",
+    "cnt": 4,
+    "critical": 4,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "statistical-validity",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "structure",
+    "cnt": 4,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 4
+  },
+  {
+    "category": "wasm",
+    "cnt": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "API_MISMATCH",
+    "cnt": 3,
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CONCURRENCY",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "DATA_FLOW",
+    "cnt": 3,
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DECEPTION",
+    "cnt": 3,
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DECEPTIVE_BENCHMARK",
+    "cnt": 3,
+    "critical": 2,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DECEPTIVE_FACADE",
+    "cnt": 3,
+    "critical": 3,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DESIGN_FLAW",
+    "cnt": 3,
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "FABRICATED_DATA",
+    "cnt": 3,
+    "critical": 2,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FABRICATED_METRICS",
+    "cnt": 3,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Incomplete",
+    "cnt": 3,
+    "critical": 1,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MEASUREMENT_FACADE",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "MEMORY",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_NAME",
+    "cnt": 3,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MISSING_VALIDATION",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "PHYSICS",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "PSEUDOSCIENCE",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "REAL_INFRASTRUCTURE",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "RISK",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "ROBUSTNESS",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SIMULATED",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "SMOKE_TEST",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TYPES",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "TYPE_SAFETY",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 2
+  },
+  {
+    "category": "Testing",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "VALIDATION",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WASM",
+    "cnt": 3,
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "WASM_CAPABILITY",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "coordination",
+    "cnt": 3,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "data-processing",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "data-types",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "facade-detection",
+    "cnt": 3,
+    "critical": 2,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "facade-pattern",
+    "cnt": 3,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "filtering",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "genuine-functionality",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-measurement",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "isolation",
+    "cnt": 3,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "lifecycle",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "maintenance",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "metadata",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 2
+  },
+  {
+    "category": "mislabeling",
+    "cnt": 3,
+    "critical": 2,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "misleading-claims",
+    "cnt": 3,
+    "critical": 2,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-dependency",
+    "cnt": 3,
+    "critical": 3,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "monitoring",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "no-backpropagation",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "non_compilable",
+    "cnt": 3,
+    "critical": 3,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "not-implemented",
+    "cnt": 3,
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "performance-claims",
+    "cnt": 3,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "real-function-call",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "simplification",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "statistics",
+    "cnt": 3,
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "storage",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "stub-pattern",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "test-quality",
+    "cnt": 3,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "testing_issue",
+    "cnt": 3,
+    "critical": 1,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "tests",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "info": 0
+  },
+  {
+    "category": "unused-code",
+    "cnt": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unused-param",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 3
+  },
+  {
+    "category": "usability",
+    "cnt": 3,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "validation-quality",
+    "cnt": 3,
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "verification",
+    "cnt": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 1
+  },
+  {
+    "category": "ALGORITHM_CORRECTNESS",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHM_QUALITY",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "API",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "API_COMPLETENESS",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "ARCHITECTURAL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Algorithm",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "BENCHMARK_ISOLATION",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "BIMODAL_ARCHITECTURE",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "BIMODAL_METRICS",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CIRCULAR_LOGIC",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CODE_STRUCTURE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "CONFIGURATION_FACADE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CONSCIOUSNESS_FRAUD",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CONTEXT",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "CORE_LOGIC",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CROSS_REF",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "DATA_MODEL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DEPENDENCY_USAGE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "DESIGN_PATTERN",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DISCONNECTED",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DUPLICATION",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Documentation",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "EXPERIMENT_FACADE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "Error Handling",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "FALSE_CLAIM",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Gap",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "HARDCODED",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "HARDCODED_METRIC",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "IMPLEMENTATION_DETAIL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "INCOMPLETE_FEATURE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "INCOMPLETE_INTEGRATION",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INSTRUMENTATION_LOSS",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "LOGGING",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "LOGIC_BUG",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MARKETING_THEATER",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MATH_APPROXIMATION",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MCP_INTEGRATION",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "MEASUREMENT_VALIDITY",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MEMORY_MANAGEMENT",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "MESSAGING_INFLATION",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_ARCHITECTURE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISSING_PROTOCOL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ML",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MOCK",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "MODULE_COMMENTS",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "Metrics",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "NUMERICAL_STABILITY",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "OPERATION_COUNTING",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ORPHANED_CODE",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Observability",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "PARTIAL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "PERFORMANCE_OPTIMIZATION",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PLACEHOLDER_IMPL",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PROTOCOL",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PUBLIC_API",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "QUALITY_GAP",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "REFERENCE",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "SIMD",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "SIMULATION",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STATE_MANAGEMENT",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STATISTICAL_THEATER",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STUB_API",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "SYNTHETIC_DATA",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "THEATRICAL",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "USABILITY",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "WRONG_ALGORITHM",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithm-bug",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "algorithm-implementation",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithm-incorrect",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithms",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "analysis",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "arbitrary-logic",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "architectural-issue",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "architectural-mismatch",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture-insight",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "architecture-issue",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "architecture-pattern",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "backward-pass",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "batch-cycling",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "benchmarking",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "bimodal-architecture",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "broken-dependency",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "build-system",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "claim",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "claims",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "code-duplication",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "code_quality",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "config-cloning",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "context",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "context-pattern",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "coverage-gap",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "criterion-config",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "criterion-loop",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "cross-file-reference",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "cross-reference",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "crypto-real",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "data-fidelity",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "data-loss",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "decision-logic",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "degradation",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "disconnect",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "disconnection",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "dispatch",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "distribution",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "duplicate-implementation",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "duplication",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "embedding",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "embedding-quality",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "embeddings",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "error-context",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "evaluate",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "event-driven",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "export",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "file-output",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "forward-pass",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "functional-feature",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "genuine-aggregation",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-benchmark",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-comprehensive",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-config",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-criterion",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-data-generation",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-parallel",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "genuine-reporting",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "implementation-gap",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "import-error",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "imports",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "incomplete-feature",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "incomplete_coverage",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "incomplete_testing",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "inflated-metrics",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "interface-design",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "logging",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "logic-error",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "measurement-deception",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "memory-delta",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "misleading-marketing",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "misleading-naming",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-feature",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "missing_tests",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "no-persistence",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "non-functional",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "numerical-methods",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "optimization-technique",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "orphaned-code",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "patterns",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "performance-tracking",
+    "cnt": 2,
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "positive-security",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "quantum-physics-validation",
+    "cnt": 2,
+    "critical": 1,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "real-api",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "real-calculations",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "real-chunking",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "info": 0
+  },
+  {
+    "category": "real-dependencies",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "real-timing",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "report-structure",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "safety",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "simulated-accuracy",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "streaming",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 1
+  },
+  {
+    "category": "test-design",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "theatrical-fallback",
+    "cnt": 2,
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "timing",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "training-loop",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "type-design",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "unimplemented-feature",
+    "cnt": 2,
+    "critical": 0,
+    "high": 2,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unused-integration",
+    "cnt": 2,
+    "critical": 1,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "utility",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "versioning",
+    "cnt": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 2
+  },
+  {
+    "category": "ALGORITHMIC_CORRECTNESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHMIC_FUNDAMENTALS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHM_COVERAGE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHM_GAP",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHM_IMPL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ALGORITHM_IMPLEMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ANALYSIS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "API_INCONSISTENCY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "API_SURFACE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "API_Surface",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "ARCHITECTURAL_CONNECTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "ARCHITECTURAL_DECISION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_FACADE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_FLAW",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_GAP",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_INSIGHT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "ARCHITECTURAL_MISMATCH",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_ORPHAN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURAL_PATTERN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURE_CONFUSION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURE_DEBT",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ARCHITECTURE_NOTE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ASYNC_RUNTIME",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Architectural Design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "BENCHMARKING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "BITWISE_OPERATIONS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "BROKEN_GUARANTEES",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "BROKEN_INTEGRATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "BUG_WORKAROUND",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Boundary Counting",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "CACHE_OPTIMIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "CACHING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "CAPABILITY_REPORTING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "CITATION_MISSING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "CODE_DUPLICATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "CODE_STUB",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "COMPARISON",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "COMPARISON_FINDING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "COMPILATION_ERROR",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "COMPLEXITY",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "COMPLEXITY_ANALYZER",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "COMPLEXITY_MISREPRESENTATION",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "COMPREHENSIVE_SCENARIOS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "CONSTANTS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "COPY_PASTE_DUPLICATE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "COVERAGE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "CRYPTOGRAPHY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Cache Implementation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Complexity Constants",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Complexity Gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ComputeOps",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Config Mismatch",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Configuration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Constants",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DATABASE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DATA_INTEGRITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DATA_LAYER",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DATA_LIFECYCLE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DATA_MARSHALING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DATA_PATTERN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DATA_STRUCTURES",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DATA_STRUCTURE_WRAPPER",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DECEPTIVE_COMPARISON",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DECEPTIVE_REPORTING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DECEPTIVE_SCORING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DECEPTIVE_STRUCTURE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DEDUPLICATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DELEGATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DEPENDENCIES",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DEPENDENCY_DETECTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DEPENDENCY_MISSING",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DEPENDENCY_ON_STUB",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DEPS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "DESIGN_ISSUE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "DIMENSION_BUG_WORKAROUND",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DISABLED",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DISABLED_INTEGRATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "DISCONNECTED_LAYERS",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Deceptive Marketing",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Dependency Graph",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Dependency_Architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Dependency_Surface",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Depth Limiting",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Deterministic vs Probabilistic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Distribution",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "EDGE_CASES",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "EFFICIENCY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "EMBEDDING_CHAIN",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ENERGY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ENVIRONMENT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ERROR_PROPAGATION_REAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Embedding Integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Error_Handling",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Expander Decomposition Gap",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FABRICATED",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FACADE_AVAILABLE_ACTIONS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "FACADE_INITIALIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "FACADE_LAYER",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FAKE_BENCHMARKING",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FAKE_IMPLEMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FALLBACK_CASCADE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FALLBACK_PATTERN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FALLBACK_STUB",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "FEATURE_CONFIG",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "FEATURE_GATE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "FEATURE_INTERFACE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "FILE_METADATA",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "FORMAT_CONVERSION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "FRAGMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Fabricated Reasoning",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Facade",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Fake Metrics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "False Claim",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "False Sublinearity",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Feature",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_ACTION_BULK",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_ALGORITHMS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_CODE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_INFRA",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_MEMORY_MGMT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_MULTI_GOAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_PLAN_EXEC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_STATE_MGMT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_SUCCESSORS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "GENUINE_WASM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GEOMETRICALLY_WRONG",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "GRACEFUL_DEGRADATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Gradient Computation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "HARDCODED_DATA",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "HARDCODED_DEFAULTS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "HARDCODED_PARAMETERS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "HARDCODING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "HELPER_METHODS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "HEURISTIC_ANALYSIS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Hierarchy Coarsening",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "IMPLEMENTATION_GAP",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INCOMPLETE_ALGORITHM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INCOMPLETE_CODE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INCOMPLETE_MEASUREMENT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INCONSISTENCY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INFLATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INFRASTRUCTURE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "INITIALIZATION_DETAIL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INPUT_VALIDATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INSTRUMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INTEGRATION_INCOMPLETE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INTEGRATION_POINT",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INTEGRATION_TEST",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "INTERFACE_COMPLIANCE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "INTERFACE_ONLY",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ITERATOR_CORRECTNESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ITERATOR_IMPLEMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "In-Memory Only",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Incomplete Algorithm",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Incorrect Verification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Input Validation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Integration Architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "JS_OPTIMIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "KMER_ALGORITHM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "LIFECYCLE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "LIST",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "LOOKUP_TABLE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "LOW_SIGNAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "LocalKCut Initialization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MAINTENANCE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "MATH_IMPLEMENTATION",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MATH_RANDOM_FACADE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MATH_VERIFIED",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "MEMORY_SAFETY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "METADATA_GENUINE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "METRICS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "MINOR_ISSUE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_API",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_CLAIMS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_LOGGING",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISLEADING_PERFORMANCE_CLAIMS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISSING_DISTRIBUTED_LOGIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MISSING_FUNCTIONALITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MISSING_INTEGRATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MIXED",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "MIXED_PLAN_TO_STATE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "MIXED_VALIDITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Mathematical Correctness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Memory",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Misleading Architecture",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Misleading Step Tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Missing Certification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Missing Implementation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Missing Integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Missing Tree Packing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Module Organization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Monitoring",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "NAIVE_IMPLEMENTATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "NAMING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "NEURAL_ACCELERATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "NOMENCLATURE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "NON_FUNCTIONAL",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "NO_STUBS_FOUND",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Naive Recourse Tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "OBSERVABILITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "OPTIMIZATION_PREVENTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ORCHESTRATION_FACADE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "ORPHANED",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Orphaned",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Orphaned Architecture",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PARSING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PERCENTILE_ACCURACY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "PERFORMANCE_GAP",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "PERFORMANCE_ISSUE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PERFORMANCE_METRIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PERFORMANCE_TARGET_INFLATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "PHILOSOPHICAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "PHYSICS_CLAIMS",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "PLATFORM_ABSTRACTION",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "POSITIVE_FINDING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "PROCEDURAL_SIMULATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "PRODUCTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "PRODUCTION_READINESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "PRODUCTION_SEARCH",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Path Analysis",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Performance Claims",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Performance Tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Physics_Model",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Policy",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Positive - Incremental API",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Positive - Tests",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Positive - Type Safety",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "QUALITY_METRIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "QUALITY_METRICS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "QUERY_DESIGN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Query Implementation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REALISTIC_CLAIM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REALNESS_SIGNAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "REAL_ACCURACY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REAL_ALGORITHM_DISABLED",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "REAL_AUTO_SELECTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REAL_BENCHMARK_FRAMEWORK",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REAL_LATENCY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REAL_MATRIX_ANALYSIS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "REAL_OPERATIONS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "REAL_OPTIMIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "REPORT_GENERATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "RESET_WORKAROUND",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "RESOURCE_EXHAUSTION",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "RESTRICTED_APPLICABILITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "ROOT_CAUSE_VALIDATION",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "RULES_UNKNOWN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Reasoning Type Classification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Routing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SAFETY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "SCORING_LOGIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SEARCH",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SECURITY_POSITIVE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "SELF_REFERENTIAL",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SEMANTICS",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SERIALIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "SERIALIZATION_CORRECT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "SHARDED_INDEX_REAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "SILENT_FAILURE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "SIMPLIFIED",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "SIMULATED_METRICS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SIMULATED_RL",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SIMULATION_ONLY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SORTING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "SPECIFICATION_ONLY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STATISTICAL_COMPOSITION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STATISTICS_PASSTHROUGH",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "STATS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "STRATEGIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "STRUCTURAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STRUCTURE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "STUB_FUNCTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "STUB_METHODS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SUCCESS_CRITERIA_VALIDITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "SYNTH_DATA",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "SYSTEMIC_ISSUE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Semantics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Session Management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Singleton Pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Statistics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "String Matching Reasoning",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Stub Inference",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TANGENT_CACHE_REAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "TEMPLATE_SUBSTITUTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TEMPORAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TEMPORAL_ALGORITHM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TEST_AUTHENTICITY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TEST_COVERAGE_REAL",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "TEST_DESIGN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TEST_INCOMPLETENESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TEST_PATTERN",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "TEST_WEAKNESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "THEATRICAL_OUTPUT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "THEATRICAL_PSEUDOSCIENCE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "THEORETICAL_ONLY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "THRESHOLD",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "THROUGHPUT_METRICS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TIMEOUT_PROTECTION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TOKEN_HANDLING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TRAINING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TRAINING_CORRECTNESS",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "TRAIT_MISMATCH",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TYPE_CONVERSION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TYPE_ISSUE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TYPE_SYSTEM",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Templated Responses",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Testing Coverage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Training",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "Trait Design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Triple Storage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "TypeScript Interfaces",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "UNREALISTIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "UNSAFE_CODE_OVERHEAD",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "UNUSED",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "UNUSED_BINARY",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "UNUSED_CODE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "UNUSED_IMPORT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Unrealistic Defaults",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "Uptime Tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "VECTOR_INTEGRATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "VERIFICATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "Vector Embeddings",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WARMUP",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "WASM_BINDING",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WASM_BINDING_CORRECT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WASM_CONFIG",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "WASM_FACADE",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WASM_GENUINE",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "WASM_TYPE_CLASSIFICATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "WASM_VERDICT",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "WEAK_HEURISTIC",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "WEIGHTED_COMPOSITION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "WEIGHT_INITIALIZATION",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "WHAT_IF_PASSTHROUGH",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "accuracy-calc",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "actionable-suggestions",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "adr",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "agent-booster-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "agent-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "aggregates",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithm-composition",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "algorithm-design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "algorithm-mismatch",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithm-novelty",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithmic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "algorithmic-correctness",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithmic-novelty",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithmic-simplification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "algorithmic-soundness",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "analysis-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "analysis-types",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "api-completeness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "api-quality",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "api-usage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "api_design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architectural",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architectural-deception",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architectural-isolation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architectural-pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture-concern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "architecture-disconnect",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "architecture-fiction",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture-inconsistency",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture-validation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "architecture_clarity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "aspirational",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "assembly",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "assertion-coverage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "attention-decay",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "batching",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "benchmark",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "benchmark-authenticity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "benchmark-completeness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "benchmark-design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "benchmark-framework",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "benchmark-methodology",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "benchmark-scope",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "benchmark-status",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "benchmark-structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "bidirectional",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "body-parser",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "broken-import",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "broken-reference",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "build",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "build_system",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "built-in-functions",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "cache-ttl",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "capacity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "capacity-management",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "circular-dependency",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "class-architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "cli-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "cli-wrapper-facade",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "clifford-simulation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "code-smell",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "code_structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "commented-claim",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "comparative-ranking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "compatibility",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "compilation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "compilation-blocker",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "compilation-error",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "complexity",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "complexity-analysis",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "complexity-claim",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "concurrency-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "confidence-level",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "config-struct",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "conjugate-gradient",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "consistency",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "console-theater",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "constants",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "core-architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "correct-abstractions",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "correct-bindings",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "correct-logic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "correctness-concern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "cosine-similarity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "cost-propagation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "cost-tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "coverage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "cross-file",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "cross-platform",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "cross-repo",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "data",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "data-completeness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "data-dependency",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "data-mapping",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "data_structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "database",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "database-queries",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "dataset",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "dead-config",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "dead-feature",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "dead-parameter",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "debug",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "decode",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "delegation",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "dependency-error",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "dependency-structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "design-flaw",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "design-limitation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "dimension-mismatch",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "discovery",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "discrepancy",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "display",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "distributed-systems",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "dropoutrate",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "dual-retrieval",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "duplicate-code",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "duplicate-facade",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "edge-case",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "efficiency",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "encode",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "encoding",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "energy-scale-classification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "environment",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "error-factory",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "error-taxonomy-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "error-wrapping",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "error_handling",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "event-architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "example",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "executable",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "execute-method",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "execution",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "export-capability",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "export-formats",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "export-pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "exports",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "expressions",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "extensibility",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "external-reference",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "facade-element",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "facade_pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "factory-pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "fake-embedding",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fake-metric",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "fake-sparsity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fallback-behavior",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fallback-primary",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fallback-quality",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fallback-strategy",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "false-api",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "false-claim",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "false-claims",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "fann-heritage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "feature-gap",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "feature-gating",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "file-assessment",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "file-purpose",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "filesystem-canonicalization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "finding",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "flow-nexus-tools",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "format",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "format-coverage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "formats",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "fragmentation",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "framework",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "functionality-gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "gate-operations",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "gates-computation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "generated-code",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "genuine-dependencies",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "genuine-orchestration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "goap",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "governance",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "graceful-degradation",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "graph",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "graph-interpretation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "graph-management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "graph-patterns",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "gru-gates",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "gruCell",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hardcoded",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hardcoded-baselines",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hardcoded-dimension",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hardcoded-path",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hardcoded-values",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hardware",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "hash-encoding",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hash-facade",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hash-quality",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "hashing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "health-checks",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "heartbeat-system",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "helper-function",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "helper-quality",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "heuristic-limitation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hook-structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "hooks",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "http-client",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "implementation-detail",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "implementation-note",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "implementation_gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "incomplete-algorithm",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "incomplete-persistence",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "incorrect-conversion",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "infrastructure-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "initialization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "inline-data",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "instance-management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "integration-architecture",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "integration-completeness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "integration-confirmed",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "integration-gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "integration-mismatch",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "integration-pattern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "intelligence",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "interaction-protocols",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "interface_design",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "interop",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "loc-analysis",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "logging-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "loss-function",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "lossy-transform",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "machine-learning",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "maintainability",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "marketing-collateral",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "math",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "math-accuracy",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "math-error",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "mathematical-correctness",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "matrix-operations",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "matrix-ops",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "mcp-infrastructure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "mcp-protocol",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "mcp-reference",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "mcp-server",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "mcp-tools",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "measurement",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "measurement-accuracy",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "measurement-validity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "memory-concern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "memory-pooling",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "memory-retrieval",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "memory-tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "merging",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "method",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "metrics-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "mislabeled",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "misleading-stats",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missed-opportunity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "missing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-bridge",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-data",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "missing-import",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-module",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-validation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "missing-verification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "missing-wasm",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "module-initialization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "module-structure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "module_export",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "monitoring-quality",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "multi-scale-analysis",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "multi-source-conflict",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "naming-inconsistency",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "naming-mismatch",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "network-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "neural-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "neural-net-authenticity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "neural-refinement",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "no-goap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "no-implementation",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "no-resilience",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "no_std",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "not-intelligent",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "numeric-literals",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "numerical",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "operational",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "optimization-theatrical",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "options",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "orphan",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "orphaned-abstraction",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "orphaned-scaffolding",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "output",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "output-layer",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "p-value-threshold",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "p2p",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "parameter-count",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "parsing-primitives",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "partial-implementation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "partitioning",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "pattern-match",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "pattern-matching",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "pattern-reversal",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "performance-claim",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "performance-concern",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "performance-theater",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "performance_claim",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "persistence-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "persistence-facade",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "persistence-validation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "persistence_disconnection",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "physics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "physics-constant",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "platform-support",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "preemption",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "privacy",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "process",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "projection",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "prologue",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "prompt-engineering",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "property-paths",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "purpose",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "quality-difference",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "quality-illusion",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "quality-metrics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "quality-split",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "quantization",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "quantum-error-correction",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "quantum-measurements",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "query-complexity",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "query-complexity-heuristic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "queue-system",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "r20-clarification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "r20-propagation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "race-condition",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "random-weights",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "ranking-mechanism",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "rate-limiting",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "rdf-quads",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "real-exports",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "real-infrastructure",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "real-quic-exists",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "real-training-loop",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "realness-assessment",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "recommendation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "recommendations-genuine",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "reconnect-logic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "recovery-missing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "redundancy",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "reference-novelty",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "replan-logic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "resolution",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "resource-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "resource-management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "resource-mgmt",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "resources-count",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "sampling",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "sampling-rate",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "scalability",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "schema",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "scope-clarification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "scope-gap",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "scratchpad-eviction",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "security-positive",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "semantic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "sensitivity-levels",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "server-reference",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "session",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "session-id-format",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "session-management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "shared-parameters",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "sigmoid-activation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "silent-degradation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "simplified-statistics",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "simulation-not-real",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "solution-modifiers",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "sparse-csr",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "specification",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "sql-injection",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "stale-pricing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "state",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "state-management",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "state-tracking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "statistical-quality",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "statistical-tests",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "status",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "stub-code",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "style",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "sublinear-algorithm-binding",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "summary",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "swarm",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "swarm-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "synchronization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "synthetic-data",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "system-b-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "system-monitoring",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "tanh-activation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "task-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "telemetry",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "temperature",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "terminology",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "test-framework",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "test-gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "test-generation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "test-harness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "test-matrix-generation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "test_coverage",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "theatrical-claims",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "theatrical-computation",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "threat-model",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "threshold-arbitrary",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "timing-bug",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "tokenization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "tool-schema",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "tooling",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "tools-count",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "training-architecture",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "trait-implementation",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "transport",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "trigger",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "triple-patterns",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "trivial-check",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "two-stage-soundness",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "typescript-patterns",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "ui",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "undifferentiated",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unicode-attack-missing",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "unpacking",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "unregistered-module",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unreliable-benchmarks",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unsafe",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unusable-dep",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "unused-import",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "update-operations",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "usage",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "utilities",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "utility-functions",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "utility-methods",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "uuid",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "vae-support",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "validation-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "validation-gap",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "validation-logic",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "variable-attention",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "vector-pool-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "vector-search",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "visualization",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "wasm-bindgen-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "wasm-errors",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "wasm-export",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "wasm-integration",
+    "cnt": 1,
+    "critical": 1,
+    "high": 0,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "weak-abstraction",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "weak-rng",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "web-sys-performance-api",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "websocket",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  },
+  {
+    "category": "websocket-client",
+    "cnt": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "info": 0
+  },
+  {
+    "category": "wrapper_status",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "info": 0
+  },
+  {
+    "category": "zero-integration",
+    "cnt": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "info": 1
+  }
+]

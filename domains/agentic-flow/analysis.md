@@ -42,9 +42,9 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | EmbeddingCache.ts | agentic-flow | 726 | 90% | DEEP | 3-tier cache (native SQLite > WASM > Memory), SHA-256 keys | R22 |
 | IntelligenceStore.ts | agentic-flow | 698 | 90% | DEEP | SQLite dual backend. SQL injection risk in incrementStat | R22 |
 | sona-tools.ts | agentic-flow | 676 | 90% | DEEP | 15 tools delegating to sonaService singletons | R22 |
-| EmbeddingService.ts | agentic-flow | 1,810 | 80% | DEEP | ONNX, K-means clustering. simpleEmbed = hash fallback | R22 |
+| EmbeddingService.ts | agentic-flow | 1,810 | 80% | DEEP | ONNX, K-means clustering. simpleEmbed = hash fallback. ONNX path IS reachable when ruvectorModule loads (corrects prior "always hash" claim). semanticSearch() is O(n) brute-force, no HNSW | R22, R119 |
 | worker-registry.ts | agentic-flow | 662 | 80% | DEEP | SQLite WAL persistence. sql.js race condition | R40 |
-| RuVectorIntelligence.ts | agentic-flow | 1,200 | 80% | DEEP | SONA Micro-LoRA, 6 attention types, HNSW, LRU | R22 |
+| RuVectorIntelligence.ts | agentic-flow | 1,200 | 80% | DEEP | **GENUINE 2-plane pipeline**: routeTask() chains HNSW→SONA→attention (0.3/0.7 weighted). 6 attention types. "Graph" = GraphRoPeAttention (scoring), NOT graph traversal. MoE expertWeights bug. First confirmed cross-subsystem composition | R22, R119 |
 | dispatch-service.ts | agentic-flow | 1,212 | 80% | DEEP | 12 worker types, secret detection, dependency scanning | R22 |
 | agentdb-wrapper-enhanced.ts | agentic-flow | 899 | 80% | DEEP | AttentionService stub fallback. calculateRecall wrong | R22 |
 | edge-full.ts | agentic-flow | 943 | 75% | DEEP | 6 ruvector WASM modules. JS fallback for 5/6 | R22 |
@@ -78,6 +78,7 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | QUICClient | agentdb | 489 | 15% | SURFACE | sleep(100) + {success: true} | Initial |
 | SyncCoordinator | agentdb | 553 | 40% | SURFACE | Real logic on stub QUIC transport | Initial |
 | ReasoningBank | agentdb | ~400 | 82% | SURFACE | Real pattern store with optional GNN | Initial |
+| MultiHeadAttentionController | agentdb | 494 | 55-65% | DEEP | Genuine 8-head structure (INVERTS Rust single-head R108). CRITICAL: random projections (not learned) — results non-reproducible. VectorBackend populated but NEVER queried for search (dead on read path). Sequential despite async signature (claims "parallel"). Average aggregation divides signal by 8. Max aggregation zero-biased. Disconnected from main AgentDB pipeline | R112 |
 
 ### ReasoningBank Implementations
 

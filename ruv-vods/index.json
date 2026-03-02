@@ -1,0 +1,73 @@
+{
+  "transcripts": [
+    {
+      "name": "live-february-26",
+      "sourceFile": "/home/snoozyy/ruvnet-research/ruv-vods/inbox/live-february-26.txt",
+      "totalLines": 1362,
+      "chunkCount": 1,
+      "status": "cross-validated",
+      "addedAt": "2026-03-01T00:00:00.000Z",
+      "chunkedAt": "2026-03-01T12:20:52.600Z",
+      "scannedAt": null,
+      "analyzedAt": "2026-03-01T12:44:02.051Z",
+      "preprocessedAt": "2026-03-01T14:30:00.000Z",
+      "crossValidatedAt": "2026-03-01T17:00:00.000Z",
+      "verifiedAt": null,
+      "leadsFile": "leads/live-february-26-leads.md",
+      "verificationPlan": "leads/live-february-26-verification-plan.md",
+      "leadsCount": 22,
+      "verifiedCount": 0
+    },
+    {
+      "name": "ai-hackerspace-march-01",
+      "sourceFile": "/home/snoozyy/ruvnet-research/ruv-vods/inbox/ai-hackerspace-march-01.txt",
+      "totalLines": 1176,
+      "chunkCount": 1,
+      "status": "cross-validated",
+      "chunkedAt": "2026-03-01T13:03:38.943Z",
+      "scannedAt": "2026-03-01T13:04:00.000Z",
+      "analyzedAt": "2026-03-01T13:10:00.000Z",
+      "preprocessedAt": "2026-03-01T15:30:00.000Z",
+      "crossValidatedAt": "2026-03-01T17:00:00.000Z",
+      "verifiedAt": null,
+      "leadsFile": "leads/ai-hackerspace-march-01-leads.md",
+      "verificationPlan": "leads/ai-hackerspace-march-01-verification-plan.md",
+      "leadsCount": 22,
+      "verifiedCount": 0
+    }
+  ],
+  "crossValidation": {
+    "planFile": "leads/cross-validation-plan.md",
+    "generatedAt": "2026-03-01T17:00:00.000Z",
+    "transcriptsIncluded": ["live-february-26", "ai-hackerspace-march-01"],
+    "totalActionableLeads": 31,
+    "thematicClusters": 5,
+    "sessionsPlanned": 5,
+    "sessionRange": "R115-R119",
+    "totalNewReads": 42,
+    "totalReReads": 13,
+    "estimatedLOC": 47800,
+    "sessionsCompleted": [
+      {
+        "name": "R115-cv",
+        "sessionId": 129,
+        "date": "2026-03-01",
+        "cluster": "A: Consensus & Distribution",
+        "leadsResolved": ["Feb26-005", "Feb26-012", "Feb26-014", "Feb26-019", "Mar01-016", "Mar01-020"],
+        "newReads": 13,
+        "reReads": 2,
+        "linesRead": 6421,
+        "findings": 110,
+        "criticals": 14,
+        "verdicts": {
+          "Feb26-005": "PARTIAL — algorithms genuine, integration REJECTED (3 parallel systems)",
+          "Feb26-012": "REFUTED — zero PostgreSQL dependencies",
+          "Feb26-014": "PARTIAL — Raft present, gossip stub",
+          "Feb26-019": "REFUTED — zero QUIC anywhere",
+          "Mar01-016": "CONFIRMED — three-tier daemon architecture real",
+          "Mar01-020": "CONFIRMED — persistent daemon with JSON state"
+        }
+      }
+    ]
+  }
+}

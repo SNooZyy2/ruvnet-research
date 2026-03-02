@@ -101,12 +101,12 @@ db.close();
 "
 ```
 
-Relationship types for cross-repo tracing:
-- **shares-pattern**: Same anti-pattern/approach in both files
-- **duplicates**: Near-identical code across repos
-- **wraps**: One file wraps/re-exports another repo's code
-- **contradicts**: Incompatible implementations of same concept
-- **evolves-from**: Later version/fork of same logic
+Relationship types (use ONLY canonical values):
+- **COMPETES**: Same pattern/approach in both files (parallel implementation)
+- **COMPETES**: Near-identical code across repos (duplicate)
+- **WRAPS**: One file wraps/re-exports another repo's code
+- **BROKEN**: Incompatible implementations of same concept (contradicts)
+- **USES**: Later version/fork of same logic (evolves-from)
 
 ### 5. Insert Findings Per Instance
 
@@ -133,7 +133,7 @@ const stmt = db.prepare(\`
 for (const inst of instances) {
   const file = db.prepare('SELECT id FROM files WHERE relative_path = ?').get(inst.file);
   if (file) {
-    stmt.run(file.id, sessionId, inst.severity, 'SYSTEMIC', inst.description, inst.line_start, inst.line_end);
+    stmt.run(file.id, sessionId, inst.severity, 'INTEGRATION', inst.description, inst.line_start, inst.line_end);
   } else {
     console.log('File not in DB:', inst.file);
   }
@@ -195,6 +195,25 @@ These have been confirmed systemic in prior sessions:
 - **Hardcoded accuracy returns**: lstm.js (0.864), gnn.js (0.96) (R40)
 
 When tracing a pattern already on this list, focus on finding NEW instances not yet recorded.
+
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
+
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
+
+Use **INTEGRATION** for systemic cross-repo pattern findings.
+Put pattern classification (SYSTEMIC/CLUSTER/ISOLATED) in the description.
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
 
 ## Success Criteria
 

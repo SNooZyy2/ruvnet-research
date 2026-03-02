@@ -1,8 +1,8 @@
 # claude-flow README vs Reality — Feature-by-Feature Verdict
 
-> Cross-referenced against 90 research sessions, 1,332 DEEP files, 9,171 findings.
+> Cross-referenced against 106 research sessions, 1,466 DEEP files, ~10,400 findings.
 > Each feature classified as: GENUINE / PARTIALLY REAL / FABRICATED / UNCOVERED
-> Date: 2026-02-17
+> Date: 2026-02-18
 
 ---
 
@@ -12,9 +12,9 @@ The headline feature. Can we deliver it?
 
 | README Claim | Verdict | Evidence | Can We Rebuild? |
 |-------------|---------|----------|----------------|
-| **ReasoningBank** (RETRIEVE→JUDGE→DISTILL) | **GENUINE** | TS+Rust both 92-95%. 160 findings across 90 sessions. Real DeepMind-style algorithms (MaTTS search, MMR). Mature v1→v2 migration. | YES — copy both TS and Rust implementations |
-| **EWC++** (prevents catastrophic forgetting) | **GENUINE** | micro_lora.rs 92-95%. Real online Fisher, adaptive lambda, task boundary detection. NEON SIMD. | YES — copy from Rust crate |
-| **SONA** (<0.05ms adaptation) | **PARTIALLY REAL** | sona crate is 85% production-ready (~4,500 LOC). LoRA+EWC+++federated+SafeTensors all present. But <0.05ms claim is unverified — no benchmark proves this. | PARTIALLY — the crate works, performance claims are inflated |
+| **ReasoningBank** (RETRIEVE→JUDGE→DISTILL) | **GENUINE** | TS+Rust both 92-95%. 160 findings across 101 sessions. Real DeepMind-style algorithms (MaTTS search, MMR). Mature v1→v2 migration. | YES — copy both TS and Rust implementations |
+| **EWC++** (prevents catastrophic forgetting) | **GENUINE** | micro_lora.rs 92-95%. Real online Fisher, adaptive lambda, task boundary detection. NEON SIMD. R106: training.rs orchestration has correct EWC penalty math (λ*F*(w-w*)²/2) but Fisher information is never updated during training — making it static EWC, not truly "++". The micro_lora.rs core is genuine; the training loop's continual adaptation is incomplete. | YES — copy from Rust crate; wire Fisher updates for true EWC++ |
+| **SONA** (<0.05ms adaptation) | **PARTIALLY REAL** | sona crate ~75% production-ready (R98 revised down from 85%). Algorithms 85-90%, orchestration 60-70%. LoRA+EWC+++federated+SafeTensors present. Loop C missing from exports (R100). <0.05ms unverified. | PARTIALLY — algorithms work, orchestration incomplete, performance claims inflated |
 | **MoE** (8 expert networks) | **PARTIALLY REAL** | moe-router.js has real 2-layer gating (384→128→8) with Xavier init. But it's a JS file, not integrated into any training pipeline. | MAYBE — the routing math is real, needs wiring |
 | **LearningBridge** (0.12ms/insight) | **FABRICATED** | Zero files found in DB. No code exists. | NO — write from scratch if needed |
 | **9 RL Algorithms** (PPO, A2C, DQN, etc.) | **FABRICATED** | All 9 reduce to identical tabular Q-value updates. DQN has no neural network. PPO has no clipping. Decision Transformer has no transformer. Cosmetic naming only. | NO — would need real RL implementations |
@@ -38,11 +38,25 @@ What you WON'T get: the inflated performance claims (<0.05ms), the 9 RL algorith
 | **Product Quantization** | **GENUINE** | R90: 88-92%. Real k-means++, Lloyd's, ADC with lookup tables. | YES — copy from ruvector-core |
 | **Conformal Prediction** | **GENUINE** | R90: 88-93%. Valid Vovk et al. quantile formula. | YES — copy from ruvector-core |
 | **RuVector PostgreSQL Bridge** (77+ SQL functions) | **PARTIALLY REAL** | R35: architecture-complete, persistence-incomplete. SQL functions exist but R35 found persistence layer not fully wired. ~61µs search claim unverified. | MAYBE — needs completion work |
-| **39 Attention Mechanisms in SQL** | **UNCOVERED** | 0 DEEP files on SQL attention specifically. 3 files exist in DB. Likely PostgreSQL CREATE FUNCTION statements — may be syntactically valid SQL but untested. | Unknown — needs investigation |
-| **15 GNN Layer Types** | **PARTIALLY REAL** | ruvector-gnn has real training.rs (1,368 LOC DEEP), tensor.rs, query.rs. But findings show "GNN enhancement is syntactic sugar — calls opaque backend.enhance()". JS fallback needed for broken native APIs. | PARTIALLY — some real code, integration broken |
+| **39 Attention Mechanisms in SQL** | **PARTIALLY REAL** | R96-R97: 5 DEEP files in `ruvector-postgres/src/attention/` (flash.rs, mod.rs, multi_head.rs, operators.rs, scaled_dot.rs). SQL attention arc COMPLETE (R97). Real pg_extern functions implementing attention as SQL operators. 16 total postgres attention files. | PARTIALLY — genuine SQL operator implementations, "39 mechanisms" count inflated |
+| **15 GNN Layer Types** | **PARTIALLY REAL** | 33 files in ruvector-gnn crate, 15 DEEP. Real training.rs (1,368 LOC), genuine Kipf & Welling GCN (R101). TWO parallel GNN ecosystems: ruvector-gnn crate + ruvector-postgres/gnn (self-contained reimplementation, zero cross-crate composition). GNN bindings genuine: gnn-node 88-92% (napi-rs), gnn-wasm 90-94% (R99). Both inference-only. Deterministic weights throughout (no training). | PARTIALLY — real GNN math, two disconnected ecosystems, no training pipeline |
 | **MemoryGraph with PageRank** | **PARTIALLY REAL** | backward_push.rs is genuine O(1/ε) (95%+). intelligence.cjs has real PageRank with power iteration. But "MemoryGraph" as an integrated product doesn't exist. | YES for PageRank algorithm, NO for integrated MemoryGraph |
-| **Hyperbolic Geometry** (Poincaré ball) | **PARTIALLY REAL** | 63 files exist, 0 DEEP. Coordinator docs describe real hyperbolic attention but findings note it's in documentation/design, not deployed code. | Unknown — needs deep reads |
-| **AgentMemoryScope** (3-scope system) | **PARTIALLY REAL** | Memory system works at basic level (better-sqlite3). But 9 disconnected persistence layers means the "3-scope" claim hides architectural chaos. | Rebuild with single persistence (ADR-v4-002) |
+| **Hyperbolic Geometry** (Poincaré ball) | **GENUINE** | 63 files, 21 DEEP. R92: hyperbolic HNSW GENUINE (88-95%). R99: hyperbolic-hnsw crate COMPLETE. R100: ruvector-attention hyperbolic module COMPLETE (4/4, 90-93%), poincare.rs 93-96% STRONGEST, mixed_curvature.rs MOST NOVEL. R98: SQL hyperbolic GENUINE (poincare 88-92%, lorentz 87-92%). R101: postgres hyperbolic COMPLETE. CRITICAL: zero manifold validation at any layer. | YES — genuine hyperbolic math across 4 crates, needs manifold validation |
+| **AgentMemoryScope** (3-scope system) | **PARTIALLY REAL** | Memory system works at basic level (better-sqlite3). But 11 disconnected persistence layers (R106: serving KV cache = 11th) means the "3-scope" claim hides architectural chaos. R104: ruvllm context module COMPLETE (7/7 DEEP) has 4+ genuine HNSW stores that NEVER compose at runtime — each sibling (semantic_cache, episodic_memory, agentic_memory, working_memory) maintains its own independent vector index. | Rebuild with single persistence (ADR-v4-002) |
+
+---
+
+## LLM Serving Infrastructure
+
+Not prominently claimed in README but genuinely present.
+
+| Component | Verdict | Evidence | Can We Rebuild? |
+|-----------|---------|----------|----------------|
+| **Continuous Batching** (vLLM/Orca) | **GENUINE** | R35: scheduler.rs 90-92% (vLLM-style with preemption, chunked prefill). R106: batch.rs 90-95% — production data structures with correct merge_prefill_decode(), TokenBudget dual-gate, PagedAttention block_table threading. 4 tests. | YES — strongest serving module in ruvllm |
+| **PagedAttention KV Cache** | **GENUINE** | R106: kv_cache_manager.rs 88-92%. Genuine Kwon et al. 2023 paged allocation. Real bugs: deadlock risk (double RwLock), memory estimate 2x too low (claims f16, stores f32), broken swap_out accounting. 11th parallel subsystem vs MinCut KV cache. 7 tests. | YES — fix the 3 bugs, use as single KV cache layer |
+| **LoRA Adapter Management** | **GENUINE** | R106: adapter.rs 85-88%. AdapterRegistry (DashMap+LRU eviction), AdapterPool, AdapterComposer (6 strategies). forward_sequential() has math bug (double-removes input). All math delegates to micro_lora.rs (92-95%). | YES — fix forward_sequential(), wire to micro_lora.rs |
+| **LoRA Training Loop** | **PARTIALLY REAL** | R106: training.rs 82-87%. Correct EWC penalty math, 7 LR schedules (Cosine, OneCycle, etc.), async feedback queue. But GradientAccumulator is dead code in main path, Fisher updates never called, EwcState cloned per step. | MOSTLY — orchestration works, dead code needs cleanup |
+| **Two-Tier KV Cache** | **GENUINE** | R34: kv_cache.rs 90%. NEON SIMD quantize/dequantize, hot/cold tiering. | YES — wire to kv_cache_manager.rs |
 
 ---
 
@@ -51,7 +65,7 @@ What you WON'T get: the inflated performance claims (<0.05ms), the 9 RL algorith
 | README Claim | Verdict | Evidence | Can We Rebuild? |
 |-------------|---------|----------|----------------|
 | **Agent Booster (WASM)** "352x faster" | **FABRICATED** | agent-booster-enhanced.ts (1,428 LOC DEEP) exists, but 13 theatrical WASM stubs found. "352x" has no benchmark. The WASM stubs we found are console.log facades. | NO — the 352x claim is baseless |
-| **Flash Attention** "2.49x-7.47x" | **PARTIALLY REAL** | flash_attention.rs in ruvector-mincut-gated-transformer (997 LOC DEEP) and JS fallback (643 LOC). R34 found this crate is "MOST NOVEL." Performance numbers unverified. | MAYBE — the algorithm exists, speedup claims unverified |
+| **Flash Attention** "2.49x-7.47x" | **PARTIALLY REAL** | 3 DEEP files: flash_attention.rs in ruvector-mincut-gated-transformer (997 LOC), cuda-wasm flash_attention.rs (528 LOC, R92), JS fallback (643 LOC). R34/R93: MinCut crate "MOST NOVEL," kernels 88-93% with SIMD. Performance numbers unverified. | MAYBE — the algorithm exists across Rust+CUDA+JS, speedup claims unverified |
 | **Int8 Quantization** "3.92x memory reduction" | **FABRICATED** | R82: quantization.rs 75-78%, R87: inference/quantization.rs 0-5% PLACEHOLDER (returns empty Vec). No working quantization pipeline. | NO — placeholder code |
 | **LoRA Compression** "128x" | **PARTIALLY REAL** | micro_lora.rs IS genuine (92-95%). But "128x compression" is a theoretical maximum, not demonstrated. | YES for LoRA, NO for 128x claim |
 | **Token Optimizer** "30-50% reduction" | **PARTIALLY REAL** | Hook system is genuine (98.1% R19). Token optimization hooks exist. But 30-50% reduction claim is unverified. | MAYBE — hooks work, savings unproven |
@@ -78,7 +92,7 @@ What you WON'T get: the inflated performance claims (<0.05ms), the 9 RL algorith
 
 | README Claim | Verdict | Evidence | Can We Rebuild? |
 |-------------|---------|----------|----------------|
-| **AIDefence** (<10ms threat detection) | **UNCOVERED** | 0 DEEP files. 16 files exist. 1 finding: "npm-published package excludes aidefence module." The module exists but was excluded from the published package. | Unknown — needs investigation |
+| **AIDefence** (<10ms threat detection) | **PARTIALLY REAL** | R92: 3 DEEP files (AIDefenceGuard.ts 763 LOC, test 235 LOC, integration 166 LOC). Overall 82-88%. 16 files exist, npm-published package excludes aidefence module. Guard class has real pattern matching and threat classification. <10ms claim unverified. | PARTIALLY — real threat detection logic exists, performance claims unverified, excluded from npm publish |
 | **Input Validation** (Zod) | **GENUINE** | config-loader.ts 92-95% with Zod. input-validator.ts exists in self-impl (270 LOC). | YES — already have this |
 | **Path Traversal Prevention** | **GENUINE** | R88: RuVectorBackend has FORBIDDEN_PATH_PATTERNS, validatePath() on every op. | YES — copy from RuVectorBackend |
 | **HMAC-SHA256 Proof Chain** | **PARTIALLY REAL** | guidance_kernel has HMAC but with HARDCODED key (security concern from early sessions). Concept real, implementation has a critical flaw. | MAYBE — fix the hardcoded key |
@@ -90,7 +104,7 @@ What you WON'T get: the inflated performance claims (<0.05ms), the 9 RL algorith
 
 | README Claim | Verdict | Evidence | Can We Rebuild? |
 |-------------|---------|----------|----------------|
-| **3-Tier Routing** (WASM/Haiku/Opus) | **PARTIALLY REAL** | 6 PARALLEL routing systems found — none properly connected to each other. The concept works through claude-flow hooks. | YES — already works via hooks, just needs consolidation |
+| **3-Tier Routing** (WASM/Haiku/Opus) | **PARTIALLY REAL** | 6 PARALLEL routing systems found — none properly connected to each other. R106 confirms 6th: ruvector_integration.rs (82-87%) implements SONA→HNSW→keyword three-tier fusion with REAL ruvector-core HnswIndex (not hash). But it creates two independent UnifiedIndex instances that never synchronize, and is completely parallel to hnsw_router.rs (R37 BEST at 90-93%). The concept works through claude-flow hooks. | YES — already works via hooks, just needs consolidation. Pick hnsw_router.rs as the single routing surface |
 | **75% Cost Reduction** | **INFLATED** | Model routing does save money by using cheaper models for simple tasks. 75% is a theoretical maximum. | PARTIALLY — real savings, inflated number |
 | **Multi-LLM** (GPT-5.2, o3, Gemini 3, Grok 4.1, Llama 4) | **SPECULATIVE** | README lists models that may not exist. Provider config files exist but actual multi-provider testing unverified. | Depends on actual model availability |
 
@@ -127,28 +141,28 @@ These features have zero genuine code backing them:
 
 ---
 
-## Where to Find More Genuine Code (Uncovered Areas)
+## Coverage Progress on Previously Uncovered Areas
 
-These areas have code in the repos but weren't DEEP-read. They could contain additional genuine implementations:
+These areas were identified as uncovered at R89. R90-R101 addressed most of them:
 
-| Area | Files | Location | Priority |
-|------|-------|----------|----------|
-| **AIDefence** | 16 files, 0 DEEP | Excluded from npm publish but code exists | HIGH — if genuine, adds security layer |
-| **Hyperbolic Geometry** | 63 files, 0 DEEP | Various locations | MEDIUM — could be real math like PQ/conformal |
-| **SQL Attention Mechanisms** | 3 files, 0 DEEP | PostgreSQL functions | LOW — likely CREATE FUNCTION statements |
-| **SONA crate internals** | 156 files, 3 DEEP | crates/sona/ | MEDIUM — 85% production-ready per findings |
-| **ruvector-gnn** | 130 files, 3 DEEP | crates/ruvector-gnn/ | MEDIUM — training.rs is DEEP, but integration broken |
-| **SWE-Bench adapter** | 21 files, 3 DEEP | ruv-swarm/crates/swe-bench-adapter/ | LOW — cannot execute benchmarks |
-| **Flash Attention Rust** | 5 files, 2 DEEP | ruvector-mincut-gated-transformer | MEDIUM — could provide real speedups |
+| Area | At R89 | At R101 | Sessions | Verdict |
+|------|--------|---------|----------|---------|
+| **AIDefence** | 16 files, 0 DEEP | 16 files, 3 DEEP | R92 | 82-88%, real pattern matching |
+| **Hyperbolic Geometry** | 63 files, 3 DEEP | 63 files, 21 DEEP | R92,R97-R101 | GENUINE across 4 crates, zero manifold validation |
+| **SQL Attention** | 16 files, 0 DEEP | 16 files, 5 DEEP | R96-R97 | Arc COMPLETE, real pg_extern operators |
+| **SONA crate** | 156 files, 3 DEEP | 156 files, 35 DEEP | R95,R98,R100 | ~75% (revised down from 85%), Loop C missing |
+| **ruvector-gnn** | 33 files, 3 DEEP | 33 files, 15 DEEP | R91,R94,R99,R101 | Two parallel ecosystems, inference-only |
+| **SWE-Bench adapter** | 21 files, 7 DEEP | 21 files, 7 DEEP | (pre-R89) | Cannot execute, no new coverage needed |
+| **Flash Attention Rust** | 5 files, 2 DEEP | 5 files, 3 DEEP | R92 | CUDA-WASM flash_attention added |
 
-### Recommended Deep-Read Priority for v4
+### Remaining Uncovered Areas
 
-If you want to expand v4's feature set beyond the current spec, read these first:
-1. **AIDefence** (16 files) — most impactful if genuine
-2. **SONA crate** (156 files, only 3 DEEP) — already 85% production-ready
-3. **Flash Attention Rust** (5 files) — direct performance benefit
-4. **ruvector-gnn** (130 files) — if the GNN layers work, adds ML capabilities
-5. **Hyperbolic geometry** (63 files) — if genuine, adds hierarchical code understanding
+| Area | Files | DEEP | Location | Priority |
+|------|-------|------|----------|----------|
+| **AIDefence** | 16 files | 3 DEEP (13 remaining) | npm/packages/ruvbot/src/security/ | LOW — core guard reviewed, remaining are docs/helpers |
+| **SONA crate** | 156 files | 35 DEEP (116 NOT_TOUCHED) | crates/sona/ | MEDIUM — algorithms confirmed, remaining are internals |
+| **ruvector-gnn** | 33 files | 15 DEEP (18 remaining) | crates/ruvector-gnn/ | LOW — inference-only, no training pipeline |
+| **Hyperbolic** | 63 files | 21 DEEP (37 NOT_TOUCHED) | Various crates | LOW — all major modules COMPLETE |
 
 ---
 
@@ -157,18 +171,22 @@ If you want to expand v4's feature set beyond the current spec, read these first
 ### Genuinely deliverable (backed by real code):
 - Self-learning via ReasoningBank + EWC++ + hooks
 - HNSW vector search with PQ compression and conformal prediction
+- Hyperbolic geometry (Poincare ball, Lorentz, mixed curvature — 21 DEEP files across 4 crates)
 - Multi-agent coordination via Claude Code Task tool + MCP
 - 175+ MCP tools, 42+ skills, 33 lifecycle hooks
 - Raft consensus (from RAC crate)
-- Path traversal security, Zod validation
+- Path traversal security, Zod validation, AIDefence threat detection (82-88%)
 - Model routing (3-tier via hooks)
 - Sublinear PageRank, bit-parallel search, temporal analysis
+- SQL attention operators (5 DEEP postgres functions)
 
 ### Deliverable with moderate effort (real design, needs wiring):
 - Gossip protocol (state machine correct, needs ~300 LOC transport)
 - MoE routing (math is real, needs integration)
 - Flash Attention (Rust implementation exists, needs benchmarking)
 - Event sourcing (event bus exists, replay needs building)
+- GNN layers (real Kipf & Welling math, needs unified ecosystem + training pipeline)
+- Hyperbolic manifold validation (math exists, zero validation enforcement — needs ~100 LOC guard layer)
 
 ### NOT deliverable (fabricated, would need from-scratch implementation):
 - 9 RL algorithms (all fake)

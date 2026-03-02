@@ -124,6 +124,22 @@ All files inserted with depth=NOT_TOUCHED
 Ready for priority-based analysis
 ```
 
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
+
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
+
 ## Success Criteria
 
 - All non-ignored files discovered and inserted

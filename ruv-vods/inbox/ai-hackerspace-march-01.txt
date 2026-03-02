@@ -1,0 +1,1175 @@
+ they're using internally yeah that's the things are well if i'm any indication things are definitely
+ moving in the right direction absolutely you're leading the pack and agentic ai team here leading
+ the pack as well which is awesome yeah i think uh i think things are things are looking good
+ a lot of the a lot of things we've we we've started or came up with um you know others have followed suit
+ quite quickly and yeah we're leading the charge
+ keep going it's exciting yeah i see nick and peter hey hey guys
+ hi nick but hey
+ peter you you need to have a uh your your avatar picture like like nick's here yeah i should
+ especially wall street since today i'm looking like this so another picture would be
+ you either got to fight with a raccoon or or the shaving uh pushback yeah the shaving the shaving
+ uh story is better but actually it was a a biopsy on some stuff on my face so you know
+ uh okay well wait well i hope hopefully you're okay no yeah rubbish life yeah like
+ and peter where are you located again me in warsaw we're actually um gonna hold an event
+ now i can i have to look at the list for the city but it's it's about an hour away from from warsaw uh a
+ little bit north so maybe you might want to check that one out yeah that's but that's in poland or
+ some place in poland yeah oh okay let me get i'll get the city for you here and and we're doing
+ germany too right yeah there's one in um hamburg that's gonna go and then another one that's more
+ it's gonna happen sooner in nuremberg okay yeah yeah what's pretty sweet yeah lots lots going on
+ what's going on i'm not around next week i've got taking off tomorrow to uh bangalore so that should
+ be interesting weather can't be is can't be worse than toronto here it's minus 21 this morning but what the
+ hell was that well we are we're almost at the same level of temperature here in warsaw now we're uh
+ today it was not so bad but over the next couple of days it's going to be like 20 even even minus 30
+ degrees in the night in some parts of the country in warsaw is going to be minus 20 so you know for
+ for what we've been having in terms of winters over the last several years this is extreme extreme in the
+ in the extreme well we we had 60 centimeters of snow um a few days ago which was the most snow we've ever
+ seen in in in this in my city and uh and now it's this morning i got up and it was minus 20 22 i think
+ so uh yeah it's cold cold and snowy it's weird it's a it's a bad winter here i i guess this is a little
+ farther away than i thought it's in krakow so i guess it's like around three hours away
+ who's uh who's organizing that the guy's name is conrad bujack we'll see if it ends up going but
+ he's definitely uh he already has a network that he's a part of as well so it it has a lot more
+ likelihood of of actually happening when people have existing communities and are already running
+ events and things right so um he talked about warsaw we'd love to get worse on the map
+ uh you know so just something something to keep in mind i'm thinking i'm thinking about it we would
+ love to have you to to participate in that you know no pressure no pressure or or you know find us
+ somebody that that would you know that you know is a tech guy we'll train him up on claude flow and
+ some of reuben stuff and then you know well i'm just you know even now i'm sitting and using it i was
+ i was experimenting now with this new extended mcp protocol that allows you to have a user ui within
+ claude uh claude desktop or chat gpt and i've just gotten it up and running with some of my own api
+ to to my own uh visual aesthetic engine so it turns out it works we were chatting it like two days ago
+ that uh it wasn't even working the the anthropic placed some films where they were showing how they
+ you were getting charts and stuff from figma and over the first two days it was really on the blink
+ i mean even claude desktop was having problems and it was trying to disconnect from from the apis
+ but now now it seems to work already and uh oh you should show us yeah that sounds cool
+ yeah not much to show at this point i mean aside from the fact that i've got a chat within which
+ there is uh some rubbish uh well i can i can give you a screenshot but aside from that it's not much
+ shells to demonstrate right well the setup even the setup is is cool right like
+ you you've kind of gone down that path so that i'd like to see how you how you set it up and you
+ know if anything else well i'm uh you know i i have to stabilize because i'm literally got to show
+ some images because it was making some mistakes like half an hour ago so uh over the next over the
+ weekend probably i'll be developing that it probably makes more sense to show it once i've gotten my own
+ head around it but uh other than that of course here
+ it's actually uh it's actually a pretty pretty big deal this whole mcp
+ it used to be called mcp ui and actually it was a bit of a it's going to be reminiscent of uh uh your roof
+ story but this is some guy that did this protocol like i don't know six nine months ago uh supported
+ by a guy who works for shopify and then it took uh tropic like months and months to pick up on it but
+ but they are they're creating those two guys that they actually led the way but this is going to be
+ a pretty big deal for e-commerce because you can you know you can go into chat gpt or uh well in this
+ case cloud desktop but chat gpt has it implemented in a very close way and you can just you know chat
+ about what you want and you can have a built-in app or an installed app that that uh you know that does
+ much more than just chat with you about the product so so it's uh it's probably going to be important
+ that's i'm just testing the performance here see if that was zooms killing
+ i've really taken over the freaking operating system i've got ru i don't know me or ru is is maybe
+ ru vector is agi and it's just figured out how to insert itself into the very core of windows
+ yeah that's crazy
+ so i'll publish this probably later this afternoon
+ all right i'm convinced that colby is agi yeah seriously
+ okay it's not got a few bugs to sort out
+ i put an image of the of the screen uh that i just got working in the chat
+ you know it's as ugly as november night but uh but it's with it's from within
+ cloud desktop so so it sort of proves it works nice awesome i get to use that
+ well good then i'll you know i'll finish it up and
+ you'll be my first canadian user perfect
+ i see uh i see dragon's qe fleet is doing really well too
+ yeah that's a huge thing that he's written it looks amazing
+ you know project is suddenly doing really well too for me is my uh agent db it's is uh seems to be taking
+ well since we're on that how does agent db differ from uh root vector what what is the overlap with
+ the relationship it's it's the same basic stuff i just part i just made it a little easier to
+ understand it's it's a db for it for it's an agent db right so it's dumb it's obvious and i don't upgrade it as often so it's more stable
+ okay because i'm using a root vector edge right now for uh
+ sort of in browser and on device agents that chat with each other and exchange
+ information about what people have chosen in this uh the stuff that i just uploaded you know in terms
+ of their preferences or i'm beginning to use it so uh that's yeah it's pretty good right i i use it all
+ time it's like drop it's dropped uh some of my clients uh ai bills by a massive amount like all
+ that ml that he used to offload and do like nightly now happens real time as people visit their website
+ yeah it's nice it's a nice package what do i call that it just i think it's called an edge
+ edge yeah you have edge and edge full yeah edge full is a more and more stuff
+ i think it was edge full is that and i i also have the edge net too
+ and do you remember what that is
+ oh yeah well she's edge net's doing really well as well they're all doing really well
+ edge yes there's edge full i'll pop that i should probably consolidate i don't know why i create so
+ many i you know random sometimes i just get carried away yeah that's the problem with this ai generation
+ you know it generates faster than you can even read it uh that's when this guy two or three weeks ago
+ was telling about how he uh over the weekend uh did like i don't know six worlds world who was it
+ cornelius or somebody like that uh i was really tempted to ask him whether he also had time to read
+ it i i i do try to read it uh my stuff um so this is the edge net so what edge net does is shares the
+ capacity so it creates a global shared capacity for you know using the edge and edge full but then it
+ then you can uh basically create uh swarms of people's browsers that essentially share their
+ compute capacity globally yeah you mentioned sharing the capacity but i didn't notice that there was a
+ package you you're not yeah you i i if you use edge and edge full you're not you're not part of this
+ that you'd have to use this package specifically but yeah this uh this is how it works i've got it all
+ working i was thinking of doing that in cloud flow but then i thought no i don't want to take over
+ people's computers so i didn't do it but um good call or or well without without opting in and uh anyway
+ yeah i you know to be honest there's you slap a wasm in these things and it communicates to a third
+ party you know it's just it's just about opting in um i don't think you should do that without asking
+ hi how are you doing rob i'm good i'm good i'm on site today so i'm looking a little fancier than
+ normal but we have a is is right here i guess i don't know i don't i don't see him well if you
+ got to show us your fancy out of it oh you don't see me well we see that way this layer only yeah
+ you're competing with dick apparently yeah i just i just put up my uh my wall street oh yeah yeah
+ rob looks good today man yeah it looks like john williams james yeah sean connery sean connery
+ that's right clean up sometimes yeah that's the joy of working from home the vast majority of the time
+ you know you get your favorite old t-shirts you're good to go yeah exactly so we have a div garg today
+ um one of the co-founders of multi on and then uh the current ceo of agi inc
+ pretty pretty neat to have him uh with us and then i think um uh brad uh there's a fellow member uh
+ andreas who's got some open stuff uh source stuff he's been working on he may be available to present
+ i just got to confirm with brad but we should get some uh interesting quality time if i'm not
+ mistaken multi-arm was ultimately pert i know that uh open ai was an investor um and uh that was a very
+ early version of the automated agent that um you know works on your pc so it should be a fascinating
+ conversation to be able to have nice yeah i i've got a little bit of a demo of a uh agent that takes over
+ your pc as well is this is this uh uh your agent browser uh no this is my um my root my roof bot in
+ embedded into the very fabric of your operating system on windows or or mac and it can take over
+ basically anything on your computer learn and operate it from like desktops to games and everything in
+ between fantastic so it's a merger between the optimizer and roof bot yeah well robot is essentially
+ agentic flow just just be clear i i i put that out ages ago but uh you know the world went all nuts
+ over uh you know claude bot which is a very very rudimentary version i might add but you know
+ whatever yep we're top of the hour
+ oh here we are sorry i i um let's hit let's hit the record button here sorry guys i was daydreaming
+ uh all right recording the cloud whatever you say will and can't be used against you forever
+ we're broadcasting on linkedin and youtube you gotta google it to find it okay we're recording here we
+ are um while while i was dissing on the uh claude bot which i guess anyone joined the top of the hour
+ got me got my unfiltered version that's been the the topic of the week pretty much everybody asks me
+ about it and i you know it it's definitely a moment for agentics right it's like everybody's talking
+ about what what we've essentially been doing for a while so i that's good i think right it's not it's
+ not necessarily the worst thing to be to that something has gone has had a viral moment um and you know i
+ think i think they're getting a lot of bad pushback on things that are easily fixed so it's like i looked
+ at the code it doesn't look that bad i think it does what it's supposed to do it's elegantly built
+ it's modular it's got plugins it now the only thing that they didn't do is like the default deployment
+ when you're trying to use it like it they probably should have included some security considerations as
+ part of that default docker but literally it's like asking claude to say hey can you go uh secure that
+ deployment for me and it's actually secure so it's not i can't i can't dis on it that much other than
+ the fact that we did that like a year ago yeah i remember the demo too you had it you had it auto
+ applying for uh for job applications as a just a random demonstration and it was blisteringly fast a
+ year ago yeah yeah yeah yeah so it's it's it's it's an interesting it's an interesting time um i love to
+ see others do well so you know you know hats off to those guys they they they did it and got and had
+ the right inflection so good good for them um what what do we got uh go what's what do we got going on
+ today yeah well it's uh it's uh fascinating and absolutely
+ because uh one of our guests today um is uh div garg and div guard was one of the um uh co-founders of
+ multi on and um uh and is now the ceo of agi inc so that's really exciting uh that's by way of
+ matt matthews so uh we've got uh him joining us today and then there's a member andreas i'm just gonna
+ uh click in to confirm with andreas he's got some uh really neat open source stuff that he's working
+ on too you you you've got to have a lot of courage to call your your company agi and come come on to the
+ ai hack absolutely we'll we'll we'll see uh we'll see how agi if it passes our agi sniff test and uh you
+ know and i have a a digital agi sniffer that that we can set on it no it's totally not an agi sniffer
+ um but you know it'll be exciting to see what what they put together and i'm i'm a big fan of the
+ work that these guys have been doing um yeah so we we've got we've got some other things housekeeping
+ to to do um one of the things that we've been looking at is uh our retreat and we the guys in
+ killington mark and mac yeah they've put together a nice little website here um the agentix foundation
+ retreat so there's a crew of us heading to vermont killington vermont which according to the guys in
+ killington vermont is the best mountain in the northeast so yeah so and i i think that actually
+ is the best mountain in the northeast as far as i'm aware and they're not just saying that 150 trails
+ yep yeah 150 trails right so if you're in the snowboarding or skiing i'm i'm gonna ski because
+ i'm too old to learn new things i'm and i know how to ski so yeah my my teenage sons are coming too but
+ they they snowboard but they don't have any time for me they're off doing flips and things um everything
+ in even one so what we're gonna do is we're gonna get together and we're gonna hang out and build
+ stuff that's the idea um i'm gonna i'm hopefully gonna have some hardware with me as well so i might
+ bring a few chips and things that we can hack some physical devices as well and i think i think we're
+ gonna bring some uh starlinks i think that's what we discussed yesterday to try to improve the the
+ internet because we're off in a mountain somewhere and we're concerned there might be bandwidth issues
+ hopefully hopefully that works maybe i think martin offered uh that we could borrow his so maybe we'll
+ bring a few of those with us um yeah but basically it's an agentic weekend the idea is that we do
+ this twice a year and we we get together we build we have a few drinks we get to know each other in a
+ more casual setting and we do what we do always um here's the you know it's expensive this time of
+ year that what can i say um 2026 is not cheap but everything's included they tell me food and drinks
+ and all that sort of stuff the mountain isn't um you but we're on the mountain i think you can actually
+ ski into their spot or whatever um but you'd have to get that separately i i don't think that's too much
+ extra but this this is this is what they put together they own a uh small boutique hotel and
+ there's a neighboring hotel that's like walking distance like i think like across the street sort of thing
+ um they've got a little oh it looks like there's an or there's a 500 off i don't know that that's
+ new i didn't see that yesterday so yeah make sure you grab that i guess um the idea is to make money
+ on this just fyi and if there's any money left over we're putting it into the gentix foundation to
+ sort of support the foundation this isn't intended to be a money-making endeavor it's more of a
+ let's get together and and talk talk ai kind of thing yeah um what am i missing
+ wait what else what else rob oh let's see um boy there's so much stuff going on but that's
+ that's a that's a big one um and then you're traveling next week so you're off to bangalore
+ which is incredibly exciting you get a chance to actually spend time with craftsmen we're all jealous
+ yeah yeah he's coming he's coming i think a couple other folks are coming as well um i'm at the
+ marriott in in bangalore i'm they're in business there was it's one of those um you know i i like
+ i got a call okay you you want to go to you want to do this hackathon in bangalore man i don't i don't
+ like leaving leaving the house kind of thing you know i'm kind of happy but let's do it over zoom and
+ then it's like well what if we did this and i'm like you know one of those what if we did this i'm
+ like oh okay i guess i'll do it yeah that's you know that's that's that's now that's the entire
+ negotiation some summarized but they made they made it worth my while so thanks thanks for that um and
+ i guess i do have to get out of that occasionally and it's funny because i i find out about these
+ groups and there's like this this giant company then like hundreds of people that are people are like
+ using like my tools in in the company and then and then they inevitably asked like you know who's
+ this guy that built it and then then they show up my on my doorstep then the phone rings yeah that's
+ right yeah that's it it's being adopted yeah it's being adopted organically by the engineering
+ community and that's it yeah so uh so that this month cloudflow is hitting i think 150 000 active users
+ so that's uh that's a decent number it's a real for sure yeah so it's been exciting to sort of see
+ see how that's been growing i don't need a vibe maybe i'll get a viral moment but i i think slow
+ steady monthly growth is just as good that's right yeah there'll be a viral moment okay a little
+ sun's gonna pop off yeah no doubt my biggest viral moment was essentially like oh my god this guy
+ doesn't know what he's doing he created wi-fi d d uh decompose and and it and it doesn't work
+ because you're not using a a wi-fi wi-fi decompose router it's not that it doesn't work it doesn't
+ work on all wi-fi but of course the it was a cautionary tale on how vibe coders can build things
+ that they think are are completely uh effective but aren't but it actually is but that that was like
+ 10 million 10 million views on that stupid post amazing amazing yeah and then uh next week we
+ should mention um for next friday when you're gone uh hopefully you can dial in for the thursday we'll
+ come up with something to do for the thursday but then what we're thinking for next friday is uh
+ that the uh finland chapter out of helsinki will take the reins for the friday episode next week
+ and we get a chance to hear all about the incredible work that um timu and miko and ag on
+ are doing uh helping the finnish government um what can't forget you can't forget tommy
+ oh yeah and tommy yeah absolutely yeah um yeah helping the finnish government steer into an ai native
+ um uh future and it's remarkable what's taking place in finland so i think it's there's going to be some
+ excellent lessons uh certainly uh for canada and for people that are working in um in laying down the
+ plans for streamlining uh governmental services so it's it should be just a fascinating episode next
+ week and they're going to have a bunch of guests um and demos from folks from the finnish chapter so
+ it will be live from helsinki next friday so that should be really exciting nice that's yeah i'm i'm
+ i wish i we should do that more often with me involved too so i feel like i want to be there
+ but i don't think i can make it i think i don't i think it's just i think i'm actually flying out
+ friday night next week and from there which would be right around now so what probably won't work
+ in the in the future for sure like uh it'd be great to give uh paris and london um you know
+ uh new york city a chance to um you know i'd be uh uh invite folks from their local communities
+ uh for the fridays it'd be awesome yeah on saturday night i'm i'm gonna be on on this flight you know
+ for like 20 20 hours and uh i was thinking maybe i might if i get the wi-fi working at 38 000 feet
+ uh i might do a little uh 38 000 foot hackathon um right just just i mean i'm in i'm in i'm in
+ business or first or whatever it is they stuck me on on this flight to uh to uh india so i get some
+ room to spread out and see you know it's it'll be it'll be my office in the sky on friday on saturday
+ night so i will probably uh go on to the discord and if anyone's interested if i get it working
+ fingers crossed we can do some uh hacking in the sky all right speaking of hacking in the sky i want
+ to show you guys some stuff i've been working on so you know i've been working this week on this that
+ the um optimizer so i i've managed to optimize both uh mac and um and windows use using this little this
+ little tray here so if you go in here you can see i can optimize and do different settings but i i added
+ i added a control panel so inspired a little bit by the work of like uh the power toys and windows
+ you know i've said i'm going to create my own power toys that that takes over the internal core
+ operating system of both windows and and mac os from the kernel level all the way up to all applications
+ that's what this thing does so this is the first screen you see here and this is actually three js
+ i figured out how to run three js in a desktop app this is not a this is this is a desktop app not
+ a uh website or anything like that um i'm using website ui stuff but it is a it's a fully compiled
+ application in the exe uh type app now i can go in here and optimize all my apps you can see i got a
+ created animation boom it does that but i also add different optimizations here for you know profiles
+ so i can speed up my computer for different you know things i'm doing and it can auto switch if i
+ need to so if i'm doing something that's a little more intense i can do that i got a monitor that looks
+ at my health so this is using all the rue vector self-learning capabilities it incrementally using uh the
+ attention the hyperbolics the all the stuff that you would normally use i took that and said how can
+ i understand the signals and everything that's happening inside of my computer in real time and
+ then optimize for it so you know i can go to the logs here i can see what's happening so you can see
+ memory poles here auto optimized here a few minutes ago and i can see what what it did i can copy the
+ json i can see the different sort of patterns emerging this is a really good way to sort of show
+ the the capabilities of self-learning system and i can go in here i can see my sort of startup you
+ know i can enable or disable different parts of the start and see root my root vector memory system for
+ example different apps i'm currently running onedrive teams discord you know my razor stuff um now we
+ have a big governor so if you've ever played with linux subsystems what this does and this is and this
+ there was an idea yesterday which was really cool i know i forgot who suggested it but someone suggested
+ that i take this windows subsystem and not only optimize the ram and in sort of cpu but i could
+ actually act as a kind of defragger for the actual um window subsystem so it doesn't take up so much
+ space in your hard drive so yeah i got that working as well so you can reclaim memory so it so you don't
+ have to create this giant um window subsystem sort of hypervisor it can kind of quantize it make it much much
+ smaller which there alone is a pretty cool use case so you can see the processes you can see how much
+ it's using i also uh create a build optimizer so for those that are building like i am for different
+ environments like mac or windows or linux or whatever or even these little devices i can this
+ system will optimize your build process and this has had a dramatic effect on the time it takes me to do
+ builds especially larger builds you can see that my biggest build right now is rust related because i do
+ a lot of rust but if i want to clear that bump one button i'm cleared i can look at my bill i haven't
+ done any builds today so i don't see anything there um this leak detector is kind of cool the leak detector
+ looks at different uh different um applications that are running so you can see here that vs code is
+ particularly bad um i'm not sure what ms edge and the brown so ms edge is like a it's like a it's
+ embedded itself and pretty much everything so it kind of sucks um here we go zoom i'm running right
+ now so i can see that it's optimizing so it's kind of cool i and then i can optimize all these parts as
+ well i'm not going to do that since i'm already sort of uh showing my screen i'll probably crash zoom if i
+ did but you can see this is a real-time self-learning optimizer the predictive prefecture this this provides
+ the ability to pre-fetch certain things so it starts faster you know some apps just take a few minutes
+ to start this fixes that and it's training a model directly on something a markov chain-based application
+ launch prediction who i i don't think anybody's ever thought to create a markov chain-based application
+ launch prediction system so there you go we we got we got that uh we we may not have the um
+ the the the the bot moment but we have that all right we've got thermal aware scheduler this allows
+ me so when you're when your cpu gets too warm it throttles and gets slow and so for a lot of people
+ who have you know older computers and remember there's a there's a a head space in on computers one of the
+ problems you're really facing is this sort of balance between the temperature and the performance of
+ the computer so ram's important but so is the temperature what this does is it optimizes the
+ the sort of use between cpu gpu and fan speed and and reduces and optimizes those in an intelligent way
+ that means you're not ever throttling your cpu and your system will run a lot faster this monitors
+ that in real time learning and adapting and seeing all the various processes this is again what's running
+ currently this is real 100 live um the plug-in i'm still working on the plug-in store but the the plug
+ the plug-in is is interesting so i needed to figure out a way to build a cross-platform mechanism to
+ deliver these smart agentic applications that i'm building root vector and clod flows and clod codes
+ and all that stuff as a way that that can be easily implemented on both linux mac or windows but i didn't
+ want to have to use a um like an exe or the dvg or whatever it is on mac and so on so what i ended up
+ doing is using a wasm so the wasm self-contained no external external components you can basically
+ install it and i can run this the same way on any environment now i'm securing that with ed25519 and a few
+ other things i'm using wasm or runtime but yeah you can go in here you can install all these i'll
+ probably make this available for others um as well this is kind of cool um here's the gpu memory system
+ this this optimizes your gpu performance this is particularly important if you're doing any level
+ of infer of inference or a gpu heavy things which you sometimes do i can optimize specifically for the
+ environment you can see i can see what's using different my what's using my gpu currently no vram leaks
+ detected so lots of different options there bloatware let's say i want to lose the bloatware
+ i think you know this kind of reminds me a little bit of like that semantic or or norton a little bit
+ but this is like rather than being like security focused or this is made for like you know basically
+ infusing ai into the core of your application environment yeah so i can get rid of random things
+ here here's the time the time traveling system allows me to go back in time so if i had a configuration
+ that was highly optimized two weeks ago i can just go back and restore that and the system will start
+ working like it was at that point i can create a checkpoint and we'll call it ai hacker space
+ now create that now we're gonna yeah and now i've got a checkpoint and i can start running from this
+ point forward it's kind of cool um like i can see after like if i'm gonna install drivers like i do a
+ lot of like mucking around with the internal parts of my my systems right the mac i've completely
+ customized and my windows that are also completely customized and like it or not sometimes i screw it up
+ pretty good so what this does is uh allows me to recover from my uh my internal system hacking
+ the last part and i'm not quite i'm this isn't quite done yet but this is going to be the part that's
+ the craziest what this does is i'm using a series of visual and computer use language models free ones
+ that run locally to do um to to basically learn watch the system so as i'm using different applications let's
+ say i'm using i don't know my browser or a i'm playing a video game the system can then stream
+ the output of that video game in real time because i'm infused into the core of your operating system
+ learning and watching and understanding how that video game for example works and then once it's done
+ training i can then have it actually operate that video game or you know play play play poker do a crm
+ whatever it is that you're doing on the computer it can then do that thing because it's watched you do
+ that thing for a while collecting typing moving your mouse around whatever it is that you need to
+ actually operate that thing and then and then i can you know train a model in real time based on that
+ which again don't think anyone is doing i've got i've got the ability to to take this and do like any kind
+ i've got to train a model at this point if you want to you know train your own language model or
+ invent your own new model that which is a concoction of all my stuff you can go in here and and train
+ those models i'm not going to cut the train model because i'm sharing the screen right now but you see
+ here i've got a few different model tiers that i've made available um so i can load my grounding model
+ here it's loaded you can see how much vram it's using and then i can click train model boom you're training a model
+ like super super simple that's like one of the last frontiers of data enclosure yeah look so here's the
+ self-training metrics success rate 84 this is real this is real guys real stuff um i've got improvement
+ over baseline 12 like it's it's you know watching and i've got my ai defense system built right in so i can
+ have real time threats people trying to hack me or or ex you know you know personal identifiable
+ information you know real time from the core of my freaking operating system learning and adapting
+ um currently there's not i haven't i had i i had to forcibly try to exploit my system to make sure that
+ it actually works but it does it totally works but it's always watching so back to this idea of you know
+ i i installed clog bot and it's a massive security problem the ai defense would have would have allowed
+ it to operate but would have guided and modified it in a way that meant that it wasn't going to be
+ um insecure so you can feel comfortable in in essence randomly installing crapware and not have to
+ worry that the crapware is secretly stealing all your information or moreover let's say you you're worried that
+ there's some kind of background spyware although in fairness i'm kind of a background spyware but it's
+ all open source just look at my code but there isn't a malicious background spyware secretly sending
+ information this is going to find it in real time sub one millisecond so i'm operating as fast and as
+ close to the silicon as you possibly get so there you know there's no way that something's going to slip by
+ because this is just faster than most processes in your computer this acts as a kind of preprocessor
+ before that information ever hits the os kernel itself which is just incredible just to just to
+ all right we got light oh we got light mode i know you guys like light mode so we got we got light mode
+ uh let's let's uh let's just do a deep clean boom all right yeah that's that's pretty that's what i've
+ been building and uh there's a i think the agent stuff in particular is going to be like who needs an
+ agentic browser when you can have an agentic os and that's what i've built
+ hey roof so this is pretty cool one thought i have have you thought about like like you have like right
+ now for like heavy jobs like rust building right to farm them off to like the cloud or maybe if you
+ have another computer sitting nearby being idle so you can ship a container there so it would be like
+ a mom it's funny you have resources available like then you will uh run the rust build right but if
+ you're doing the first builds or doing something else you would just ship these jobs like somewhere
+ else like yeah so that's what that's what you're the second person to ask me that today so yes i've
+ already built that and it's called you can install it it's edge net um that's what this does i might
+ put it into this we we could have an optional opt-in network that allows you to share your gpu and cpu
+ compute we can do it for good we could do like cancer research that kind of thing um but in this case
+ that's what this does and this works yeah um but if you have another desktop sitting around in your
+ house like there's just nobody using you can just ship you there like it doesn't have the network can be
+ you right it doesn't have to be public right in that in for example you can use the edge component here
+ uh uh well no actually edge full is the one that's popular and i'll see that one edge fold
+ so what with this you're the edge so what this this allows you to connect all together now if you're
+ asking me to put it into uh this yeah totally i'm i should totally put it into this and then i could add like
+ a um a parallel option in the build i could probably do the same for like games and anything that involves gpus
+ i could probably if you've got a fast enough connection like internally you could probably do
+ some stuff but the gpus it's tricky you need to do very sophisticated model of like the cost optimization
+ not necessarily monetary cost right because it might be uh expensive to ship the training somewhere else
+ like and even if it's gonna take longer on your pc here with the cpu or like very small gpu you might
+ get uh like the overhead actually you might not be that large to justify like go getting it like the big
+ gpu somewhere in the cloud but you need to size the model right so if you're trying to like
+ retrain something huge like the like image like medical image right you want to ship it out but
+ if you want to do like color optimization you just do it locally even if it's going to be slower
+ yeah yeah that's a good way to think about it so it's a total cost of ownership basically right so like
+ if it's going to take like 15 minutes more and like you might just wait 15 minutes if it's going
+ to take days and alternative is like spending two three bucks so like on the cloud then you just do it
+ like and then well actually i optimized um so you guys know i've been doing my my chip stuff with roger
+ over the last few months and um one of the things that we had to do was the eda which is basically the
+ final sort of test before you do the the tape out and send it to the fab and the that software which
+ is crazy expensive like a million dollars for to to buy a license for the software it and so the one we
+ were using i don't know the exact name i i have somewhere but anyway it took 16 hours to do 256 tiles
+ and it was doing the tile sequentially and it was running the full detailed simulation essentially 256
+ times i managed by using a parallel approach go from 16 hours down to 55 seconds and and it's like
+ i'm talking to the guys and like why hasn't anybody thought to uh like rewrite this software for like
+ the age of you know ai and apparently it's just the this software is like was built 40 years ago and
+ they're basically just patching it for like 40 years so it's like c c code that just keeps going and
+ going and and it basically the answer was it was too complicated for most people to sort of figure out
+ so the easy solution was just to um keep kind of patching what they'd already done and i i show up
+ i have no idea how the industry works and i'm like okay hey claude how can we do this so it doesn't
+ take freaking 16 hours and it's like oh let me create you some rust and and that was like an evening
+ yeah right heavens can we zoom out a little bit prove um just what you're talking about the ability to
+ uh provide like uh operating system level guards for i mean one of the most devastating risks and attacks
+ uh you know for municipalities for hospitals uh are hijackers getting into the system taking control
+ and blackmailing uh for access for file access well two two things i can do which it's interesting you
+ mentioned that one i i can i can mitigate that from you know mitigate that or hopefully reduce the
+ chance of that happening i can't a hundred percent eliminated but i can i can greatly reduce it by fat by
+ catching it really really quickly and i've got the ability to do immediate rollbacks right so when you
+ go the time you know you say oh well we were we were exploited last you know on tuesday but it worked
+ on monday we can go back and we can do that we can run diagnostics on it and because i'm inner inner woven
+ into the very fabric of the operating system i can i could probably surgically remove uh some of the
+ problems now some of the problems might might involve like exploited like user and and and profiles
+ um i can also provide a mechanism right there to to create new profiles or mitigate that as well so
+ a hundred percent this this thing and i and you know of course everyone's like why aren't you selling it
+ i don't know i probably should sell it but i'm not i'm giving it away because i'm i'm a i'm a crazy
+ person um but yeah so this way that's exactly why i did it and if you go into mac you know i haven't
+ done the mac desk desktop yet but you'll be able to go in here you can choose you know start logging or
+ whatever deep clean optimize and boom i got i got an optimizer and i'll have the i'll have the exact same
+ ui although i prefer dark so let's go back to dark but there's a ton more and by the way
+ everything you see here is there's a cli for all of it so you can go there's a tutorial you can get
+ you're getting started you can see how i built the ui this whole thing is like five megabytes in terms
+ of the the compiled ui there's tutorials if you want to learn how to use it and there's cli for everything
+ but you access the cli on the bias level if yes not bias but you you can do it on the on the on the
+ command line what if you can't get into the os or get on the internet maybe one question how much time
+ did did it take to build this here yeah uh i started yesterday uh yesterday's hackathon which was i guess
+ 12 o'clock yesterday uh no i started the same morning yeah i don't know 20 um the the swarm was
+ running for probably okay i'm gonna i'm gonna i'm gonna do this for my kids it was running for six or seven
+ hours yeah for sure yeah it wasn't running much like this this is this is like an afternoon worth of
+ work but keep in mind i had the um i had the cli before but if you if you include the c if you include
+ the uh the integration that took probably like the original mac and windows um integration like the
+ system tray that i was showing you that took probably another three or four hours on top of that
+ and rue vector is a behemoth like we're i don't know how many code how many lines of code we have
+ in there i think it's close to two million lines of code that i've been working on that since since
+ september of last year yeah stack stack stack right yeah it's it's the modular it's all so now
+ that i've got the self-learning self-optimizing attention roof llm blah blah blah and you know
+ stuff like just hundreds and hundreds of packages i then can mix and match those packages and
+ because those packages i've built all to be wasms i instantaneously can use them in the browser or
+ across different operating environments without having to recompile them so it makes building these
+ sorts of things super easy all right so to speak well yeah it's yeah that's that's what i've been up to
+ since yesterday anyway uh hurry we got i think we got an agi on today so let's we do um of course uh div
+ has been has been called into an investors meeting but he's uh he's uh fighting to get out in time for
+ 12 45 but we do also have andreas frederick uh frederick uh andreas are you there yes yes yes how are
+ you uh fine fine fine welcome so the lightning talks we typically do about four minutes of presentation
+ and then five ten minutes of discussion afterwards and we are glad to have you i understand you're working
+ on some open source stuff yes uh well uh or other projects uh uh so let me know when i should start
+ uh to explain now i think the floor is all yours sir okay okay so i'm andreas we are um i'm based here in
+ germany in heidelberg um and uh we started uh we are building a startup uh here in in germany uh we are
+ three co-founders yeah um uh so i'm uh from germany i have an uh my auto co-founder is from brazil and
+ the north is from ecuador uh they are not here today uh we are building up um so for let me introduce you
+ what uh for i was before i uh i i started this uh startup i was working for cap germany in germany
+ and i was a project manager for a big project in the banking landscape yeah uh and uh on the bank um
+ i run into some kind of issues because i was the project leader for a big transformation project for
+ digital payments uh for instant payments yeah it's named here in europe cepa yeah and i was having no
+ clue about that and that told me now you are the boss you need to manage everything and explain all to
+ to the customer yeah and i was in some kind of trouble and i was looking how can i explain them
+ compliance uh in the landscape of digital payments very fast yeah and you know the customer was asking
+ me yeah you are the expert you need to explain me everything yeah so i built up the this was the startup
+ uh the start when jet gbt was coming coming out with the custom gbt yeah so i built up some custom gbt's for
+ sepa yeah and uh it was very helpful so i was thinking hmm it could be that uh it could be interesting if i would have
+ just replace consultings or consulting with digital consultants yeah oh yeah so i developed an idea around
+ about of that and um it go up in the time yeah and can i share this my screen yeah
+ i will give you so we we are try to we have built up a platform for automate and compliance and governance
+ uh it's completely built with cloud code and codex um so we we are thinking we we are so compliance is a
+ very complex area because you need to understand there are a lot of regulations here in europe yeah
+ and there are every every day and every month there are coming more and more regulations yeah
+ and there's a high risk for the companies to introduce uh some new technologies because
+ they need to follow up their regulations here in in in europe um so what our solution is trying to
+ is trying to monitor all the regulations uh here in europe yeah and uh the solution uh is uh an agentic
+ platform an orchestrated agentic platform that is analyzing all and then executing that on the
+ regulations so it's modular and adaptable the version two was open source but the version three that we have
+ currently it's now closed because we i'm not so fast like uh everyone from here but it took us
+ already now now i think around eight months there uh that we are building this yeah
+ and uh um yeah we want to live from them later um
+ so um let me show you the platform yeah because uh so this is the platform that we have it's uh in german english
+ and spanish and spanish available so we have a front end where the customer can
+ get uh join the experts in the area of for example the eu the european artificial intelligence act and
+ ask the expert there if uh what he needs to do to follow up all the rules in the in the company to
+ introduce this uh regulation in the company yeah and the cool thing about this platform is uh we have callers
+ here
+ there are so for example if we if we have an expert for a digital expert for the as i pointed out the european
+ uh union uh artificial intelligence act we can point um a crawler to the regulation website and
+ and we are uh taking all the regulations and we are generating with the regulations some kind of a
+ regulation framework inside this platform and uh so um and this regulation um
+ data items are then converted into some kind of knowledge graph yeah so our platform is learning every day
+ because it's uh it's uh it's bringing all the data from uh from the regulations to our platform and
+ building up the uh making the the agents every day smarter yeah so and this is the area where we
+ created the agents and um uh it's um how did you uh build the agents what what framework did you use
+ uh it's it's based on um so the the first the second version was based on uh lang flow yeah
+ uh but it's uh the platform that you see here currently it's not anymore uh so we don't need
+ lang flow did you are familiar familiar uh about lang flow or it's the it's the drag and drop thing yeah
+ yes exactly yes yes yeah but as i pointed out we don't need uh lang flow or n8 n anymore because we
+ we have um so uh the platform is building around what is all open source out there so um lang chain uh it's
+ so uh all the open so long chain uh lang flow is based on also on on a long chain it's on
+ that uh that are the the base packages where all the people has founded to create some kind of agents
+ yeah um did i need to explain that a little bit more or no no yes okay we're the agentics yeah we're
+ okay okay so i think i think we're um so in terms of you are you live you're you've got customers yeah
+ yes uh so uh as we are still building all up uh and uh this platform is really only focused on
+ regulations yeah um we have already uh so why about we was thinking how we get customers yeah and uh so
+ we focused first of the banking area but you know banking the banks are very uh serious how can i say
+ you need to be very fundamental and already well well established to get customers in the banking area
+ yeah so we are building everything uh already to to serve that to the customers uh in the banking area but
+ our customers are uh in the moment in the medical area uh in the small company size companies here in in
+ germany and um uh also a friend of me in singapore asked me uh if if we could serve if this platform
+ can't could um be serving in the it security area and we can uh definitely um interesting
+ build everything on on that for these areas yeah jose you have you have a question yes andrea um
+ yeah basically basically what i want to know is i think it's a good idea because here in europe
+ is a nightmare for for all the regulations but who is who certifying your agents to be a specialist
+ because at the end we are relying on an agent who is certifying that this particular agent is an
+ an expert in in in in the area uh so um as i'm i'm a senior uh consultant uh or business manager i was a
+ business uh uh uh well uh um a senior consultant in the in the banking area so i know this area very
+ well and you don't do not know we don't need in this area normally certifications yeah you need to what you
+ need to show is that the um the agents need needs to be how can i say that have the qualification yeah
+ and um as we have the human factor here in built into so when the callers are picking up all the
+ regulations yeah and uh i can switch there's an autopilot here built into but i can switch it off and then
+ um uh a human needs to overlook all the regulations validate that's right super andres sorry uh i don't
+ want to uh cut short but uh i agree jose like especially in europe that any tool that will help
+ uh navigate and stay up to speed in terms of compliance and regulation in europe is a helpful tool
+ so uh thank you andreas uh best of luck with that and uh and i hope uh i hope you uh godspeed in terms
+ of establishing those early adopters and enterprise clients um we do have uh if it's okay uh ruv if
+ uh if you're all set we do have uh both jacob uh uh senior engineer and uh div garg with us from agi inc
+ uh div jacob you guys you're with us
+ yes i think i think andreas needs to stop sharing too just if you can't right
+ all right how's it going you so we're we're meeting with agi let's take let's take it away
+ cool um so let's see so we're building uh like universal computer use agents that can do anything
+ for you and uh let me just share my screen so i can like give a small preview of some of the things
+ we're doing uh we have a couple of different products uh we built uh as part of our like a
+ company uh the one we just announced is uh something that can control your whole phone
+ uh this is more geared towards uh we're calling it cv that actually works and uh right now it's it's
+ more geared towards consumers and we'll also be like enabling like a developer ecosystem so if
+ anyone is interested in using this as a as a mobile assistant that can integrate as part of their app
+ like uh this is something that we can allow and uh as a company we are number one in terms of our
+ capabilities where our agents can go and do anything on your like phones pcs browsers and we are able to
+ make sure like uh like the agent will like go whatever you want so if i say like buy me something
+ on lululemon added to my wish list it can do that for you it can order food for you
+ on doodash book appointments do project management and it's very generalized and as a technology we
+ really care about like the trust and security and so we made sure that our agents are 99.9 percent
+ reliable so if you have a custom workflows we train our agents to like be able to go and generalize and
+ do everything well all the data is also very secure so the agents are able to like do payments for you
+ for example they're able to log into different websites and we have our own security mechanism so
+ we can ensure like all the data stores this is encrypted and stored uh like properly and we are
+ able to also customize our agents for different businesses different workflows so we have seen like
+ customers come to us by saying like okay like we want an agent that can scrape linkedin for us and
+ like be really good at recruiting or we want an agent that can actually go and help us like do
+ checkouts on websites like amazon or like a bunch of other merchants and we're able to build like
+ this kind of very small agents which are very fast and very accurate on different use cases and that's
+ been like one way we have been able to distinguish and can you can you guys maybe just show us like
+ uh we see your website looks great love the logo can can you just show us in action sure
+ so let me show you the app platform i will like uh like login again this is something that's in uh
+ early access so uh if anyone here in the audience wants to like try it out we can also give you
+ uh access uh to play with it wonderful
+ all right
+ okay okay and so this is like a platform where you can ask the agent to do anything that you want
+ so if i say go to uh hacker news and uh maybe like scrape the top 10 post of the day you can go and
+ do this and what's what's and what's your agent built in uh this is built in um obviously mostly
+ uh like a javascript uh is this what we're using in the behind the scenes and we also have like uh some
+ like uh it's basically our own technology so it's our own custom models
+ that we host in the cloud and then and so you're predominantly focused on browser use
+ uh we do everything so we do browser use but we can also do computer use so we also have an agent that
+ can control anything on windows locally
+ okay yeah that's the stuff and and so explain to me your self-learning you you know you know that we're
+ pretty big on self-learning here and what what what algorithm are you using for self-learning like is
+ it vector based is it uh attention gnn what what are you doing there yeah so we use a lot of reinforcement
+ learning where we have a lot of like expertise when comes to like methods like grpo or dpo
+ um and then we are able to combine that with uh training our own models so when we like a bunch of
+ it's also attention what kind of models what kind of models um these are our own models we combine like
+ diffusion models with transformers and that allows us to like really generalize uh so you're you're
+ using so you're using gpu centric uh approaches to incrementally train or are you sort of storing and
+ doing a kind of uh sort of fine tuning um it's a lot of post training so it's a lot of uh we collect a
+ lot of data on different use cases and we can like improve the model on those particular tasks
+ and how frequently does that happen um we can do it in any anytime uh so we right now doing this like uh
+ also like a couple times a week and uh this could be so sorry so i mean you say anytime is that like as
+ it operates or you're you do it like on a cron job on a tuesday kind of thing right now it's more of
+ a more like a cron job but we also have like ways where like let's say a customer can give us a bunch
+ of recordings like like here's some use cases here's how i wanted to solve it and then we can improve
+ the things they care about gotcha any you guys have any open source can we go and try your libraries
+ and things like that yeah so we have like libraries available um and then we will be like putting out
+ more examples uh we have like docs that you can go and check out so if you go to docs.asi.tech
+ uh ja python ja node yeah and we support libraries for both like python and node right now
+ we can simply do pip install a ati and you can like get access so your python do you have any rust
+ we you know we love rust around here uh not yet but we do have like the raw library so if you
+ want to just directly like call them the api uh as an http client you can do that and then we will
+ it's very easy for us to also build a rust library so first it's a big thing it's very easy for us
+ to build that in uh and give access to developers and what about coding like let's say i want to get
+ it do a codes form or something how does that work um so this is like a very i would say like a
+ modular api so you can connect this to anything that you want so like suppose like uh i want to
+ create like something that can extract all the data for me and then i'll connect i want to connect
+ this to a coding agent uh that's very easy so you're not you like what if i wanted to use you
+ as a coding agent i would say this is more of a browser agent so it's more like a broad like
+ automation it's not like doing coding for me it's like more like uh like it's going and taking
+ actions so it's like clicking typing other things you can connect with the coding agent and that's
+ something that's okay so you so sorry i'm just a little i'm just trying to figure out where you
+ guys sit so you you you don't do everything you you're essentially a kind of browser automation
+ tool do you have any like mcp in integration uh we do yes so how does how does that work is that is
+ that pseudo pseudo or or sse um it's sse right now we actually just removed it like on wednesday
+ because we're doing some changes but it will come back okay yeah you guys you guys should um i think
+ you're you're definitely heading in a really good direction here you should check out some of the stuff
+ that we're doing with our attention real in real time learning it'll be perfect for what you've got
+ here it's open source you can integrate it do whatever you want with it um if we like we're
+ using micro lauras and uh and a few other approaches to do the real-time training on embedding models
+ language models various forms of action and world models and using a sort of inflection between vector
+ and um and a graph space it'd be perfect like you guys could probably integrate that into your
+ platform in like five minutes and you would have a ton more capability just just throwing it out there
+ for you um nick you get any comments yeah i'm just wondering does this thing like make its own
+ decisions to to achieve a goal like because because you mentioned that it you can kind of give it a
+ prompt and then it'll it'll run like on the desktop or something um but i'm just wondering does it actually
+ like do you give it could you give it a goal and it'll actually like go and figure it out for you or
+ is it more kind of like you know claude you know the claude browser extension when you kind of just
+ give it some instructions and it it tries to figure it out or does it i'm just wondering i'm just
+ wondering if that's uh how this works or or not uh yes so it's basically give it a high level goal so
+ in this case we have different goals like sex like uh extract me some data check us status page and
+ based on the goal it can figure out all the steps to take so you can also like hop across multiple
+ websites so even if it's a very complicated task that requires going across like uh three or four
+ websites it's able to like cross aggregate the data and then do things for you so if you say something
+ like go to linkedin find out the profiles and save them in a spreadsheet it's able to do that and like
+ and if you also wanted to like do something on salesforce or like any other software so it's very
+ good at like kind of like uh saving time for development by getting these automations on the fly
+ that's cool thanks definitely i think i think it's a stretch to call it agi guys i'm not gonna lie
+ like you you're you're you're a little a little away from that but i i love the ambition so you're um
+ it's cool kind of kind of reminds me a little bit of like manis but for a browser it's you know it
+ or or the um or the agent capability in chat gpt right it's similar it looks similar to that to me
+ it's cool i think you guys are i think you guys are going to do well um yeah and matt you get a comment
+ yeah thanks div uh this is exciting uh uh yeah i just uh the other day i had the opportunity to
+ test out the application and then it's very similar workflow like claude was it claude co-work or cloud
+ co-work where you can have actions what are your top use cases or customer cases that customers want
+ to use the platform for so far yeah that's a good point so i'll say we've seen like a
+ pretty much everything so there's a lot of developers and enterprises who are coming to us
+ and they're asking us like can we build ways for them to automate a lot of software so example could
+ be like salesforce a lot of like internal recruiting tools has been a big one so a lot of people have
+ been asking us for like all the recruiting basically building an air recruiter using our software
+ uh a lot of people want like something like that's like a salesperson or ai like um like a gtm like
+ automate my linkedin instagram twitter and those kind of other things have also been something that
+ we are certainly do and now we're getting a lot of uh us from like the healthcare industry the finance
+ industry and uh like for example a lot of banks are interested in using us to create like automations
+ where like we can like automatically download uh invoices uh create automations where like it's able to
+ like go and do complicated things and enterprise software and the nice thing is this can also run
+ locally so this can also run on windows as on an actual pc and so it's not limited to just the
+ browser and that's great because a lot of legacy apps are printed windows it's like templates or macros
+ and how are you handling how are you handling agent drift and how do you handle sort of bounded contacts
+ so it doesn't go and do things that shouldn't your screen went back black by the way there okay there
+ so that's some great questions that's why we are actively training our own models and because it's our
+ own model we keep we do a lot of testing and evaluation so for each customer we build a lot of like
+ benchmarks to make sure like the agent is doing exactly what it's told to do and very very very
+ big on here else so we always check for like is there any drift issue for any new use case we have
+ not maybe like encountered before you're not you're not doing real-time drift though so you're if the
+ problem with a pre-trained model is it assumes the average but doesn't it doesn't actually you know
+ control it so much while it's operating right or am i missing something um usually yes but we are
+ able to also record trajectories so if you know like something's failed then in the next training
+ round we are able to improve that so we basically do training runs like a couple times a week so
+ whenever we catch any issues we are able to improve it so like the agent gets better and better every
+ time we train so using you're using like a hyperbolic trajectory what what form of trajectory are you
+ um i guess so um okay um greg early just a quick question because at least in my mind uh the examples
+ that you mentioned i would rather use code to automate many of them and only use the llm in some very small
+ parts of that automation process i'm not sure it's a good question but how do you support this or
+ well mcp probably would work i would guess right
+ sure so what we're going to do is like automate a lot of things in the browser
+ so like if infinity is a coding agent a coding agent can't take actions so it's not able to like
+ click or type so if i wanted maybe like say like uh for example something like even this thing if i want
+ to extract data on a website i still need to go to the right links on the website click a bunch of
+ buttons and and then uh and then scrape things so we've seen that that's why like uh even if you
+ look at like uh the like the cloud for chrome extension for example uh you still need some sort
+ of browser worker that can do things in a browser and then you can connect it to a coding agent and
+ so that's what we're also trying to do we are basically trying to build this browser abstraction
+ so this is like almost like an ai browser that's doing whatever you want and then you can connect it to
+ like a coding agent or something different over time cool well good thanks guys really really do
+ appreciate you taking the time to uh present your startup i think you're in a great space i'm sure
+ you're you're getting lots of opportunities this this is uh this is the sort of thing we love to see
+ um thanks thanks thanks for sharing with us it's you know and and for people who want to learn more
+ it's agi tech uh is your website yes so yeah great great job cool cool stuff and where are you guys
+ based we're based in essa okay all right yeah um appreciate it we're at the top of the hour here
+ we're heading into our after hours if anyone has more questions feel feel free to ask away um yeah can you
+ dump your linkedin uh into the chat so you know we can yeah and one thing we can also do is for any
+ everyone in the audience we're happy to give like a hundred dollars of free credits and so you can
+ just reach out to us on our home page we have a contact us button or you can also like directly
+ ping me and then we can give you a free credit to use all right yeah it's there i think the i think
+ the the idea here of computer use browser use um you know os level use i've shown you guys earlier
+ is definitely the thing that we're going to see a lot of this year right the idea that
+ you know i and i think it's i think the browser is almost too limiting for a lot of these these
+ applications right and i think that what we're seeing here in in is the sort of autumn the autonomous
+ automation of our sort of everyday applications it's a pretty good example of what you can do
+ um yeah so and if anyone wants to present they've got something you want to show you vibed you created
+ something this week that that's exciting to us we love to see it so this is you know just raise your
+ hand and and i'm happy to take take it oh we got alexander uh how's it going hey ruben yeah it's it's
+ basically just a small announcement that nick and me have prepared for the community so basically i'm
+ from germany by the way as well and where nick and me um work closely together in the last days
+ and we now have our first agentic foundations meetup in germany which will come which will be on the 3rd of
+ march and here in the beautiful city of nuremberg in bavaria and i just wanted to let all of you know
+ that we will start a new chapter in germany now and i will really start with the basics because
+ um basically what i'm up to is getting people at a very basic level and like setting a foundation where
+ everyone one can follow i will record all of the um talks and the meetups as well so people who will
+ join the community later have the chance to actually um get the knowledge which was um uh which i showed
+ to others before and can just um stay on track with us for all the future meetups so basically we
+ start small but i think um based on the um yeah people and and who will join it also has some traction
+ i would also post the link right in the chat and if you could give it some love that would be awesome
+ but so far it's it goes pretty well and i'm super excited to open like the german chapter and having
+ nick with me who is really supported with all of that and help me getting this done well we're really
+ excited to have you do this this is the we germany has been one of our more popular locations and it's
+ good to see uh the community sort of taking hold i'll have to introduce you to several other folks
+ i know out of uh germany both berlin and munich um who are really early backers and partners and
+ supporters of ours and yeah perfect maybe we can do a combined venture out of that um yeah oh yeah i'd be
+ about that the the i'm not gonna lie the germans love agentex there's there's a very strong community
+ account coming from germany and we and we we love them as well um so thank yeah thank you for for
+ putting this together um if you do if you give me more heads up maybe we can do it like october
+ next year and i can maybe show up for a a couple beers with you well that would be awesome well
+ you will not regret it because we are seriously especially in bavaria by the way we have yeah definitely
+ yeah definitely best beer definitely definitely oh how's it going you have a question
+ yeah sure no i've got a just wanted to table like i've been playing this week with skills like you
+ know trying to create and i wanted to get people's views about what the experience are what i personally
+ found is that i found like yesterday i was trying um with cloth flow v3 and dragons qe and ddd i mean
+ basically the whole stuff simple thing as pointing to the repositories and try to say okay cloud go and
+ create a skill out of it and i kind of got a skill which is something like my system seems to have
+ hacked i probably need to use your optimizer but it came back with something like this which i'm going
+ to share my screen very quickly uh if it decides to work still um so obviously there is a skill that has
+ come up the instructions are very simple to kind of combine the different repositories by looking into it
+ and i used it i actually used it to build something yesterday and i was pleasantly surprised that it
+ actually was a lot more automated like so far when i build i'm very much in the loop um it's not there
+ yet but it managed to actually not only create a very structured um set of documentation then
+ implementation plan and that's basically phase wise was building so that's what i've been up to like
+ looking at v3 uh qe and also ddd um you know domain doing design and you know architectural decision
+ records so it creates everything that way so this is what i've been up to um what happened other people's
+ experiences around skills and it was it's working that's like with this one i'll show you what i
+ this is so this is so cool hey mandway i was actually working with skills the last like three weeks already
+ one thing actually if you scroll down and one thing um uh i see what the cloud does so if you look at for
+ example at the domain driven design right so that is kind of useless um prompt because you're wasting
+ lots of talking about domain driven design that claudis already knows about it so what i do i
+ actually once the quote i have very similar workflow to it but once it creates the skill i tell it go
+ through the skill again and remove everything you know like uh okay keep only the ones like that are
+ unique to this project like so like and also the um this one the advanced usage yeah scroll up right
+ that that's a lot of tokens i would just tell it to you like create suitable very very very high
+ level pseudocode and uh basically because god knows how to write this like typescript
+ internally so it just needs a pseudocode and very very high level guidance but it also needs very
+ detailed guidance on the things that it doesn't know about like so that's the that's a real right and
+ yeah yeah one more thing the ascii diagrams it's also they kind of wasteful we just ask them to do
+ mermaids and just understand or any kind of like more compressed way because this is not for people this
+ is for like yeah so i'll show you like for example yesterday what i did was um i think it was probably
+ yeah i used it to create this this version of the demo so i think this is the one oops my system has
+ decided to go in so all i did was i basically had a prd and i pointed up here so let me talk to the very top of
+ this one of this chat to show you what i've been up to and how i use the skill so here for example i've
+ created the branch usual stuff and then i'm saying i have uploaded um and then i've said okay i had a
+ basic prd applied some improvements with six thinking hats and then once i had created the skill
+ what i did was uh okay let me just scroll down to where i asked the skill apply the skill right to
+ this prd that's it so i had the prd i spent some time refining the prd and then i created the skill
+ separately and i said apply the skill to the prd and boom it goes and creates uh the whole planning and
+ all the phase-wise plan and everything and it's all autonomous and and uh remember in skills if
+ you're using cloud code skills in particular you can assign models to them so what what you want to
+ make sure you do is use the cheaper models for skills that aren't requiring a heavy amount of thinking
+ right because you've done the thinking for for the skill you don't need opus 4.5 for most skills
+ you're probably fine with like the heroku or hero or haiku heroku is a service a haiku um model which
+ will it gives you like a hundred times more usage how do you know how can you test that how how do
+ you know when you need to switch and uh well in in cloud flow you'll see that my skills have different
+ models and i'm and i'm changing and i'm in and i've got in a um back to the comment earlier about
+ trajectories i i determine which which is the optimal skill that that is the influence of both
+ performance i need to do it and and and then the skill then has an associated model so certain skills
+ don't need as much you know firepower thinking power so i i change the skill and the model associated
+ with that skill in real time and it gives me more bang for my buck on the usage on cloud in particular
+ or or whatever rob you got a comment um no i was just going to share uh something that i was working
+ on sure yeah i just can i just can i just double click on the my deep on the skills real quick
+ um i i got it i got into skills about a month and a half ago um and i started pushing the boundaries
+ on like what you can do with skills um and you'd be really really surprised with like some of the like
+ the crazy things that you can do um so like one of the things that i did recently and i'm not going to
+ show it but um one of the things i did recently was with the claude bot came out um i designed a i
+ designed a a more secure version of claude bot right kind of did the prd and all that then they
+ designed the skill to really build out the whole thing totally and then took out and then took the um
+ the open claw um the open claw repo and then combine the two so that way i can have some of the
+ functionality out of that one and all that um but you can just literally with the one of the things that i i
+ love doing with with the um with the claude skills is like building a skill for whatever project i'm
+ going to be built to build it and it actually acts as like a kind of a guiding line guiding
+ guidance system um to building that like the skills are really really powerful like any like i would
+ just suggest go try anything like just say like build me a skill to build a house and like just try
+ anything with it like just push the limits with the skills because you'd be surprised with all kinds of
+ of crazy things that you're able to do with it um just by asking it to build a skill yeah
+ this this brings up a very interesting thing like about like i was you start with your codes right
+ or dragons yours roof and other stuff i similarly use it then dennis have been doing a lot of work
+ about like taking unstructured data and then converting into structured data and then using that data to do
+ to direct the llm so safe tokens now he had a lot huge reports on our wednesday fortnight to catch up
+ at london i was literally when he explained the whole thing i was like okay let me see if i can create
+ a skill i literally asked you to create a skill and it did exactly what um you know denis was showing
+ so like slide mosaics and you know semantic graphs and everything and i'm wondering now if that is the case
+ if everything is open source anyone practically can point to a repository and create a skill for that
+ which means that you know obviously there'll be level of checking but that's a reusable skill for it
+ so that means like um like in this example like we were having this chat with the agi stuff right
+ practically they could take their code base and say look at you know plot flow v3
+ create a skill so that i can analyze my code base whether it takes the best practices or not what
+ can i improve so and they get it you know so it's like it's a force multiplier but that also means that
+ but it means that basically you don't really need to be technically technical enough to understand the
+ code as long as you know a piece of code works then you can take it and create something different
+ what does it mean you you just summarized my entire mantra for all the code i put out
+ you the the the reason why the code is in the form and the structure that it is modular extensible you
+ know pluggable all those things because i i want others to take it and do stuff with it that i never
+ thought that i could do so your point about skills and tools and corneus's point is exactly on point
+ everything you need to do you just need to ask go go create me a skill go fix that crappy app and
+ make it better go secure it you know oh is it secure prove it create me a skill that proves that
+ uh guys i think robert's had his hand up here and i want to give him a chance to yeah can i have a
+ quick comment to the previous topic and i knew here and maybe it's sure yeah go for it go for it so i'm
+ not yet using cloth flow but for a good reason i i want to build my own muscles first and then you know
+ using the biggest guns yeah so so one kind of short learning for me was that uh so i'm kind of going
+ the same route as kind of everybody like having a good design document and what i found that i started
+ to use like sometimes hundreds of agents like parallel agents to make sure that design document is as
+ coherent as possible and when i kind of start finding just very very nuanced issues this is where
+ i kind of generate a plan and i tried the same path to make sure that the plan i mean the
+ implementation plan and design document is coherent but for me it seems that it's a losing game because
+ comparing two big documents there is always and a lot of difference so i kind of tried the new
+ approach few days ago which seems working at least for me right now so i i kind of cut one step one
+ implementation step out of the implementation document and then i run a loop uh to make sure that
+ so i kind of with the meta prompt i generate you know one in one detailed step implementation plan for
+ that specific step and this is what i'm running in the loop until there is no issues and and what was
+ so this is kind of like a winning game because there's an end with a good quality and usually this
+ can be kind of automated so almost the the fix in each step is kind of so the lm can can do it alone
+ and then i go forward with the implementation and i find again with my limited experience this uh
+ pattern quite fruitful because and then each step the execution is quite i think you just described
+ i think you did a great great job of describing our spark uh protocol which does a kind of recursive
+ uh validation and check of the specification now you're right that level of it you know sort of you
+ know questioning and and refinement and recursion is key to developing anything did it did it build what
+ it's supposed to does it actually work and did i stay on point those are the primary points that you
+ have to do in any specification that's why the adr's work so well because it gives you all those things and a kind of
+ structure that the llm already kind of inherently knows uh okay i'm gonna get the robber robert
+ i really want to show us what wait what you got here cool so i uh i'm the maintainer of unicorn scan
+ if you're not familiar with that it's it's it's like mass scan or in map or any of these other port
+ scanners but it was a dormant project for about 15 years but uh right around christmas i decided to to
+ do to make it an active project again um so the the new thing that i'm showing off today is a
+ training module that i built that has a simulated environment that lets you play with the tool and
+ without having to install anything um and you know it even lets you scan your own ports if you on your
+ own ip address if you wanted to so it's it's it's a fun new thing i just posted the details here um what is
+ is potentially interesting is i i heavily used obviously all your cloud flow stuff i used the
+ browser uh um skill uh and then i also integrated ru vector into it for because not not only does the
+ trainer have the simulated environment but it also has an oracle ai where you can ask very advanced
+ networking questions of it all right let's see we so as you're getting started is that is that what i'm
+ doing here yeah yeah you're in already so um you can cat the file or more it or whatever you want or
+ you can go into help in order to to get the this this is a guided prompt at this point that tells you
+ exactly uh what the objective is you can do control h to get help uh control l clears the screen but um
+ yeah oh anyhow sorry sorry guys i'm i'm getting some feedback here i'm gonna be all for a sec you guys
+ can uh unmute yourselves um all right so you you run the demo you show show me uh sorry i'm you i'm
+ i meet yourself again um you you run run the demo and uh shows i i i think this is amazing and you
+ know what your timing is great maybe we put this into the uh that that optimizer app i was showing
+ you for windows and mac yeah yeah something like that could be fun um i i actually am not set up well
+ to to to do the demo i'll go ahead and pass it on to to other folks at this point but the links that i
+ shared uh i i think are enough to get started you can read about it on the about page uh but as soon as you
+ go into the try module it's meant to be self-explanatory also um there's there's easter eggs
+ like uh you know you can try to cap the etsy password get the hash file you can go crack it and
+ you can become root and you get more commands there's a bunch of really fun hidden things like that in
+ it um all right i'm on your uh i'm on your github too so like for for all of our open source friends
+ here if you could give a star would help us for any of these projects so uh go ahead there if you if you
+ can i love i love the idea and i'm gonna play with this later your your timing is absolutely
+ impeccable for the stuff sort of stuff i'm i'm working on right now um awesome definitely useful
+ definitely useful uh matt you should check out rust scan also a rust scan okay yeah yeah going back to
+ uh the the the skills that when we brought up uh my question was actually different is where and it's
+ great point uh so early on i took your gulp skill out of one of your agents and i created a skill and
+ uploaded into claude itself now do skills overlap between claude and claude code or i made them all
+ they're all compatible so if you want to create if you want to take the skill and put it into claude i
+ think you have to create a zip file with the skill inside of it skill.md i think it is and then you and
+ then in claude uh web or whatever i think you can also do it now in the mobile um you can upload those
+ skills and then those skills become inherently available within claude so i don't need to so i can
+ access them in claude code even though i've uploaded them in the capabilities section in claude
+ right because this well we've showed with mv assuming you got dot claude folder in claude code yes
+ but what you upload to claude desktop or mobile isn't inherently in claude code okay that's what i was
+ trying to figure out if there was a delineation there's a delineation 100 there's a delineation so
+ yeah i'm talking the desktops for desktop the codes for code but the two don't the two don't overlap
+ other than the your api use anyway um but the uh the the the ability to create skills quickly and
+ have it integrate especially now the claude handles npm and mpx pretty well you can quickly create skills
+ skills that say use this particular library so for example i'll use my rv light library and that will
+ give it a bunch of intelligence kind of thing and write in claude desktop web whatever you want to call
+ it the the proper club uh chris you've had your hand for a while how you doing
+ hi sorry about that um yeah i was i was actually just wanted to double click on the the whole skill
+ versus agents thing i'm kind of doing in the side thread in the chat um but my question was more
+ around just like in building with swarms and just to a prior my experience is using flow v2 uh and
+ agentic qe um a couple times and i found okay results with it uh obviously i'm not i could be using it
+ better but uh specifically you know when you're building with swarms you're you're calling on
+ agents or your swarms are composed of agents but these agents are also you know going to be able
+ to call on skills or they should kind of have skills embedded it seems like skills are actually more
+ robust and more uh allow for more complexity and so the question the thread we're doing the chat right
+ now is uh around like how is skills and agents going to potentially converge or not or like what's the
+ not utility of they're very yeah they're very different right a skill so if you want to use an
+ analogy a skill would be like in in like you know the matrix when he shows up and he downloads the
+ ability to do you know jujitsu or whatever that he's learning to do right and that that's a skill that
+ he's downloaded and now has the ability to understand right so now all of a sudden i have the ability to
+ to do karate where yesterday i didn't or learned i learned how to play the piano skills now an agent
+ is what you do with those skills right an agent is is the ability to act on the skills i've learned how
+ to you know play the piano now i need to play a song playing the song is is an agentic flow right i
+ gotta i gotta hit the keys i gotta have me in time with my my band and all that sort of stuff it's agenting
+ you know you know kicking someone's butt in after i learned how to do karate that's that's a that's an
+ agentic skill that's an agent so the two aren't the same you can create a skill that sort of tells
+ you how to how to do the actions of an agent but ultimately the agents are going to do the task itself
+ now when you think of like a a swarm a swarm is is a level of concurrency or parallelism for the most
+ part it can also be sequential depending on the type of problem you're trying to solve but it's it's
+ essentially action it's autonomous actions right so now i can spawn up a hundred agents that look at a
+ hundred different possibilities of an of a problem exploring it you know independently of the sort of
+ main orchestrator the hive queen in my in my nomenclature and then come back after 10 minutes
+ an hour a day a month whatever it is and say here's what i've discovered here here's what you
+ need to know about this particular task that i was working on and then the other 99 agents are saying
+ well here's what i learned okay we've learned all these things okay here's how we're going to use it
+ then potentially the the the hive mind the the coordinator if you will says well we need some more
+ agents we've got now 25 possibilities that make sense which of those 25 possibilities the is the optimal
+ one well let's spin up a simulation and do a million different variants until we come up with the
+ convergence on the optimal solution all that that's all agentic right that's the skill might have told
+ it generally what it needed to know and understand but it doesn't do and it shouldn't do it's a skill
+ it's it's it's more like how and why but it doesn't actually do those things if you want to think of
+ it separately the adr's you were showing the other day could one think of those as skills because those
+ are 100 skills those are skills so the adr's are skills the only thing those adr's are essentially
+ really well-defined skills that define the you know the objectives the decision process the resources the
+ domains they're bounded right then the bounding is really important it says you can't work with it
+ outside of the bounding of this particular adr where a broad skill doesn't doesn't define any kind
+ of bounded process so you get drift it'll go and build shit you don't want kind of thing but like
+ uh so but then if skills can have their call on their own models or use a particular model like isn't in
+ the analogy isn't like neo kind of like claude sdk and the skill is like there's not just like an agent
+ per se couldn't the hive queen just call on a specific skill and just work through the hive week
+ yes and that's what the hive queen does and at least in in claude and claude and claude code the hive
+ queen the orchestrator let's just call it is she's she's able to understand all the various skills
+ available to her and she can pick and choose which skill she needs to get the job done so if she's doing
+ to pick the security skill or more narrowly within security they could be sub skills but basically
+ she can you know and then separate that so different agents are activating and accessing different
+ skills if and when they need those skills but if they don't they're they're skipped and that's what
+ makes the system so powerful now the adr without without some form of bounding the these agents
+ don't know the limitations of where and how they need to act beyond what's being described to them in
+ this kind of orchestrated model so for complex really complex applications the a the adr allows me
+ to say well here's 50 parts of a really complicated application go spawn as many agencies you need to
+ get this done correctly efficiently securely and blah blah blah and let me know when you're done
+ um regularly but can we say that it's a skill so there are kind of two concerns because one is like
+ the logical grouping high what you mentioned like the how and what to do but on the other hand skills
+ starts to gravitate towards being a container so from that perspective we could maybe say that skills can
+ contain agents that you can kind of trigger yeah here let let me let me let me
+ so what would i sorry give a sec i'm gonna show it i'm gonna show you example so like here here's
+ here's a perfect example so i'm creating an agent system for operating systems right so you know i need
+ i need this is this will be a skill right so a game launcher weekly timesheet reporting so this is defining you
+ you know the the sort of broad understanding of what's it was for games now this this is then
+ defining sort of the idea of a bounded context what what it needs to do it needs to check for updates
+ verify right and then or i need to learn right so the there's this sort of balance between you know
+ broadly what it needs to do as a kind of prompt or or now i guess we're calling skill and then there's
+ the specifics of what it is to actually do these things right so in this case if i'm learning
+ then i need to i need to give it boundaries for how it needs to learn based on the sort of you know
+ context right that's a skill right so and then you see the execution that's the agent this is the
+ agent saying okay it started it's scheduling it's doing memory you know here are the things we learned
+ now i can apply it right so it's the separation that's important here and and this ultimately isn't
+ this is an agentic system just happens to be an agentic operating system but this is how how you sort of use any
+ kind of swarm based or agentic approach at least the ones that i'm building sorry go ahead cornelius
+ yeah so the way how the way i simplify skills is like just the metaphorically think about yourself
+ right like well you think about you as the agent right everyone here is the agent let's say we're
+ all swarm swarm of agents whatever right everyone here's an agent right so like um if i need to go to
+ the grocery store i'm gonna call i'm gonna call on my skill to drive a car i'm gonna call my skill to do
+ this but i'm the agent that's going to be acting upon that right and so like the way how you look
+ at it is the skill is a skill like i i put actually i was laughing when you said the neo thing because
+ that's exactly how it is right so like the skill is learning kung fu the agent is neo right so neo
+ downloads kung fu and neo knows how to down do kung fu whenever neo needs to do kung fu is gonna neo's
+ gonna call on that skill to start doing kung fu neo needs to fly a helicopter he downloads the skill
+ though to be able to fly a helicopter whenever he jumps in the helicopter he flies the helicopter so
+ you got to think of the agent as the agent is the thing the guy that's doing the thing or the guys
+ or the swarm of people that are doing the things the skill is the skill that you're giving them the
+ the abilities that you're giving them for them to do the things that they're doing so you can create
+ any kind of ability you want to give to your agent your neo for them to be able to do that like that's
+ like the easiest way to see it is that you already know how it works because you have jobs that you
+ do on a day-to-day basis you went to school for certain things you gained certain skills you're the
+ agent that now able to do those skills it's just that you should then transfer that into the ai world
+ and it becomes a little bit different yeah black yeah i just wanted to add basically people said
+ half of what i was going to say so my take after like these three weeks of deep dive you need to
+ keep skills very very small and tight and always use agents to do tasks like how roof said there is
+ a skill to play the song right so one of them is getting the keyboard so like there is a thing like
+ that um like the keyboard is in the roof's house like so that's when you launched an agent that's uh
+ going to drive to roof's house grab the keyboard bring it back and one thing about agents they
+ because what you need to watch is select your context right because uh getting the keyboard for
+ playing a song i mean it's important but you don't need to pollute your context with driving truth's
+ house and everything if you use the agent for it it's going to completely bring your keyboard
+ and then it's going to disappear and all them like the top level skill sees it's basically it is the
+ like we needed the keyboard that told the agent go get the keyboard and then keyboard appeared
+ all this independence actions they they don't matter in the things and actually if the whole playing song
+ it should be like a skill may be of like i don't know 20 or 20 lines long and it should be calling
+ engines basically confused compose the music like all the bad members get them together like so like
+ skills should be super high level and also agents can use the skills themselves and those skills that
+ agents use they can uh again called agents so it's a hierarchy of this uh things like and then so yeah
+ so um so so with the i i hate to do this but like with the skills that's that's actually the opposite
+ because of the progressive discovery with that that um that the skills actually utilize you can pack a
+ crap ton of stuff into a skill you can make skills really really really really big and really really
+ complex right um and because of the way how the progressive discovery works it's not going to
+ cloud your context window that much because it's going to first try to figure out what it's trying
+ to look for the agent's going to figure out what it's trying to do what it's not using that skill
+ and then go to that i've created skills that are departments in the organization
+ i think i think it's open for interpretation i think you know my approach is not broad i i just don't
+ have the best results with broad broad skills they they have a tendency to drift but i there's nothing
+ saying you can if you've spent enough time on it it's probably i just don't i like to i like to have
+ make my focus because i can measure it more easily basically um all right i sorry guys i'm gonna i
+ get you go up on online here uh what what's happening yeah hey guys i was just listening to the
+ conversation i wanted to ask you can you like uh meta skill essentially so you pay as um vlad was
+ saying so you you have a small skill but in that skill you pack references to other skills so you were
+ like okay say we play the keyboard right we have a skill to play the keyboard and then we have a skill
+ for the individual songs or um for separate instruments etc etc yeah you're describing the narrow focus right
+ and and by by making the skills more narrowly focused it's easier to mix and match those those
+ skills rather than having one skill that says here's everything you need to know about everything
+ which works for some things you can then if you separate those let's say there's five different
+ parts to that everything skill then those five different parts can be mixed and matched more easily
+ independently of the other parts so it's and and just to reference those that's you can have this kind of
+ idea of a primary skill a kind of master skill of sorts that allows it to understand that there's
+ subordinate parts of that that can be sort of you know used independently if needed
+ yeah i was just thinking maybe like i could um for example take the developer runbook off
+ some of the projects that i work on and then i could make a skill for every dependency in there
+ um and then i i'm just wondering if the agent would actually be able to comprehend the meta skills or
+ not like does the ai know how to it does do that yeah it does it and and that's part of one it's
+ part of the there's two primary places you're going to want to sort of define that and in cloud flow if
+ you look at my cloud.md file you'll see that it it's mostly about itself it's mostly about self-discovery
+ and understanding where and how to use the available tools that that is available to it in a way that's
+ meaningful in the things that it needs to do so predominantly it's for coding and actions and
+ activities and research and then from there i kind of let the system do its own sort of self-discovery
+ and self-optimization based on that so the self-learning capabilities and take take effect and so it
+ understands what it's done to get here if it's been a day a month a year whatever and that keeps the
+ system getting better over time uh brad you got a comment
+ yeah i just just wondering for when you're working with skills and agents
+ is there a process that you find works well for making sure that it's codified rather than
+ just a text-based suggestion like a lot of skills how do you initiate a trigger that make this
+ deterministic that you run x test rather than the llm just uh giving the best guess
+ well it's it's all grounded you don't you never ask the llm llm is always going to lie to you yeah
+ so if if you're if you're grounding is basically saying hey llm is this is this true or give me some
+ bullshit uh statistic like it's 95 you know accurate it's made up llms can't do math for one so asking it
+ to do math is just you know beyond any kind of what two plus two kind of stuff is is a recipe for
+ disaster so what you need it is an independent grounding some other secondary source that validates
+ all the things that you're telling it to do independently of itself so are you using what are
+ you using to initiate that through like to well i'm using i'm using i'm using microvector and cloud flow
+ stuff that that operates independently of the llm so when the all the learning all the all the you know
+ all the crazy is essentially independent the only thing the llm is really doing in my environment is
+ giving it the command and control structure you know in a way that is is something i can understand in
+ english but beyond that most of the learning is is in vector space was 100 mathematical most of the
+ grounding capabilities and attention mechanisms are all in that sort of interplay between the vector
+ and the graph and attention and none and that's all mathematical as well and then ultimately i just need
+ it explained to me in a way that i can understand that isn't just math and the llm interprets it back
+ to me in normal english i think it'd be really cool if we could um have the uh adaptable grounding
+ kind of incorporated into adaptive grounding incorporated into skills and even like if skills
+ could reference vectors directly in the database so you have a certain problem for example and the
+ system actually develops the skills how to solve that problem you know uh it would know in the
+ skill what works and what doesn't work and then update the skill i think i think that's something
+ not exactly that i mean i can show people like i'm just need a second they want me i'm just need to
+ find the base that's the exact bridge that i'm trying to find is yeah so force it so one of the
+ one of the things that um so when you're when i'm building a skill and again i do it differently than
+ most people but when i'm building this skill what i do is i build all of those rules within that and all
+ those things and all the memory and all the all the the outside information research and everything is
+ actually built within the skill itself right um and so when the and so when the llm or what the agent is
+ calling on on the skill is going to try to figure out again through that progressive discovery is going
+ to try to figure out what exactly i'm trying to do at the time and then it's going to call on that
+ specific section and then go deeper and deeper and deeper in that within that skill to find out exactly
+ what is what it needs to be what needs to be done so you can actually have it the skill is the bounding
+ mechanism itself right it is it is the mechanism that controls everything so like that's why i use it
+ sometimes when i'm building a project like i'll put my prd and all of those things within this skill
+ like say i'm say like for example i'm building like um right now i'm building a uh a um a uh pc business
+ email compromise thing right um and so i'll build all the structure within the skill and that skill now is
+ used to build the product itself so that if i ever start going off the rails or anything like that
+ it can it can act as a single source of truth to bring everything right back into the into the
+ build itself so you're asking cornell's you're asking the single source of truth is a recursive
+ problem you're asking itself if it for its own truth and of course it's gonna it's gonna believe
+ the thing you told it to believe it's it's its own truth that what i'm suggesting is you ground the
+ truth outside of itself and that that's that you what you described is a monolith right you've got
+ one giant um prompt that you stuff into the llm and say here's everything you need to know go do it
+ which which is fine for certain things but generally speaking you know i think we i think we move we're
+ moving away from monoliths for most code and you're moving back to it they want me to show i'm ready to
+ show what i got and i actually would love to hear the critique and tell me if i'm crazy like um so
+ hold on this is the do i need permission to share or i can just share i guess okay you guys see my
+ screen right so what i see because my workflow is kind of complex so i have like one of the skills is
+ the code author right it's i never call it myself because there is um and actually i can show you
+ yeah i will stop because this is very internal skill so like it's getting cold like inside and
+ this is how like the code writing if you notice there is nothing about the uh specifics how you write
+ code because what you so you declare intent and what next thing is you query the pattern guidance right
+ and i have these guides so the guides and then there is a reason i don't use vector things
+ so the guides actually read the manifest and in the like there is the whole thing of patterns like
+ this is right here right and there is manifest how you look up the patterns right and for example
+ like the agent needs to write logging like code right so there is a whole guide because the reason
+ i do it this way is because i work with a lot of existing huge code bases i cannot just make agent
+ like make up the own code they have to follow standards and everything so this standards actually
+ wrote with quote together but it was a collaboration and this actually guides have specific um code
+ snippets and this whole thing is only being loaded in the context of like sub sub sub agent when it
+ tries writes the code like when it tries the login code right so if i'm doing the monitoring like so for
+ the century integration right that's it would be like a separate agent with this separate so this there is
+ only one skill the code writer but it gets called in different context and depends on the context that
+ will load the proper sort of like the guide here right and there is so so the patterns are secondary
+ prompts that you're injecting based on the conditions that it needs to sort of i have this bunch of guides
+ here so there is implementation planning guide there is coding guide so if you look at there so what the guide does it's basically
+ it's the one that goes and looks at the patterns like i try to keep like do not mention any specific because
+ there is also something called manifest in the patterns are here so this is where the patterns are
+ listed and some mandatory for example like the core principles like to do pdds how you name variables how
+ you format things this are mandatory like for specific language like this is for coding right but for specific languages like when you're working with docker like
+ this has only been loaded when there is a docker operation so you're writing docker files like those
+ are never like loaded um like when you're writing python so you either write in python or writing docker like
+ and this is the whole manifest that's basically that's my vector space and uh there is a reason i'm
+ actually maybe going to vectorize i was hearing like something like different i just went to the talk
+ talk yeah but that's all i wanted to show like and they have that and my skills are super tiny like
+ and most of them are stolen from ruven dragon basically but it uh
+ can't can't steal something you're giving away and and uh this is this is awesome i think that i like i really like what you're describing
+ i think i think i think i think the combination of like the secondary sort of definition that you put in
+ is a really nice way to do it you're basically saying here's the primary and here's how i i here's
+ where you can find other related information if and when you need it it's like you're just putting
+ like a combination of variables and conditionals in in the prompt yeah oh and also so the workflow
+ themselves like actually found them like so when you work on something when you start working right
+ so this is a different so when you start the cloud right it kind of interrogates you that has this
+ context workflow it basically tries to figure out what are we working on right and then it picks correct
+ workflow i will like doing um a new like things that causes the spark like there is a security review
+ so this workflow they actually guide the uh very top level basically watch this task you're doing
+ and that is actually there is a guidance how like what do what needs to be loaded because workflow of
+ themselves like they load it and i try to keep everything as abstract as possible so like the coding
+ workflow it just couldn't work for it uh it basically says declare intent to look for guidance write code
+ like and and after that there is actually validate there is um after the code is written it's put again
+ through the whole um yeah i call it quality agent that basically loads the uh the guidance again loads
+ the code that was produced and it says hey is the the code that's produced does it match the guidance
+ and with the opposite works most of the time but once in a while it has to go through the loop
+ like two or three times i don't even look at it it just i go away like it takes about 10 minutes
+ like i come back like there is code written in it so it was like three iterations writing code that
+ wrote the code the first time it was crap it went back to fix it there was less crap and on the
+ third time it's passes like so that's the cool and that was my question does it like so for example
+ first time second time failure does it update the skills do you guys like have the skills auto update
+ no okay no that's what i want to try implementing so i only update the skills now so i spent maybe first
+ couple weeks writing the set of skills now i only work update the i only update the the guides because
+ i have one step here it's called reflect let me see is the actually this is older one i'm not sure
+ it's right here so it's reflect so at the end of the workflow when everything is commit committed
+ and plans are committed it goes through reflections and it looks at the preview like the whole sessions
+ and it asks you a series of questions like what went wrong and like is there something to learn about
+ like the experience and that what happens that updates the guides actually like so that's i see
+ yeah i i also have something like i have an update for like a week after like i set this up like it
+ just update the guides all the time like so it's so i have a progress.fd file and then it uh sorry i was
+ just gonna say i have a progress log and then as same as you've learned basically i have an agent read
+ the progress log and then update the agents.md files um yeah accordingly so i actually write so
+ the whole the thing was written let me see what's the good one uh skills okay right yeah this is the
+ actual work right and uh yeah this is the progress at the top right so and it's actually the reason
+ it's structured like this because implementation plans they take huge amount of context you don't
+ want to do it i have like agents that actually there is one that treats like that just that
+ and then it says ah hey like beyond this phase and i actually have this blocking emojis like if
+ something depends on something like it will not so it picks up that and then it's after that it goes
+ to the second and like what are we delivering basically right and then there is super detailed
+ like i mean this is not super detailed but some of them are two three thousand lines but it never
+ reads the whole thing like ever it basically just um it the most it reads at one time it's this like
+ whole phase or like how many lines is it like 100 lines like so if you're doing python vcr experiment
+ because it's in its own context that uh like basically when it's done like that agent yeah and
+ that would be like an agent working on it and once it finishes like it will write a little report
+ what i did and it will just go away like and like you never you like probably because you want
+ to keep your main context very very short essentially that's the my goal so i guess
+ all right um i think chris has had his hand up for a bit uh and we're gonna have to wrap up here
+ in a few minutes uh chris just to put a bow on this um yeah i just it told me that like you know
+ both skills and agents are dot md files so you know we're just choosing to name them the way we're
+ naming them i feel like you could theoretically and i i plan maybe to try this out is uh is wrapping
+ an entire project in a skill and then just thinking of agents as what we consider agents right now to be like sub agents or like
+ agents right now to be like sub agents or like i don't know exactly how it's going to work but i think
+ it'd be interesting to experiment with chris yeah chris one thing so the agents can use the skills that
+ the skills can use agents again and it can do them in parallel and so it's a whole sort of like swarm of
+ like things my impression of the biggest difference is the agents actually are spawned as parallel threads
+ right if you look at sub agents and cloud code that's actual parallel work whereas the skill is
+ typically run in serial with whatever thread is trying to use the skill
+ yes but the agents themselves can launch skills again and then the and those skills can launch
+ more agents so like so i think the most i had the so actually when you hierarchical
+ i think cloud has internal limit how many it can launch i don't know roof might say it but i think for
+ me 15 15 15 oh okay yeah because it has more than 15 and parallel work it will actually run first 15 and
+ it will like run but you can put like hundreds of them like in your sort of workflow like it will just
+ yeah there's there's the what i'm doing is i've separated the agents in the in the three parts so you
+ within the primary sort of uh cloud code system you can run a maximum of 15 uh agents at a point but
+ within that you can do sub agents and those sub agents allow you to invoke other instances of
+ cloud code for example which i do and then and those instances of cloud code i run headless so because
+ i don't need to actually see the ui so then i can i i and for the for the headless agents i don't want to
+ max out my um cloud code usage so for those generally i either use like open router or some cheaper
+ models sometimes use gemini or i'll use my own roof llm to do certain things because it's free and
+ local and and then i and from that vantage point those 15 sort of primary threads if you will can
+ become thousands of agents running and optimizing and doing and then the last part i've got the demon
+ the demon is always running always monitoring what clod's up to and saying how can i secure it how can
+ i fix it how can i optimize it that kind of stuff and that's running continually as you use at least my system
+ so those three those are the three primary sort of i don't know what you might call them threads or
+ layers or something i also i guess i don't know if you're like allowed to speak about the what's the
+ thing the the gas town i found that whole write-up is very hilarious just like entertain it's very
+ educational to read even if you don't intend to use gas town just read it it's like hilarious and it's
+ what's even more educational it's not the write-up itself because he opened the like a side comments
+ like the side comments also like priceless there like so yeah it's it's doing some cool stuff i like
+ the beads concept um i i um i created a plug-in because i could you know if you want to use gas town
+ in cloud flow you just ask cloud flow to use gas town and it'll find the plug-in um i don't know
+ it's a different approach to solve similar problems i i know is it better is it worse i i don't know it's
+ different i i haven't actually looked it but i found the write-up itself was very highly like hilarious
+ and educational like it's the yeah it's cool um last comment before i jump here i'm i'm i'm gonna be
+ looking for some beta testers and folks who aren't afraid to uh dig into the bowels of their computer
+ um so it's not for everyone for sure but um specifically i'm gonna do some testing here on
+ the uh my os automation capabilities over the next probably weekend that this might be my middle of
+ the night hacking thing i'll do on the airplane to india but this is functional now you can create os
+ level you know complete automation so i'm gonna i i'm a little concerned about like security for obvious
+ reasons and and other sort of runaway processes so this again this is for anyone that's willing to
+ go and potentially destroy their computer i haven't as you can tell but you know it uh you are working
+ in the midst of the you know inside of that environment um i i'm gonna share a link to the
+ github it's it's on a it's in the uh it's in a branch but you know and then once i get the windows
+ version working i'm gonna do a mac version after but i've got i did more work on windows so it's for
+ windows users on linux any linux linux is easy linux um once once i get the mac version working
+ linux i just get linux um so the the mac basically gives me linux that so i i'm gonna i'll do that last
+ but yeah linux would be an interesting one especially for servers right if you're doing like server farms
+ or like broad gpu style you know deployments this would be perfect right because a lot of the problems
+ you have in those sort of broad you know i'm gonna deploy 20 000 servers for for a week is what
+ happens in the midst of that churn most of these systems are are set up to sort of you know set and
+ forget and then tell me when it's done but what this system would potentially do is optimize during the
+ the whole entire process if you're doing like let's say i'm training a language model or something for
+ for two weeks kind of kind of work so yeah it would be good linux i'll do that i i you know i'm one guy
+ i can only do so much so windows was more pressing to me because i do i i do a lot of my stuff
+ initially windows and lin and ubuntu linux so i kind of get both in in one environment on easy easy here
+ but i'll do i'll do mac after that all right that's been another week the the first month of the year
+ is over uh thanks everyone this this was a really interesting and i the it's interesting that we we
+ had a kind of thread here of like os level automation you know browser automation and os automation i'm
+ excited by that this whole area uh thanks everyone am i missing anything any any any any last uh any
+ last comments for a jump off here all right all right thanks everyone till i guess i'm not around but
+ our friends from finland will be doing uh next uh next week's ai hacker space um they're doing some
+ amazing work i'm kind of jealous i won't be able to attend uh so thanks for timu and the whole crew
+ for putting that together. All right. See ya.

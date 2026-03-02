@@ -101,8 +101,8 @@ const findings = [
   },
   {
     severity: 'HIGH',
-    category: 'STUB',
-    description: 'discover() method returns empty array unconditionally — never queries data',
+    category: 'FACADE',
+    description: 'discover() method returns empty array unconditionally — never queries data (stub)',
     line_start: 200,
     line_end: 205
   }
@@ -179,14 +179,28 @@ Findings Inserted: {count} (C:{n} H:{n} M:{n} I:{n})
 Verdict: {GENUINE | MOSTLY_REAL | MIXED | MOSTLY_FACADE | COMPLETE_FACADE}
 ```
 
-## Classification Guide
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
 
-Use these categories in findings:
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
 
-- **FACADE**: Has correct interface/API but fake logic behind it
-- **STUB**: Explicitly unfinished (empty body, throws, TODO)
-- **PLACEHOLDER**: Returns plausible but hardcoded/random data
-- **fabrication**: Metrics or results that appear real but are computed from nothing
+Use **FACADE** for all authenticity issues (stubs, placeholders, fabrications).
+Distinguish subtypes in the `description` field:
+- "FACADE: has correct API but fake logic behind it"
+- "FACADE (stub): empty body / throws not-implemented"
+- "FACADE (placeholder): returns hardcoded/random data"
+- "FACADE (fabrication): metrics computed from nothing"
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
 
 ## Success Criteria
 

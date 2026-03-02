@@ -1,0 +1,11 @@
+{
+  "files": 14633,
+  "findings": 11121,
+  "dependencies": 1704,
+  "sessions": 114,
+  "file_reads": 1850,
+  "domains": 17,
+  "file_domains": 15939,
+  "packages": 11,
+  "exclude_paths": 64
+}

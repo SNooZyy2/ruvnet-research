@@ -25,15 +25,18 @@ Penalty weights by finding category:
 
 | Category | Per-Finding Penalty | Rationale |
 |----------|-------------------|-----------|
-| FACADE | -15% | Entire component is fake |
-| fabrication | -12% | Fake data presented as real |
-| STUB | -8% | Missing implementation |
-| PLACEHOLDER | -6% | Temporary fill-in |
+| FACADE | -15% | Stubs, facades, placeholders, fabrications |
+| INCOMPLETE | -6% | Missing implementation, dead code, gaps |
 | BUG | -4% | Broken but attempted |
+| INTEGRATION | -3% | Disconnected or orphaned |
 | QUALITY | -1% | Real but rough |
+| PERFORMANCE | -1% | Performance concern |
 | ALGORITHM | +0% | Neutral — describes what exists |
-| INNOVATION | +0% | Neutral — positive signal |
+| GENUINE | +0% | Neutral — positive signal |
 | ARCHITECTURE | +0% | Neutral — structural observation |
+| SECURITY | -5% | Security concern |
+| TESTING | +0% | Neutral — test observation |
+| DOCUMENTATION | +0% | Neutral — docs observation |
 
 Severity multipliers:
 
@@ -127,12 +130,10 @@ node -e "
 const db = require('better-sqlite3')('/home/snoozyy/ruvnet-research/db/research.db');
 
 const categoryPenalty = {
-  'FACADE': 15, 'fabrication': 12, 'STUB': 8, 'PLACEHOLDER': 6,
-  'BUG': 4, 'QUALITY': 1, 'ALGORITHM': 0, 'INNOVATION': 0,
-  'ARCHITECTURE': 0, 'architecture': 0, 'quality': 1,
-  'implementation': 2, 'IMPLEMENTATION': 2, 'stub': 8,
-  'SECURITY': 5, 'security': 5, 'INTEGRATION': 3,
-  'PERFORMANCE': 2, 'DOCUMENTATION': 0
+  'FACADE': 15, 'INCOMPLETE': 6, 'BUG': 4, 'INTEGRATION': 3,
+  'QUALITY': 1, 'PERFORMANCE': 1, 'SECURITY': 5,
+  'ALGORITHM': 0, 'GENUINE': 0, 'ARCHITECTURE': 0,
+  'TESTING': 0, 'DOCUMENTATION': 0
 };
 
 const severityMult = {
@@ -302,6 +303,22 @@ After computing scores, update the domain's `domains/{domain-name}/analysis.md` 
 - NEVER append a new "Realness Scoring" or "Updated Scores" section
 - NEVER re-list all file scores at each session boundary
 - NEVER create cumulative score tables outside Section 2
+
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
+
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
 
 ## Classification Thresholds
 

@@ -39,7 +39,23 @@ Identify issues, patterns, or notable aspects. Categorize by severity:
 **MEDIUM**: Code quality issues, missing error handling, tech debt
 **INFO**: Interesting patterns, good practices, documentation gaps
 
-Categories: SECURITY, ARCHITECTURE, PERFORMANCE, QUALITY, INTEGRATION, DOCUMENTATION
+## SCHEMA CONSTRAINTS (ENFORCED — DO NOT DEVIATE)
+
+### Finding Categories (exactly 12 values)
+ARCHITECTURE | QUALITY | INTEGRATION | PERFORMANCE | ALGORITHM | FACADE
+SECURITY | BUG | GENUINE | TESTING | DOCUMENTATION | INCOMPLETE
+
+### Relationship Types (exactly 10 values)
+IMPORTS | USES | EXPORTS | DECLARES | SIBLINGS
+COMPETES | WRAPS | FEEDS | TESTS | BROKEN
+
+### Severity Levels (exactly 4 values)
+CRITICAL | HIGH | MEDIUM | INFO
+
+DO NOT invent new categories, relationship types, or severity levels.
+DO NOT use lowercase or mixed-case variants.
+If a finding doesn't fit cleanly, use the closest canonical category.
+Put specific details in the `description` field, not in the category.
 
 ### 4. Update Database - File Metadata
 
@@ -162,7 +178,7 @@ const targetId = db.prepare('SELECT id FROM files WHERE relative_path = ?').get(
 db.prepare(\`
   INSERT INTO dependencies (source_file_id, target_file_id, relationship, evidence)
   VALUES (?, ?, ?, ?)
-\`).run(sourceId, targetId, 'imports', 'Line 3: const helper = require(\"./target/file\");');
+\`).run(sourceId, targetId, 'IMPORTS', 'Line 3: const helper = require(\"./target/file\");');
 
 db.close();
 "

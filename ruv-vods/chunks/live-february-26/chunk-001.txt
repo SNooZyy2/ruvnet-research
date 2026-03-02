@@ -1,0 +1,1361 @@
+ long enough to do whatever they're gonna do my phone so that that's uh that's a plus and i i i
+ they were one of the first to see the rvf format so uh let's see if my quantum encryption keeps
+ anyway um good to see everyone and we don't have rob today but uh i think he had to take off but
+ jed you you were saying so what i do now i've adopted i'm getting to the point where
+ i'm becoming model and coding agent agnostic and one major problem is sharing knowledge or
+ learned attributes now we have many different layers and solutions that are memory focused
+ but the problem i have with those solutions is they are centralized and it becomes a bottleneck when you
+ have up to a dozen agents trying to learn something or recall something from that memory system so what
+ i've done instead is to capture the discussions as a transcript across all agents and then set up a
+ different search platform so it scales horizontally to allow them to search each other's transcript in
+ order to learn solutions to previously solved problems and at least for now it's allowed me to scale to
+ multiple concurrent servers each hosting multiple agents communicating amongst each other
+ in a well in an indirect way sort of the same way uh plants communicate with pheromones
+ to ensure that learnings from solutions to problems persist across the entire collection of agents
+ i i hesitate to use swarm because it implies uh unity among them and this is very intentionally
+ ununified so how's that like a mycelial network yeah that's a good way yeah mycelial network that's a good way to
+ describe it and how does that more like differ from from like the the sort of you know graph
+ gnn sort of vector approach that i take where i'm saving trajectories and optimizing
+ that structure that is centralized so no it's just it's completely decentralized like i decentralized
+ state if each age is each agent then supporting their own version of that graph yeah that's exactly
+ what's happening and it's a decentralized graph so depending it depends so it depends on what what it
+ needs to to to sort of understand but i separate the pro the process of learning the state you know like
+ all the information that goes in the requests and the code and the errors and now use reinforcement but
+ the important part is after the reinforcement parts done i've learned everything i need to do it
+ creates a kind of internal knowledge or skill that skill is transferable using a transfer learning so
+ i'm not transferring like the steps to get to the the ability to learn to understand i'm transferring the
+ trajectories that allow it to then use those skills later that traverse both the vector space and the
+ and the graph itself and then i apply that with a gnn the gn allows you to sort of the eventual
+ attention since the occur uh well depend disparate decentralized nodes synchronize that knowledge
+ uh well it depends i've got a few different approaches but generally i use well for networking i use
+ you know quick which uses eventual consistency on networking layer for the handshake then on the sort of the
+ the consensus basis if if i have a lot of resources available to me like a normal sort of vm i use raft
+ if if i'm not if i don't have a lot of resources available to me then i just export the deltas the
+ deltas allow me to to to to basically send just the key bits of mathematics that are required that allow
+ to traverse that information quickly without having to send anything more than the most minimal viable
+ component which in this case is is the delta or that what is that so how do you avoid factorial scaling
+ so if you have four agents with four descent with four independent vectors that are all learning from
+ themselves you have agent a no no no not drift how do you when you're maintaining that synchronization i
+ have in a pool of four agents i have agent a with its learnings uh the learnings will transition to b c and
+ d so that's one set three i have b pushing its learnings to a c and d i have c pushing its learnings to
+ uh a b and d and then d pushing its learnings to a b c so those are what is that wealth connections
+ between in a pool of four agents so that means a pool of five agents or even more how do you
+ prevent that scaling i'm not sure if i quite understand your question but in the what i can show
+ you is it's essential what what what i can show you guys is how i'm doing it on on my uh on my nano
+ or sorry my zero so back to my zero for a moment you know i can connect multiple of these together in
+ in a swarm right so in this case multiple little devices that are essentially embedding roof vector
+ on on this it's basically raspberry pi uh zero and so i get 512 ram and it's got a 16 gig uh sd card in
+ it so limited resources get four four core uh processor now what i want to do similar to what uh what
+ jet has mentioned hopefully i'm sharing the right screen here um and i want to share the the resources
+ you know across them so this is this is the dashboard for just a single device that i'm i've connected to
+ now in this device there there's a variety of different components that that i can connect to
+ and and run locally or within the the browser itself so i pair it and then once i have that i've
+ also got a swarm capability so the swarm again allows it to understand itself and it's some of the other
+ other available resources now i don't have any other resources currently uh connected to to this
+ particular one because i'm just i just ran a quick on on this environment but hypothetically let's say
+ that uh let's say that i had i connected two of these or or or more this system then it has the ability
+ to communicate with which each with with all the other available nodes in that swarm so in this case
+ the most basic here is i've got a synchronization uh element here so the synchronization element again
+ provides this you know a delta pull or push right i'm pushing pull a pole or polling depending on
+ what's needed now i'm using it in a sparse sort of setup so it's not constantly doing it right it's
+ monitoring i don't know it's hard to describe it but it's monitoring the integrity of the overall system
+ and then saying based on certain characteristics of that system you know is it outside the bounds of
+ the acceptable operations has something changed does something need to be pushed or pulled at which
+ point the system sort of wakes up or at least that particular agent or process wakes up and then
+ sends and that or pulls that information so in the most basic sense this these these what is it four
+ components provide the ability for me to sort of understand who who or what is available to it and
+ then sync so in this case you can see here in this particular curl you know it's it's uh it's it's
+ pulling changes since a certain sort of you know epoch what was run so think of a gnn and and learning
+ compilation so it doesn't learn all the time it only needs to share bits and pieces that it needs to
+ share now in this case you can see here that the it's it's essentially returning the vector so i'm
+ sending purely just math light and the math is just the specific thing that changed in the vector store
+ itself so i'm again i'm not communicating it in the way that you would communicate like an llm i just
+ changed 50 files and here's an md describing all 50 50 files that change i'm just updating the particulars
+ in the vec in the shared vector store that that the system can then understand in correlation to
+ everything else that's happening now i know it's kind of a weird concept i'm communicating in math
+ right so you have the state is this duplicated across every agent or is there some centralized
+ aggregator of state that all the agents consume from there's a centralized centralized is the wrong term
+ it's not nothing centralized well i guess if i'm running one one of these boxes then it's centralized
+ but once i've got multiple multiple you know chips or appliances or or you know these these sensor bots
+ i can then sort of aggregate those in a decentralized fashion the the most uh the most obvious sort of
+ use case for that would be like a i don't know decentralized witness where i can have multiple
+ untrusted devices all collaborating learning and one might get exploited because it has physical
+ access someone takes out the sd card pops in one that is now exploited but it doesn't take down the
+ whole entire system it assumes everything has zero trust so i i'm in a position where i when i don't trust
+ anything then i i can sort of you know understand the the nuance so i guess it's it's hard again i don't
+ have the easiest way to explain it but long story short i then i expose all the components in a
+ variety of different api calls now everyone loves mcps and i love to pick on mcps but i i i'm essentially
+ creating an mcp device right so here are all the different endpoints relating to like loading kernels
+ or rvfs these are these aren't all the capabilities these are just the most important capabilities for
+ sort of interacting with my system for beyond this use the api itself which would have a quite a bit
+ more um so and so you see here like upgrade endpoints this is the hardware that's running
+ um and i'm and then i these are the the gpio is an interesting part of this device back to this
+ device for a moment if you look and i don't know if you see my screen or my face here but this has got a
+ 40 pin sort of gpio so what this does allows me to connect sensors right and the sensors could be
+ like environmental sensors uh hvac uh heart monitor or whatever i can plug into this and then the system
+ is able to read those the data from that directly and that can be in the form of wave which would be
+ like a hertz or gigahertz kind of signal but it can also be sort of tech you know a kind of pattern based
+ signal and that signal might be like your information coming from well the opposite of
+ a brain scan maybe it might be like the information coming from i don't know heartbeat
+ possibly uh like a human heartbeat in a collection of let's say four uh raspberry pies
+ how do they synchronize their state or is their state even synchronized
+ do they all connect i just showed you it's it's the sync api point right that synchronizes the state
+ in vector in a vector form it's all stored in a vector i'm not sure how else to describe it
+ it's not text if that's what you're asking it's not about the text part so in my case for just to
+ simplify things but state is a a learning or a representation of the learning could be vector
+ it could be text could be image or just straight binary what i'm trying to understand is node a in
+ an a b c d network learn something how do b c d get it or get that learning or even need that learning
+ or know that they need that learning does that mean it's synchronized from a and then the vectors are
+ adjusted what about if b c d are individually learning separate things do they then synchronize back to a
+ because that then implies every node would need to connect to every other node and that becomes
+ well that increases the communication overhead the more nodes you add to the network
+ that might be a question for chat gbt i'm not sure how to answer the way i the way everything is
+ independent of everything else and they commit to a shared repository or pool where while they have
+ access to all the data they are not explicitly querying all the data they're querying what is adjacent
+ adjacent to their knowledge so that's the best we could describe it i have a sandbox there are four
+ sandcastles being built but the knowledge of the other three sandcastles is not fully available to the
+ agent until they dig a moat to the corresponding castle so what what question am i asking here how are we
+ handling decentralized state across multiple, and I'm doing this in a variety of different ways, multiple agents, it's not really an agent's structure, multiple instances, instances of root vector, I don't know, something like that.
+ So what I'm trying to understand is how multiple invocations on root vector, each presumably attached to individual agents, are able to coordinate, learn, or...
+ merge, or I guess coordinate, or learn from each other, because I know it's a stated feature, I haven't been able to use it, and this is after having Cloud Code and Codex going through the code base to try and identify it.
+ All right, well, let's get to the bottom of it and see what we can find out. Maybe I'm not articulating myself. We'll come back to that in a minute.
+ So, one of the things I want to show you guys today, you know, last week I was at a hackathon, and, you know, I've been playing with the RBF format.
+ Hopefully, I'm sharing two screens. Is it, yeah, is it, can you see both screens? Is it too small, or does this work for you guys?
+ Too small.
+ It's very pixelated.
+ Oh, it is? Okay, let me, let me, I'll come back to Jed's question in a bit.
+ All right.
+ In the meantime, so, the RBF format is pretty cool.
+ So, what you're looking at right here, you know, you see the, I'm running everything in a self-contained RBF package, including the Linux runtime,
+ a Vite style, a ViteJS dashboard with 3JS running, and a self-contained vector store to basically find various forms of communication in the sort of,
+ or not communication, planets in the solar system and galaxies and whatnot.
+ So, what, so this is basically just 3JS visualization of the system.
+ Now, what's cool about this, again, it's, it's self, it's self-contained.
+ So, you know, much, much like what I was showing you here on the appliance, this, this could run directly on, you know, a chip or an appliance or completely independently of a cloud-based environment.
+ No, no cloud required.
+ In this case, I embedded a small language model as well.
+ So, what that does is, first of all, is it allows me to do things like a blind test.
+ So, when, when I'm going and trying to find planets, it's, it, you know, these systems, as you guys are aware, can create very convincing fraud, right?
+ It's, or very convincing simulations of things that are, that look true, but aren't actually, right?
+ So, in this case, what I, what I did is I started with a blind test.
+ Once I built the system, I then said, can I, can I build, can I find the same things that have already been found without revealing the things that I'm looking for, right?
+ So, one of the problems you have with a language model is there's a tendency for a language model to tell you the answer because it's been trained on the data that contains the answer.
+ Now, in this particular scenario, I'm not using a language model.
+ I'm using purely mathematical sort of structures that underpin it.
+ So, I'm looking at a kind of vector, in this case, a quantum style vector space to see if I can find the same planets without telling it where those planets exist.
+ It turns out, I was able to do that quite, quite quickly.
+ So, I was, I was in the 10 planets that were found recently.
+ I was able to find those planets, you know, using a blind test with 100%, well, according to this, 94%, but it's 10 out of 10.
+ So, that's 100% to me.
+ So, now that I have that, I'm like, okay, can I prove it?
+ One, again, second problem of language models is this idea of the witness, right?
+ And each of the steps involved in actually finding a particular element, or in this case, a particular planet, and defining how in which that was found.
+ So, within this, within the pipeline of steps I need to do to find these things, I need to validate and hash or cryptographically verify each of the things I needed to do to find and discover the thing.
+ So, think of, think of like a proof, it's basically proof of work.
+ It's a proof of work that sort of proves that each step that has, has happened and, and in how it happened.
+ Now, more importantly, it uses a C because it's deterministic.
+ So, that means when I, if I, if I give you this RVF, which by the way, you can go and run yourself, it's in the examples folder.
+ Where the heck did I put that?
+ Let me just make sure I, I, I remember where I put that.
+ It's in, uh, examples RVF, uh, causal Atlas dashboard.
+ So, if you go into the RVF folder for a moment, you can run this yourself, and then you'll see there's an examples, and then you'll see causal, causal, oops, causal Atlas.
+ So, this is, this is the, uh, appliance, so you can run it, again, self, self-contained.
+ You can make it as an, uh, a RVF format.
+ Where'd I put those?
+ Where, uh, where is the RVF?
+ Anyway, long story short, it's a self-contained file that, that includes all the sort of learnings, all the process.
+ It includes the Linux kernel.
+ In this case, I can, I can then go and, and understand each part.
+ So, if I want to look at how it, you know, how it found a stellar parameter, and when I see the first step, RVF store opened, Genesis anchor created.
+ Step two, it did, ingested the, the sort of various information for a particular candidate.
+ It did some more studying of, of the periodic signals, which is basically, I think, the movement of a, of the planet as it goes behind a star and creates a slight variance in the amount of light coming off the star, I think is what it's doing.
+ So then, so I'm, I'm able to, to do that, and this is all happening in seconds, by like, like microseconds.
+ So each of this is crypto, it being cryptographically verified, so I can basically validate exactly what happens.
+ I can, I can see each step down here as well.
+ Okay, so now I've got the system capable of telling me exactly what's happening inside of this really complex neural network, sort of vector-based, uh, system.
+ What, what can I do with it?
+ Well, let's try to find some stars.
+ So in, in this, in the world, let's try to find some planets.
+ So in this case, then it's, it's taking publicly available data and trying to determine what the most likely, likely planets are in terms of both, uh, their chemistry and, and just viability.
+ So you can see here that I'm, I'm looking at it and, and then validating the information, which is kind of cool.
+ And there's some other detection criteria.
+ Again, some of this is beyond my, uh, my ability to explain, but essentially this is fine.
+ It's finding planets.
+ Once you found the planets, I'm like, okay, can I find life on these planets?
+ And I'm not necessarily looking for life that is human life.
+ I'm not, I'm, I'm not looking for what they, what the Star Trek guys M class planets.
+ I'm looking for just planets that might exhibit potential life based on bi, on biosignatures, which is what I'm doing here.
+ So in this case, and it found a bunch of different planets, some of which are, are likely not supporting life.
+ This one here doesn't support life.
+ This one doesn't support life, but in this case, I found one that has a 22% chance of sort of biogenic life.
+ Now, when you, when I say 22%, 22% out of, I, in this particular data set, I looked at 5 million potential planets.
+ And so 22% likelihood out of a, out of a galaxy or universe of planets is actually really, really high.
+ Like, I don't, I don't know if you could probably get much higher than that without actually going and visiting the damn planet.
+ But what this is looking at is sort of saying, you know, what's, what the molecular signals, it's might be a little small.
+ I apologize.
+ I probably need to up the font size a little bit here, but this is looking at basically found CH4, 95%.
+ It found some other sort of habitability requirements.
+ And then it's looking at, you know, whether it's, it's confirmation that someone other than me actually found this planet as well.
+ And right here, it was found in 2023 by these, these folks, which I'm not going to try to pronounce.
+ And it's telling me the various settings.
+ So that's, that's kind of cool.
+ And this is all happening quite quickly.
+ Now, once I've got that, I'm like, okay, what, how can I take this even further?
+ Well, the next step is basically, well, actually I didn't run the discovery pipeline.
+ Let's run that for a moment.
+ So this is the discovery pipeline running Rust in the RVF format.
+ You can see how fast it is.
+ And then I found something here.
+ So I'm visualizing the, the orbit of the planet and letting like, it's telling you the radius.
+ I can switch and you see different planets have different sort of speeds.
+ So you can see that this one's moving quite a bit faster.
+ You know, I'm just messing around with, with a self-contained file that includes its own AI, its own reasoning, its own understanding, its own vectors, its own, all in that one file.
+ And this is all running, you know, in, I think the entire thing is like three megabytes or something.
+ So lastly, there was some research that came out recently, I think in the last month that said that they've discovered some Dyson spheres and I'm like, okay, let's take a look at Dyson spheres.
+ So for, for those that don't know what Dyson spheres are, let's run the search pipeline.
+ I can blind test it.
+ So first of all, I needed to do another blind test.
+ So the blind test is like, can I discover the same things that those guys at, at, I think it was SETI found around these potential candidates for, for, you know, Dyson spheres that exist.
+ Now, for those that don't know what Dyson sphere is, a Dyson sphere is this concept that essentially will wrap an entire star with this geometric structure that, that basically takes all the energy of the star and repurposes it.
+ So what we're looking for in a Dyson sphere is basically places in, in, in various galaxies that have a kind of void, right?
+ So you're looking at, at this void where you might have a kind of anomalous structure that says, well, there should be a star here based on gravitation and other sort of characteristics, but there isn't one, right?
+ So in this case, I'm looking for, I'm looking for the absence of, of the thing in which I'm looking for, which is perfectly suited for my min cut diagram.
+ All right.
+ So I was able to, again, do a blind taste, or blind taste test.
+ This isn't food, but blind test.
+ And I found Pepsi.
+ And then what, what we, what we have is I was able to find again, the same, the, the same results, seven of seven results.
+ And then I'm like, okay, let's go find some more stuff.
+ So in this case, what we're going to run, we're going to see what we can find that, that hasn't been discovered.
+ And here we go.
+ We're, we're, we're looking at, again, we ran, well, we run here and you guys can try this.
+ Do you want to fool around with it?
+ Ask Claude, go, go to my Rue vector and, and run it.
+ Yeah.
+ One thing.
+ So this is, this is great.
+ And I've been working on something which is tracking near earth objects and interstellar objects in terms of artificial behavior and orbital mechanics.
+ And I tried to model and build that in Python.
+ I, I linked that to you in the chat.
+ So if you maybe want to look a little bit, let's say closer to our home, uh, I, I, I can't, I can't really talk about that.
+ One of my clients is a, is I'm, one of my projects is a suborbital management system for management of near, near, near, near earth objects, mostly space junk and satellites.
+ So I kind of steer clear that discussion at the moment, but it's the same tech.
+ I just supplied, I, I applied what I'm doing for finding and controlling sub, um, sort of suborbital satellite or orbital satellites.
+ And rather than showing the, showing you guys what I was doing in that space, I applied it more broadly, but it's the same tech.
+ But I can't, I can't, I can't, I can't really get into that right now.
+ I've gotten into it.
+ You don't have to, I just want to pitch some inspiration.
+ So bottom line, um, I've been noticing some, let's say, um, animal's behavior and, and near earth objects, which seem to be a different than orbital normal mechanics imply.
+ And I was trying to, to see through them and find out if they have certain patterns of behavior in terms of recurring presence in earth, uh, while trying to, um, uh, disprove the Fermi paradox.
+ So if you have a look into that repo, maybe it's something that might help you achieve whatever you're doing without going into detail.
+ Yeah, yeah, for sure.
+ Uh, you have me until Python, um, make it rust and I'm your guy.
+ But, uh, it definitely sounds, it's definitely sounds interesting.
+ I don't have to have in a token.
+ That's the thing.
+ So the, the last part that I want to show you guys is the self-learning solver.
+ And this is my most recent addition to the, my system.
+ Now the, the self-learning solver essentially creates a kind of, I don't want to call it AGI because that opens up a can of worms to what the hell's AGI.
+ But essentially it's a system that, that allows it to question its own structure, basically creating its own puzzles.
+ So when you look at the configuration of the training, it's, it's self-reinforcement learning in the most basic sense, but it's a self-reinforcement learning that allows the system to question and, and, and then form its own sort of causal loops of puzzles that it needs to answer.
+ So when you look at sort of, again, I need to zoom in a little bit.
+ You guys can run this if you want, but you look at the puzzles, I can define how many puzzles it's going to do, how it auto trains each round.
+ Now I, I use this kind of auto training, auto kind of puzzle solving system for just about any problem I'm looking to solve, like DNA or whatever it happens to be.
+ And you can sort of play with the settings.
+ I can choose balanced or various other components, and this is looking for sort of mechanisms to discover the undiscovered by telling back to the blind test, how do I find things that I want to discover without telling it the answer to what it needs to discover, right?
+ And that, and that, and this in particular is how I'm handling that.
+ It's, it's creating that loop, that really quick loop of the ability for it to, to learn very quickly through sublinear processes.
+ So what that means, and I'm going to try to explain it because I'm on the verge of what even makes sense to me, but basically it's learning in very, very tightly constrained time-based loops.
+ So again, micro seconds and below, and then as, as it goes through that, it's creating multiple sort of parallel tracks that it can then test each of those potential or hypothesis of what those tracks may look like different planets, different, you know, elements, different things that it needs to understand.
+ And it does that in a, in a kind of parallel or SIMD, I think is, is the actual tech.
+ So all, all at once across multiple channels, and then they converge at some point there's similarities between all these different parallel tracks and the systems tracking that kind of convergence of where and how those things are, are kind of blending together.
+ And at which point it says, okay, out of a million or a billion different possibilities, these ones are clustering together in this, in this kind of vector space, which are, which you're kind of looking at here.
+ And we see some of the, we see some of the data in the background, which is going to kind of a cool visualization of it here, the data.
+ And this is sort of doing the pattern recognition.
+ So obviously the red bits here are the parts that are, are less interesting.
+ The green bits are the parts that where they sort of cluster together.
+ I know it's kind of, kind of what it's kind of weird to see here, but I kind of like, I kind of like the visuals.
+ So if you're, if you're looking to apply this to other things like business or stock trading, you can literally take this entire thing that I've built pointed at my neural trading system and say, go find me the best, you know, stocks.
+ But it's not finding those stocks based on the obvious patterns.
+ It's finding it on the inverse patterns of what it thinks it needs to find, setting puzzles, and then saying, how can I solve this problem without asking for help?
+ Again, kind of, kind of nuts.
+ Here's my memory system.
+ So this entire thing is in, uh, about nine megabytes, uh, of, uh, of, of, of sort of total storage.
+ You know, this is, this is how much I'm using.
+ Here's my bounds, uh, for this is, this will be min cut.
+ This defines the boundaries of the system.
+ Now I can download this entire thing as an exe executable.
+ So if, if I want to run this and give this to someone else, I can just download the .exe.
+ I, and, uh, or I want to run it on my Mac, uh, DMG or Linux, the, the, the tarball, the all, the entire thing is completely self-contained, which is again, the, the part that's most amazing to me.
+ I don't need, I don't need an operating system, literally running, running this whole thing on a single device.
+ Right?
+ So when I jump back and show you this, the roof, uh, the cognitive system, I'm doing the same thing here.
+ Now the difference is when you go into, let's say, you know, I, it mounts it as both a storage system and as a, uh, network on, on your own device.
+ So the network would be this one nine, the one 69, my kids said I should have done one six seven, but I did one six nine, whatever.
+ Uh, I thought, I thought the 69 kind of fit into each other, kind of like the, you know, whatever.
+ But anyway, so you get this launch.
+ So on a Mac, you'd see this when you plug in the device.
+ And if you drag this in here, it's going to do a quick lookup.
+ It was so fast.
+ You probably couldn't see it, but it's checking the configuration.
+ Then it takes you back.
+ Now, if you go to the index page, you're going to see just the, um, the API.
+ You can test the API at any point.
+ This is the response.
+ And it's super fast because there's no network.
+ It's literally, I'm literally connecting to the box.
+ So I'm limited the only speed is the speed of the time it takes me to traverse the USB cable and to speed it up.
+ I just used a shorter USB cable, which is the most amazing part.
+ So the difference I, I'm, I'm able to see the difference in speed between a long ass USB cable, this one being fairly long and, and this one.
+ So that's actually a measurement of the, I guess the speed of electricity, maybe it's not light, but anyway.
+ It's it, and, and so the, the length of the, of the, of the, uh, cord actually shaved millis, micro milliseconds off, but I could measure that, which, which was kind of cool.
+ But when, when, when you go in here, you can see like identity and I can test it.
+ Depends on the USB protocol you're using, USB two or USB C vastly different.
+ I'm using, I'm using USB three.
+ That's just for speed.
+ The other thing to consider is how many retries are there over the longer cable?
+ Because the expectation is there's some signal degradation until the re it until the handshake is reestablished.
+ I'm not using handshake.
+ Remember I'm using quick.
+ So I'm using, I'm using the USB protocol, right?
+ No, I'm using, and I'm using the M DNS protocol.
+ Uh, so that's a network pro I'm not, I'm not using the USB protocol USB driver.
+ Uh, well that I did, that I'm using the mount.
+ Yeah.
+ So I'm only using, I'm only using the USB mount for sort of the initial configuration.
+ As soon as this is configured, I'm actually bypassing USB altogether and using the, in this case, I'm using a wifi connection, which is even, which was faster than the USB connection in this scenario.
+ Cause it's so close, I guess.
+ I don't know.
+ But you're still running through the controller, right?
+ Cause the signal is still passing over the wire through the port, through the USB controller over to the CPU.
+ No, it isn't.
+ It's using the, it's in this case, it's using, it's using the Y it's, it's, it's using, it's using my network adapter.
+ In this case, I'm well, I can hypothetically, I guess, use the USB controller for that.
+ In this example, I'm showing you right at the moment, I'm just using, I'm, I bypass the USB and I'm using wifi.
+ Now I can mix and match, but regardless, it's freaking fast is, is the idea.
+ And you can see it when I go here and do like a vector lookup, right?
+ The, the response is almost instantaneous, right?
+ So it's, it's, and these, these are all the different API sensors.
+ So for in this, in this particular group, you're looking at here, these are all my sensors that I might add for, again, connecting other things to it.
+ And again, to Jed's point, the limit to speed in, is going to be the mechanism in which I'm connected to the device.
+ So ultimately I'm connecting a wire to these, these pins and you know, I can only move beyond, I can't move faster than the speed of the wire or the USB three or wifi or whatever I'm, I'm using.
+ But regardless, it's way faster than any cloud by many orders of magnitude.
+ So in this case here, you can look at my sensor and drift history.
+ So the, the, the drift history in this particular scenario would, would be looking at whether the sensor fits within the, the, the sort of learned pattern of the sensor in which I'm looking at.
+ So that could be, let's say a heartbeat, and let's say this is in a hospital now, remember, this doesn't require any external network, no clouds, it all runs completely on this device.
+ So that means it can learn in proximity to the patient in which it's connected to so worst case scenario, let's say the hospital loses its, its interconnection, the power goes off, this thing's running on, on, on a thermal optimized processor that I devised.
+ So it can run on, again, a double a battery or less.
+ Now, if, if we want to see how that works, which is even is, which is pretty interesting.
+ Here's all the mechanisms I have for overclocking the system.
+ So I can adjust the frequency of the actual arm chip based on whether it's doing something or isn't doing something, whether it needs more capacity or doesn't need capacity.
+ And I can overclock this entire chip on this little thing, all four cores, uh, up to 30% before it degrades to a point where it's unusable.
+ But, but for certain things, like when I want to rebuild an index for, let's say a GNN, I can, I can overclock it just long enough to get that job done.
+ And so what takes potentially one millisecond at a thousand, uh, a thousand megahertz can now happen at 1.3 mega, 1.3, uh, you know, thousand megahertz.
+ And that shaves 30, 30% potentially off the time it takes you to do that thing.
+ So I'm going from one millisecond to microseconds just for that.
+ Aren't you still found a millisecond to microsecond is order of a thousand, right?
+ So how does a 30% increase in something and produce a thousand percent effect in something else?
+ Well, I'm, I'm, I'm already on the verge of a microsecond and millisecond.
+ So it's enough to shave that sort of, I'm like 0.001 milliseconds or whatever.
+ So the 30% was enough to drop it under that threshold, which is, which is the important part, but it is, it's, it's a, it's a 30%, you know?
+ So 30% only is going to take you to so far, it's not like 30 X or anything.
+ So you're literally doing task-based clocking of your hardware.
+ Mm-hmm exactly.
+ 001 millisecond is one microsecond already.
+ You can play with it anyway.
+ So yeah, this, so what, what you're seeing here in essence is the kind of underlying pattern that exists within what I was showing you here.
+ The only difference is this is the final app, right?
+ This is the, this is the final result, but you can see how, how it's nice and quick that, you know, you know, I'm using in this case, three, three JS for, you know, the, my processor on my laptop in the GPU, offloading that.
+ But the, the actual, like actual intelligence of the entire thing that you see here is all power based on that, the device that I'm showing you here or, or where, so I can run any of these on this.
+ So in this case, if I want to take it further, let's say I want to download some of my other RBF, uh, related, uh, components.
+ I've got the ability to let's, let's go here, RBF, import and export.
+ So I can then import my various, I'm not going to do it cause I don't have it handy, but all I need to do is import my data.rbf that I stored.
+ And then I can, I can bring it onto the device.
+ Again, it's a limited size in terms of the device.
+ So you, you're going to watch out for RAM and you're going to watch out for the amount of storage.
+ I've got 16 gigs in here, which is pretty good for most of the things I'm doing.
+ But, uh, if you want to export it, then you've got the ability to go here and you can, you can export the RBF as well.
+ So it'll build it.
+ And I get different formats here that I can choose from.
+ So I've got, here's my security components.
+ So everyone's like, okay, you built this crazy thing.
+ Like, what are you going to do with it?
+ So I know my, my, my most obvious example was the crazy example here of, uh, of the universe itself, but it actually was useful because it represented a whole variety of things that most deep analytics is going to want to do.
+ Anyway, it's, it's representing the data in a higher dimensional structure in terms of the vector environment.
+ It's representing it in a kind of causal relationship.
+ Is it learning?
+ Is it adapting?
+ Is it getting better?
+ It's defining drift.
+ Like, is it going outside of the bounds of an acceptable structure?
+ Can it, you know, can understand what that structure is?
+ All of this stuff here is happening within this system.
+ So taking this and applying it to some other, you know, like a legal platform or what, uh, Rob mentioned in terms of like a group of satellites is, is at this point fairly trivial.
+ It's the same basic structure and information just with different purpose.
+ Now, so that's what I'm really trying to show here.
+ Um, let me pause for a moment.
+ I think you asked, uh, in regards to the question, regards to how I, how I was learning.
+ Let's see if I can find, did I get an answer to that?
+ Let's take a look here.
+ Uh, I think Stuart had a question.
+ Sure.
+ Hey, um, obviously this stuff is really cool.
+ If we were to take it from outer space and bring it into a business context, I'm having a little bit of a hard time wrapping
+ my brain around how it applies, what it looks like.
+ And have you done this in any of your business clients that you could at least describe what
+ it looks like when you apply it to a concept that's more approachable for many of us who
+ are kind of in that world?
+ Yeah, I, I, um, the most obvious would be the work I'm doing in the medical space.
+ So the, the ability to sort of understand sort of the, the interconnected relationship of
+ diagnostics within a hospital setting is, is one of the projects I'm working on mapping.
+ All these sort of information in terms of all the interactions, for example, between the current
+ state of their, the patient's vital signs, medical history, um, pharmaceutical sort of interactions, and
+ then providing the mechanism to traverse all that and say, based on all these things, here's what the
+ likely X is, right? So, and I can do that really quickly. So that's a diet, that's like diagnostics, right? Just on a person.
+ All right. But, but, but you do that with an RVF? Do you teach the RVF about the domain? Do you store the, the AI and the data? And like, I guess I'm trying to understand how much is stored in the RVF? And how much is the RVF acting on a data set?
+ It is the data set. It's all in the same file. There is no external, I bring it all into the one data set. There's one, there's no external. That's not, there's not like I'm going and calling an API somewhere else.
+ I'm importing all of it into a single file. It all self-contained in one place. That said, I only invented this two weeks ago, guys. Like, I don't know, it's there's, you know, the world doesn't move as fast as I do.
+ I do. So the, the most of the things that I'm doing in terms of the larger projects that I'm involved with are more traditional roof, if that's even a thing, more traditional roof vector, where I'm basically taking a lot of the things I'm showing you right now, and I'm connecting to an API or a data lake or some repository of documents and whatnot, and then, and then doing this kind of causal sort of analysis of it.
+ So I just, I just, I just took it a step further and said, okay, rather than having a whole bunch of, you know, separate systems and all these different places and all these different clouds and APIs, can I put that on one, one package?
+ But that's only two weeks old.
+ So I understood. And then what's the limit of how much you can compress a universe into this kind of black hole sphere of an RVF that is omniscient? How much can you get in there? I mean, if you're talking a whole hospital system.
+ A lot 96% compression. So I use the, I use the same sort of compression algorithm I use for like compressing an LLM, you know, quantitizing, I guess would be the right term.
+ And generally speaking, the, the, that, that, that in more traditional terms is eight or four bit integers.
+ I, I've settled on a seven bit integer, which people tell me is, is odd, but it works really well because it's one in seven is a prime number.
+ It, it's not naturally gives me sort of the benefits of being an odd number and a prime number.
+ So I, I like it for my quantitization, but that doesn't, that, that gives me, depending on the type of data and the level of which I need to quantitize it, remember stripping out all the stuff I don't need and only focusing on the things I do.
+ So that generally gives me somewhere between 80 to a 90% reduction in the overall size of the data going beyond that as the thing operates and begin, keep in mind.
+ I'm doing millions and millions of little tiny calculations, which if stored in just plain texts would be gigabytes very quickly.
+ So I'm, I'm only storing the important deltas, the deltas are tiny and those are hashed using crypt, cryptography.
+ So super small little deltas that rep are represented in a vector space that I then can traverse and ask, what does it all mean and how does it work?
+ And that, that, that allows me to run it in tiny little, on a tiny little chip kind of thing.
+ All right.
+ Thank you.
+ I mean, it's, it's amazing.
+ We're just trying to figure out how to get our head around it and how to apply.
+ I can't even get my head around it.
+ I don't know.
+ I like this, to be honest, this is beyond my comprehension for most things, but it seems to work.
+ So I don't know.
+ All right.
+ So can you, can you guide a little bit the, the commands to effectively create the RVF?
+ So you, how, how would you do it?
+ Ask Claude, just ask Claude.
+ Yeah.
+ You, you could add, you, no, one's going to type in a bunch of commands.
+ Like if you are, you're, you've got more time on your hands than I do.
+ Ask Claude.
+ Yeah.
+ I built it into, uh, my agent DB.
+ I published that list weekend and, and my, um, Claude flow will have it here shortly.
+ So the entire, uh, Claude flows, uh, system was moving from, uh, SQL light to my RVF format.
+ But basically the most important part of it is it uses a copy on write structure.
+ The copy on write structure means if you're familiar with sort of virtualization, if you
+ look at like the WSL and windows, which is the windows subsystem, you have to partition
+ that space.
+ And then the maximum they can grow is within that structure of the partition.
+ A copy on write structure allows it to sort of sequentially grow kind of like a zip file,
+ right?
+ The zip file gets bigger, the more stuff you put in it, but the, unlike a zip file, I've
+ included a runtime kernel and the, all the other root vector stuff in as different parts or layers
+ within that binary structure one.
+ Um, so think of each, each layer doing different parts of that, of the requirements of that
+ file.
+ One might be again, the, the Linux kernel, the other might be the GNN, the other might
+ be a self learning loop.
+ Those are all different layers within the file.
+ Some things need to expand.
+ So there might be a POSIX style storage area, like what I was showing you earlier in terms
+ of the USB drive that might need to expand and have more space that can grow, but it can
+ also optimize itself.
+ So because it's self optimizing, I can then, I can then strip out any extra extraneous information
+ to keep it tight, tightly bounded.
+ Now, again, I don't, you got to ask Claude if you want something a little more simple in
+ terms of explanation, but the moral of the story is it's portable and it's, and it's deterministic.
+ That means you're going to get the exact same result.
+ If you run my RVF in some other environment and some other, you know, chip set, it's going
+ to give you the same exact results.
+ Right.
+ Where an LLM, even if you set the probabilism to zero, the temperature, the top K, the top
+ P you're, you're, you're always getting a bit of drift because it's always going to trying
+ to give you a bit of a probabilistic answer.
+ So it's really difficult to get the exact same result every time.
+ And you'll notice that with like, you know, the additional adjectives thrown in here or
+ there, the, the, the, the, the, that, and the other thing.
+ And it's even worse when you start using mathematics, there's no, there's no room for drift in mathematics.
+ Right.
+ It's, it's inherently deterministic.
+ So as soon as you start trying to say, well, you know, tell me the drug interaction or the, you know, the folding patterns of a protein.
+ Language models just don't, don't cut it.
+ There's, you can't probable, you create a probabilistic description of the protein patterns of a drug interaction.
+ It just doesn't, it doesn't work.
+ It just doesn't, it doesn't work.
+ This solves that problem.
+ It's explicit, it's indeterministic.
+ So legal, if you need a witness chain, it solves that problem, right?
+ You've got a, you've got a sensor that's been, you know, that's running in a black box on a drone or a plane.
+ It's giving you exactly every single particular step that happened and it's repeatable and traceable, which is important.
+ All right.
+ I'm blabbing here.
+ Hopefully you guys can see my other screen.
+ You're not, this stuff's really important.
+ And this is the stuff that helps us get our head around what you're building and how we can actually find a way to utilize it.
+ So this extra explanation is really, really helpful.
+ Agreed.
+ Yeah.
+ And again, I don't have all the answers, guys.
+ I'm, you know, exploring and learning and trying to explain the best I can.
+ But some of these, I just, it's beyond my ability to explain.
+ All right.
+ So Jed had a question earlier, which was, which is interesting.
+ He asked, you know, how we handle a decentralized state across multiple instances of root vector.
+ This project has a layer distribution state designed to spread across several dedicated crates, which is kind of what I said.
+ So we've got this idea of delta consensus.
+ This is, and we might want to dig into that slightly more here in a minute.
+ We've got this idea of a consensus algorithm, this raft approach, which I mentioned.
+ This provides the state machine, election, log, replication, and quorum.
+ Similar to what you'd have in like, I think it's like Ethereum, probably.
+ Then you've got this idea of a DAG consensus.
+ A DAG consensus would be, if you're familiar with the blockchain world, this would be Avalanche.
+ Where, so if, if, if Raft is Ethereum, DAG is, is, is, again, it would be like an IPFS or a, an Avalanche style sort of blockchain.
+ It's not a blockchain in that, in the way that, like, you know, Bitcoin blockchain, but for lack of a better term, it's similar.
+ Then we get this idea of event sourcing.
+ So this delta stream with checkpoints, relay, and compaction.
+ So again, the delta, back to the delta, the delta is the vertical, the, the, the intersection, right?
+ It's the, it's the, it's the, it's the, it's the state of knowing and understanding applied to itself.
+ Sometimes described as that triangle icon from Greek, if you're in the Greek sort of alphabet.
+ Alphabet, um, causal delivery, vector clocks and sharding.
+ So this is my clustering capabilities.
+ So this is how I would handle, um, scaling this on a project that has, you know, hundreds of millions of users.
+ Right now, my largest project, it has a hundred million active monthly users.
+ Shout out to these guys.
+ Thanks for, for hiring me.
+ But how do I, how do I handle that?
+ So that's how the, that's how I handle that.
+ I'm handling that through a combination of the clustering and the replication to, to, to allow for a kind of eventual consistency in the system.
+ Conflict resolution, how it all fits together.
+ State flow.
+ So now I asked it to explain this in a simpler terms.
+ All right, let's, let's go for simple.
+ So think of root vector, like a team of people all working on the same giant spreadsheet, but each person has their own copy.
+ So think of RBF as their own copy.
+ So RBF is kind of like a PDF file for like cognition.
+ So who has the data that provides that's done in the form of a shard.
+ So instead of every instance, holding all the data, we split it into 64 chunks or shards, a consistent hash ring decides which instance owns, which chunk.
+ When a new instance joins only a small slice of the data moves, not everything.
+ Remember I'm the anti blockchain.
+ I hate the concepts of having to move all the data for, for like consistency and understanding and sort of, you know, conflict resolution, which is what essentially Bitcoin and Ethereum do, right?
+ They're like, if you want to be a node in Bitcoin, you got to move all the Bitcoin transactions that's ever happened, which is stupid and unnecessarily to prove the work.
+ I don't have to do that.
+ I only need the, the deltas that, that are needed to prove that particular part of the work.
+ So we have two different strategies as I, I, as I was trying, but badly trying to describe earlier.
+ So the, we, we've got a, a sort of wrap consensus.
+ One instance is elected leader.
+ All rights go through it.
+ So that I guess would be centralized if, if to a judge point and the majority must agree before anything is committed like a team vote.
+ So in that instance, it's kind of like Bitcoin, right?
+ It's people claim Bitcoin's decentralized, but it sort of isn't really decentralized from, from a completely decentralized approach.
+ Then we've got this kind of frequent, you know, idea of using CRD DTs, special data structures that can be merged without conflicts, no matter what order the data arrives.
+ That is sometimes referred to as eventual consistency that back to my, my quick protocol.
+ That means I don't need the data to be delivered all at once in a sequential pattern in order for me to start working on it, which is important because in the form of my RVF format, I, I, the, the entire package could be multiple gigabytes.
+ But I only need the first four kilobytes before I can start working within the structure of the, of the package itself.
+ So it's, it grows, but it can be worked on before it's done downloading.
+ This is just making sense or I get, I'm hoping that I'm hoping this is helpful.
+ For number two, you have a centralized writer that acts as the canonical source of all the data.
+ It doesn't necessarily store all the data.
+ It's an index that points to the other nodes, which carry the shards where the data actually lives.
+ Did I get that?
+ Yeah, I think that's a way to look at it.
+ So, okay.
+ So in this, in this raft leader Singh, how does the, in the event, the leader dies or is otherwise marked as, I think it was suspect was the term.
+ How then is the new leader elected?
+ I assume someone has some, it's elected amongst all these nodes, but they all nodes do not know about each other.
+ They only knew about each other because of the leader, right?
+ Yeah.
+ So how does the system, what prevents them from, what prevents the system from creating a series of islands where.
+ Yeah.
+ Let's say adjacent nodes elect a leader, but then a different island of adjacent nodes elects a different leader.
+ How do they reconcile between?
+ Does that make sense?
+ Does that make sense?
+ Uh.
+ For those listening along in the chat, let me know if I'm not making sense.
+ I, I, doing a question I can ask.
+ Let's, let's go jeopardy on this.
+ I, I need, I.
+ What is.
+ Okay.
+ How do decentralized nodes with only knowledge of adjacent nodes elect a leader under raft?
+ Type, type that, type that in, in, into a zoom and I'll, and I'll pop it in here.
+ Right.
+ Um, but, but the moral of the story is I'm not using centralization.
+ So it's not really about a, a, a required question.
+ I mean, I'm decentralizing the thing.
+ No, I'm using, I'm using the decentralized protocol.
+ I, I can use raft if it's a trusted network, but as I showed before, it's, it's generally not required.
+ Right.
+ And that's why I'm using the consensus algorithms and whatnot, which are decentralized.
+ So that's the.
+ Yeah.
+ Yeah.
+ Yeah.
+ You've got different architectures.
+ You can, you, you can, uh, apply.
+ Right.
+ Now I, I, you, if, if, if it's an environment that you trust, sure.
+ You can, uh, use, use a centralized approach.
+ All right.
+ How do we decentralize knows who knows presence.
+ Okay.
+ That's a good, let's, let's see what, let's see what it says.
+ Which repo is this in?
+ And maybe I'm querying the wrong one.
+ This is re vector.
+ Um, so yeah, this is my re vector and there's, there's, you know, millions of lines of code
+ in here at this point.
+ So you need to kind of point it in the right direction.
+ All right.
+ All right.
+ So what do we got here?
+ Leader election.
+ When you know, when you only know your neighbors, gossip first, vote second.
+ A node can't vote for someone it doesn't know exists.
+ So it happens in two phases.
+ Every node starts knowing just a few C peers.
+ Then a knows B and C and B knows a and D and C knows.
+ So it's a hierarchical grid.
+ It's the most fundamental part of my swarm structure, right?
+ You've got a it's in this scenario.
+ It's a, it's a hierarchical grid.
+ So what you're really talking about is what happens if, you know, how do we handle fault tolerance?
+ Phase two raft.
+ Okay.
+ How do, how do we handle?
+ How do we handle fault tolerance in a decentralized form?
+ Something like that.
+ You get, I think you just got to ask Claude to be honest, fool around with it.
+ See, see, see what you can wait, what you can, you know, cook up with it.
+ Are there any uncommitted changes here?
+ Cause I'm, I'm cloning the, the repos shortly.
+ No, I just did a push this morning.
+ I did a major update actually.
+ Speaking of there's a, there's a couple new crates.
+ And this is probably right up snooze alley.
+ That might be really interesting for you.
+ In particular, I created several novel new forms.
+ Uh, no, that's a node.
+ I want to show you.
+ I want to show you the, uh, no transformer.
+ Yeah.
+ Graph transformer.
+ Sorry.
+ A lot of stuff to cover here.
+ I've been on a, on a bit of an epic, uh, swing here.
+ So what I did here, I created several new graph transformers.
+ So what this does is let's, this is a, lets you create mathematically proven sort of elements
+ that can then be applied and understood using a sort of attention mechanism.
+ Um, if, if you're, if you're looking to sort of push into the, uh, further into the boundaries
+ of really large amounts of information, like how do you scale to millions of nodes and understand
+ the sort of physics of those nodes?
+ So let's say you're doing drug analysis and there's billions of particular nodes and understanding
+ the causal effect of how those are going to affect, you know, people and, and other structures
+ in and around it.
+ The, this library is going to handle that sort of thing for you.
+ If you're, or if you just got a ton of information, let's say you're Google and you, uh, have the entire
+ internet that you need to look at this, this structure would allow you to traverse all that.
+ So this is the, this is the structure for like super large data sets, billions.
+ And, you know, peta, petabytes of data, and then being able to traverse that really quickly.
+ So I've got a few different modules that I've created for that sublinear attention,
+ which is probably the most interesting, the proof gated one.
+ Let's see.
+ This, this provides the, uh, the ability to validate each element within the actual graph state
+ before it makes a decision, which basically means it's deciding on the decision of the,
+ before it makes the reasoning process that it needs the reason on and then reasons on that reasoning.
+ And that's happening in using a sublinear attention back to speed, really, really tightly constrained timeframe.
+ But if you're looking at sort of going down the rabbit hole of crazy, this is, this is the, this is the one to look at.
+ And I include all the various ADRs to show you how I built it.
+ So if you go in here and you look at the ADRs, you'll, you'll, you can like, like, here's the, uh, this is probably the most interesting for me.
+ This ADR, this ADR basically graphs sort of real world dynamics.
+ Well, why is it rendering for me?
+ Anyway, the, the real world dynamics would be like a world model, like from the particle level on up.
+ So I can map the particles of a, of a system using a simulated quantum state, which is what you'd see in that example I was giving you earlier and then apply attention to it.
+ So this is, this is, again, absolutely insane, but the, the practical application was that planetary system that I was showing you.
+ Ruf, have you tried Falkor DB?
+ Have you checked it out?
+ No.
+ What is it?
+ Pointed to your swarm.
+ There might be a couple of things that are interesting because they're actually using main operations when they're doing the queries instead of Cypher.
+ Yeah, let's, let's do it.
+ Okay.
+ Uh, let's create, I mean, on main, let's not work on main.
+ So let's go here.
+ Uh, create, create new, I'm, BSP.
+ And, uh, I gotta, I gotta update my cloud code here, but whatever.
+ There was a major update they did to Windows the other day that broke everything on Windows.
+ Um, new branch and review.
+ Okay.
+ Uh, let's do it.
+ Let's do it.
+ Let's do it.
+ Uh, Falkor.
+ I like the name.
+ Falkor DB.
+ All right.
+ Let's see.
+ Yeah.
+ Let's see what.
+ What's built in.
+ Really interesting and faster.
+ Now for me.
+ I have a question.
+ Sure.
+ Um, when you mentioned that amount of data, uh, that you were saying before in the project that you were mentioning before, or in the package to handle that amount of data.
+ You mentioned that rbf format will packed all that data in one file.
+ Yeah.
+ In a, in a very, in a very small file to run in a, in anywhere.
+ You know, yeah, the, I can get the, I, I, I got this so small that I was able to create a seed and put it in a QR code.
+ That's as small as they would get it.
+ So you can literally embed the core, um, the core intelligence of the, the rbf, you know, cognitive system in the space, which is 200, 2000 bytes.
+ So I guess that's two, two kilobytes in, in a QR code.
+ So when you scan the QR code, then the seed then expands because it expands to available information to it.
+ So the most basic could be like a QR code that then opens up in a browser possibly or whatever.
+ And then once it's in the browser, expands and, and downloads and optimizes itself based on that.
+ So it's literally, I don't, I don't know if anyone else has figured out how to put a legitimate, a, you know, AI inside a QR code, but yeah, that's how small you can get it.
+ I mean, all you'd need is a large enough camera resolution to interpret the QR code, right?
+ Well, QR code is limited, right?
+ You can only put so much information and I think it's like 2000 bytes.
+ So, but I, I was able to get it into 2000 bytes is the moral story, which is tiny.
+ Now it's going to download all the, it's going to download other stuff at that point.
+ Like I could do some basic stuff in 2000 bytes, but really, if I need, if I want to do anything particularly interesting, I'm going to have to bring other, other systems in, in the play at that point.
+ Now, the only thing I don't like about this Falkor thing is Redis.
+ Like, why do I need Redis?
+ It looks like you need to run it in a Docker.
+ It's a Python.
+ It's bloated.
+ The imagination is saying interesting thing when doing the queries, right?
+ Maybe if you're able to extract a logic and then apply it somewhere, it would be really cool.
+ It's using sparse matrix.
+ I'm doing the same thing.
+ It just looks like a bloated version of what I'm already doing.
+ I'm using linear.
+ I'm using sublinear algebra for queries.
+ They're using linear.
+ Yes.
+ It's, it's, it's similar in structure to what I'm doing.
+ Just slow and bloated.
+ There you go.
+ Yeah.
+ When you, when you create the, the cognitive container, you're using firecracker, right?
+ I can, I don't need to firecrack, firecrack crap, uh, firecracker is a, uh, is a orchestra.
+ I guess an orchestrator for, for bare metal.
+ So you, you, you know, you can use it if you want to use it on like an E2B style environment
+ or, or like a serverless environment, then you would, you would use firecracker.
+ Now for like on my ESP 32 or whatever, I'm just, I'm just compiling the RBF directly to
+ run on the ESP 32 or an ARM based processor.
+ And then I don't need, I don't need firecracker.
+ That's the binary.
+ Yeah.
+ It's binary.
+ Now you're going to have to compile it.
+ Right?
+ So remember what I was showing you earlier, this download.
+ Yeah.
+ When you go here to download, you know, download is an exe or, or a DMG.
+ So I'm compiling the RBF to be an exe.
+ Right?
+ And then no installation required.
+ You can just double click the exe and it'll run CLI or desktop or whatever you want.
+ Um, no installation.
+ Now in that scenario, I'm compiling it for windows or, or Mac.
+ Right?
+ So because it's rust, I can compile it for different environments.
+ Now the core RBF itself is, is just a binary.
+ So when I include it with a runtime, for example, when I've included in agent DB, as well as the, um,
+ MPX root vector that includes the runtime.
+ So I don't need to worry about compilation at that point.
+ I can just run it through the, the MPM runtime.
+ So it'll just work.
+ Right?
+ Cause I've already handled that part of that problem.
+ But if, if you don't want to use an MPM, you know, you want to just have it native, you know, on the chip bare metal, then use compile it for that chip.
+ Got it.
+ Okay.
+ Uh, let's see.
+ I, I, I've got the other one running too.
+ Uh, let's see what, what it has to say.
+ Um, it's almost done.
+ Let's go back to the other screen.
+ Too many monitors here to keep track of.
+ Agent is complete.
+ I got a file somewhere.
+ No, it's not quite done yet.
+ And by the way, if you're curious about how I build everything in root vector in particular, which is kind of my, uh, my, my lab, you're going to see the various, uh, ADRs.
+ And the ADRs, again, is, is kind of my, the magic to what, what I've, how I can build all this stuff.
+ Oop.
+ Research.
+ FALCOR DB.
+ Okay.
+ Let's go there and see what we can see.
+ Uh, research.
+ FALCOR DB.
+ All right.
+ It's not rendering that for a moment.
+ I got to restart the, uh, VS code.
+ You're going to have to look at it in, in, uh, so FALCOR DB is a high performance.
+ High performance in memory pro, uh, property graph based on Redis, which is, or Redis graph.
+ It's got a, it's got a shitty, um, license.
+ It's got lots of stars.
+ It's an architecture is built on a single foundation.
+ Graph traversal can be expressed as sparse matrix multiplications.
+ So.
+ Yeah.
+ Same premise.
+ I'm, I've, I, I've got the same premise.
+ Uh, generally speaking of this idea of sparse matrix rather than crawling through, um, uh,
+ Uh, FALCOR translates cypher patterns into algebraic expressions by graph blasts.
+ Topology.
+ Data model.
+ Okay.
+ Okay.
+ Let's ask, let's ask stupid questions.
+ Like how's it better or different than how's it better?
+ Or different than Rue vector?
+ That's the real question I want to ask.
+ And I'm going to take, I'll take whatever's better and we'll integrate it.
+ I'm going to go full Claude code on, on, uh, on FALCOR.
+ Um, keep, keep, keep sharing the ADRs is, this is very important.
+ I think for.
+ I'm going to create an ADR on this in a second.
+ So what I'm going to do is I'm going to take the best bits of FALCOR DB, and I'm going
+ to create a, I don't know, an, an RBF and, uh, and then we'll, and then we'll go ahead and do that.
+ I have a question roof.
+ So for the, uh, you were showing the API earlier on for Cognitum and where is it?
+ Is that in Rue vector in the repo?
+ Yeah.
+ Where is that?
+ Sorry.
+ You're, you're talking about how I built the, uh, the, the causal.
+ What are you, what are you referring to?
+ The Cognitum API.
+ Right.
+ Oh yeah.
+ I, I, I'm that's my, my box.
+ You're going to have to buy one of my boxes.
+ Yeah.
+ I know.
+ I get that, but where's the, the, the documentation for it?
+ On the box on the device.
+ Okay.
+ It's so you plug in the, you plug in device and it, and it shows up in, as on your, in your browser.
+ Or wherever, wherever.
+ There's no documentation now to look at it, to see what to build on it.
+ Well, it's, it's between us.
+ It's through vector.
+ It's just a commercial version.
+ It's a commercial version of it with a dashboard and a bunch of other stuff.
+ You know, and some people don't like CLIs.
+ And for those people, I've got a, a, a dashboard and whatnot.
+ All right.
+ Okay.
+ So according to this, Falcor DB and versus root vector, they're fundamentally different things.
+ Falcor is a database.
+ Root vector is a computation engine.
+ They solve different problems at different layers of the stack.
+ Falcor DB graph database storage and queries.
+ I don't know if I'd agree with that.
+ They're building it in C.
+ I'm building it rust.
+ They're doing stores.
+ I computer graphs.
+ Falcor is better persistent graph storage.
+ Well, I would disagree with that.
+ I've, I've got persistence.
+ Okay.
+ Okay.
+ Claude, you're letting me down.
+ Okay.
+ Um, what about the, uh, root vector, you know, post script, post gray and persist, persistence
+ capability capabilities.
+ That's, that's the problem with my, my repo.
+ It's a bit too big for even this thing to understand.
+ It keeps forgetting about those.
+ Yeah.
+ Yeah.
+ Graph reg SDK, turnkey LLM integration.
+ No graph aware rag.
+ Well, yes, I do.
+ I just showed you the graph aware rag.
+ The doesn't it.
+ It's built.
+ It isn't built in Ross using red, right?
+ So that's why it might not be able to read through it.
+ It says it's complimentary, not competitive.
+ Okay.
+ It's the reddest reddest module.
+ I don't, I think, I think the system has, it doesn't.
+ It doesn't.
+ I think in this particular scenario, it doesn't quite understand what I'm doing to a point
+ to give it a, because everything it said here, isn't actually true.
+ A lot of it's not true.
+ Like, at least in terms of my capabilities.
+ Have you built an RVF on RVF roof?
+ So that it understands everything it is, can do, et cetera, in a way that Claude Opus doesn't keep getting confused.
+ Yeah.
+ Yeah, I, uh, yeah, I did.
+ There's a, where the heck did I put that?
+ You're talking about like an NPM module?
+ Uh, RVF.
+ Yeah.
+ You can hear all the RVF components.
+ I can't, it's not rent.
+ It's not rendering for some reason.
+ I don't know.
+ I'm not sure what happened to my, my BS code, but this is, this is the document.
+ This is, this is what you need to point it at.
+ And it's published.
+ I published both as a NPM and a crate.
+ So you could run it in like co-work or whatever in Claude, that kind of thing.
+ I would like to make a note here roof.
+ If you allow me.
+ Sure.
+ I think this is exactly what would happen most of the time.
+ Whoever is trying to wire something that you already built.
+ Claude is not smart enough to understand how to do it.
+ Or still missing a lot of the implementation that you already have.
+ So I have to go push and push and push and finally understand what is, what is actually implemented.
+ So my idea was that we have an MCB with all the projects, with all the documentation, all indexed correctly.
+ So we don't have to keep pushing just to have an, a roof, a roof MCB with everything.
+ So yeah.
+ I think you're talking about my root, my Ruby MCB.
+ Yeah.
+ But I don't know if Ruby is actually with every single package.
+ No, I haven't got around to doing it.
+ I get too much crap.
+ I don't know.
+ I know.
+ I know.
+ was to take Ruby and actually create a full updated for all the packages and include it in
+ cloud code. So every time it will be able to go in the MCP, find the technology that we have
+ available and not try to reinvent it. And then it come back and say, okay, I can use this, this,
+ this, this, and this wired, and we have the solution. This, this will be the most useful for
+ everybody trying to use all the packages to get going. Ruby is probably a good place to start.
+ I built so much crap. This is already out of date, but you can tell here there's, there's 250 packages.
+ I'm well into like a thousand. So I would need, I would need to add another 700 probably, but this
+ is probably a good starting point. It's organized by structure. There's an MCP for all of it. You
+ can interact with it. It's MPX Ruby. You can see, there's just a lot of stuff in here.
+ I don't know. I don't know if my idea was good or bad. It just, just push, push in ideas here.
+ Jose, that's what I tried to do with the ask Roof net. I just put it in the chat if anybody wants it.
+ It literally goes out every night, looks at 148 repos from Roof, takes down all the latest stuff,
+ stores it in Roof vector. I created a knowledge base and an MCP against that. I've made available
+ for you guys. If it's useful, I'm still trying to get my head around it myself to try to do just that.
+ Cause I think a lot of us are struggling with, how do we make sure that Claude is smart enough to
+ understand what Roof is doing. And so I've got it looking on a, on a daily basis. If you click on that,
+ the knowledge base and the knowledge universe, it'll show you on the left, kind of what's,
+ what's been updated, what the latest repos are, things like that, just to kind of give a flavor
+ for some of that stuff, whether or not it's all the right answers. I don't know. I've been really just trying to get it to,
+ get its head around all things Roof, because I think honestly, we all have a challenge kind of keeping up with that rate of change.
+ And we really have a frustration with Claude being a couple, three or four hops behind.
+ And I like Jose, have to spend lots of time trying to catch it up on the advanced concepts you do every day.
+ Uh, Stuart, if I may offer some feedback, add also the GitHub commits, not just the repo contents,
+ because Claude is usually good about leaving notes within the commits of what was intended.
+ And that can be reconciled against the actual pushed code.
+ Yep. Roof, if you click on the button on the left that says knowledge base or the knowledge universe.
+ Right. That, that'll start to tell you kind of what's there, the latest, how soon it was updated.
+ I've got it sweeping on a nightly basis, kind of pulling things down to, to read and pull in.
+ And if anything's new, if there's a new rev, it starts, it starts running those, at least that, that was the intention.
+ And it's all kind of built with the latest and greatest, but who knows if it's the right thing.
+ I think in an hour, you could do the stuff with it that would turn it into something that would deliver that.
+ And if you click on the knowledge universe, I'm trying to get it to, to, yeah, click on the ball in the middle.
+ That's cool.
+ And then each one of those allows you to traverse up and down the path to see what are we learning?
+ What's there?
+ How do we dive into it up three or four or five, six layers and levels?
+ Because I can't figure out what the hell's in a root vector.
+ I know everything is, but so I'm, I'm building this to try to understand what do we do?
+ Where should we use it?
+ Why should we use it?
+ What are the advanced techniques and how could we explain to cloud code?
+ Even if it's cloud code at V3, how does it know some of the other crazy, as you say, that's in Rue vector that it can and should be using to dynamically or novelly solve the problem you're asking it to work on?
+ Yeah.
+ Right approach, wrong approach, Rue?
+ If you would know, we wouldn't.
+ I don't, I, I'm just experimenting.
+ Like you, you're just seeing, you're seeing the output of my experimentation.
+ I'm just trying to see where the rabbit hole leads.
+ I think that what you're doing is visualizing it in a way that's useful.
+ I could, we should package this whole thing up as an RBF.
+ Take it.
+ Yeah.
+ Listen, I will, you contribute all your stuff.
+ If this is in any way useful, please take it, roll with it.
+ Let's add it to my Ruby, my, my, my Ruby package and, and then package that up as an RBF.
+ And then you can just basically point it at that.
+ This is cool.
+ This is really cool.
+ I would definitely use this thing.
+ A hundred percent.
+ Yeah.
+ I actually, thank you, Stuart.
+ I feel better now.
+ I'm not alone in this situation.
+ And, and then another thing.
+ We're all feeling this way, Jose, brother.
+ Believe me.
+ Yes.
+ And, and another thing is just, just in the, just make it update automatically based on,
+ it will check all your repo and everything.
+ It does.
+ You don't have.
+ It happens on a nightly basis.
+ Every single repo.
+ Okay.
+ Okay.
+ Okay.
+ Because.
+ And it even looks for other new things he's done.
+ Cause roof.
+ I never know where the heck you're, you're taking some of the new crazy that you're inventing
+ just this week.
+ Cause sometimes they're, and sometimes they're somewhere else that you're working on them.
+ Yeah.
+ Question.
+ Yeah.
+ You don't mind Stuart.
+ Based on your.
+ Yeah.
+ Comment.
+ I agree.
+ It's very useful to include.
+ I don't know if you're doing that.
+ That's the question.
+ The, the issues there to get the intent also.
+ That, that really helps.
+ Well, what, what was that?
+ Sorry.
+ I missed the question.
+ Yeah.
+ In the, in the, in the GitHub, you got issues, right?
+ Yes.
+ Based on those, you can find the intent on some packages because otherwise Claude got lost
+ in, you know, missing connection or yeah.
+ I kind of kept this out of Claude.
+ I just had it be Claude flow v3 and roof vector build this so that cause Claude gets confused
+ too much dealing with roof stuff.
+ Yeah.
+ Is that the right way to think about a roof?
+ To have Claude flow v3 and roof vector be the two.
+ Combined to go build it.
+ Well, yeah.
+ Yeah.
+ There's, there's a collection of stuff.
+ I debate.
+ If you want to think of like conceptually, my roof vector is my lab.
+ I just create and I put it out there.
+ Then it trickles up into agent DB and agentic flow.
+ And there's two new versions.
+ I'm pushing out today of both those packages, which is more of a commercial sort of package
+ of it.
+ That's like, how do I use it in a business kind of packaging?
+ Right.
+ And then ultimately, once that's sort of, you know, I know there's no major bugs in it.
+ Then I push that to Claude flow.
+ I'm in the process of doing the Claude flow push.
+ And that'll be roof flow here shortly.
+ And that's my stack.
+ That's what I build.
+ So if I need a, an agent that lives and breathes forever, then that's, you know, my agent, my
+ agentic flow package.
+ Like if I'm creating, you know, open claw or whatever, that's how I would do it.
+ I would use that package.
+ And it's got everything basically.
+ Those agentic DB and an agentic flow has everything worthwhile.
+ I've stripped out the crazy.
+ You know, some things are just so out there that you position it and people think you're
+ insane, but it's positioned a little less insane, basically.
+ All right.
+ Well, can I offer this to you, Rube?
+ Is that useful at all?
+ I'd be happy to invite you to the repo and you can take it and run with it however you
+ wanted.
+ Yeah, yeah.
+ Send it over.
+ And what I'll do is I'll package it up as an RVF and put it in Ruby.
+ Beautiful work, Stuart.
+ Thanks.
+ But look at it first to make sure it's what you want it to be.
+ Me trying to deliver your stuff and you trying to deliver your stuff in two different things.
+ Yeah, I get it.
+ There's so much stuff here.
+ And Claude half the time thinks the stuff I've created is too crazy to be even to be true.
+ And that's my concern.
+ It's true.
+ Like you saw it here before.
+ It's like, oh, your system is too crazy, right?
+ Oh, no, it isn't.
+ It actually works.
+ So like here, I said, what was the root vector post gray and persistent capabilities?
+ And he says, oh, look, you've actually got a post gray.
+ Yeah, that's my core thing.
+ Like, you can run it all in post gray.
+ Like, come on.
+ And then it says, you know, add solvers.
+ And it does, you know, my embeddings and all that kind of stuff.
+ And yeah, you know, here's, here's, this is probably the most, this is the most, probably the most appropriate comparison.
+ You know, nobody wants to use Redis.
+ It sucks.
+ It sucks.
+ I, I, I, I chose, I chose post gray and it could run in or outside of post gray, like SQL light.
+ You know, no near zero loss.
+ It backs up.
+ It backs up.
+ You got replication consensus.
+ If you're looking to build the state of the art in a business, I, I, at least the businesses that I work with, it's got everything you need.
+ You just got to discover the pieces that you need, which is back to, uh, Stuart's, uh, component.
+ Yeah.
+ Yeah.
+ And just, just to, just to say something before we continue, uh, about the intervention from Jordy and jet.
+ I think it's in very important for this kind of system for helping Claude that the intention of what is the package for.
+ So the, the git implementation are very important for him to, to know it because I try it.
+ Uh, I was working on this for, for a few weeks and, but this implementation from Stuart is even better, but I think this is important.
+ The intention of the package.
+ So it will understand exactly what, what it's for.
+ Sorry.
+ Yeah.
+ Yeah.
+ Yeah.
+ That makes sense.
+ The, the other thing that I might suggest you do, if you're, if you're curious, um, about exploring it pointed at my ADRs.
+ Everything I've built over the last few months is an ADR and they're all interconnected to one enough, one another.
+ So you could, uh, basically create an index of the ADRs, which are inherently a kind of multidimensional structure.
+ And then you can map it pretty quickly.
+ Now I haven't shared my actual, my personal, uh, root vector, um, learnings, which I, maybe I should, but I'm just worried that I might expose stuff that I, I probably shouldn't.
+ But if you, if you look at my environment here, you know, I've got, you know, six gigs of, uh, data that underpins my, my learnings.
+ And this was a question I think Jed or someone asked earlier, like, how does it know what you've already built?
+ It already knows everything I've built.
+ I've, I've got the master brain.
+ So the reason I can build as quickly and efficiently is because it's system knows everything I've already, I've done to get to this point in the system.
+ So I should probably export that.
+ So you guys can use that.
+ You've put that into, into root vector post grade.
+ Um, no, this is running just native.
+ Uh, this is just running native natively.
+ And as I think it's an RVF at this point.
+ Um, can we export the, all, all the learnings of the six gigabytes of text?
+ No vectors.
+ Uh, the cloud flow.
+ I want to make call it memory.
+ I mean, a RVF format that others can use based on everything we've, we've learned in this.
+ Repo since the first day of its existence.
+ I don't even know.
+ Do deep, new deep review and create an ADR.
+ Uh, I'm going to say other, other users will use this to kick.
+ Start their root vector.
+ Development.
+ Journey.
+ We're okay.
+ Well, I, I actually have one question about that memory.
+ Recorded is, is that in some way able to lose it?
+ If we've pushed force installation of cloud flow or anything else.
+ Uh, possibly, but I've got if cloud flow has checks.
+ So when you do the in it, uh, it, it actually looks at your existing memory and then ports it to whatever crazy concocted scheme I've come up with.
+ So it'll, so it'll, so it basically imports it.
+ So remember the sort of when I first launched cloud flow in June last year, it was a JSON and I just did, you know, uh, kind of appended JSON files.
+ And I still, there's some remnants of the JSON still in there for certain things that just JSON's fine.
+ And then I moved to SQL.
+ And then I moved to SQL.
+ Then I realized that I had some issues with a sort of SQL light.
+ Then I had, then I had some issues with a cross platform seek a SQL light.
+ So then I moved from using better SQL three to SQL dot JS, which was a wasm based approach.
+ Then that, then you start seeing the dot, the memory dot DB files and the swarm dot DB and a few other files that, that created a binary.
+ And then that, then that was my sort of, Oh, if they're doing a binary, maybe I could do a binary.
+ Then that, that inspired me to create root vector.
+ And then I'm like, Oh, I can actually create a multi layered binary.
+ And then, and now in the process of replacing all the sort of SQL, the SQL light binaries with my RBF style binaries.
+ And then, so in the updated version that I'm, um, you, you'll see some of it right now in, in agent DB.
+ And in probably an hour or two, you'll see it in a genetic flow, but I migrate those binaries from SQL light into the RBF format.
+ So I'm kind of moving it.
+ Now, if you use the force option, the force option could, could potentially overwrite your cloud D dot MD and some of the other files that you have.
+ So be careful with the force.
+ There's an upgrade command.
+ That's what I use.
+ And I, there's upgrade settings.
+ The upgrade settings will give you like the most recent, um, status line component that you saw when I shared my screen a moment ago.
+ I've optimized that a bit.
+ Cause.
+ Cloud code keeps mucking around with the status line, little dots pop popping up and that kind of crap.
+ Yeah.
+ So I've, I've, um, I've, I've, I've had to do several updates to that based on their issues, not mine, but that's the path that I'm taking.
+ Okay.
+ So that the six gigs right now is for you.
+ I'm late and turn it into RVF.
+ What, what is it in right now?
+ Right now it's in a SQL light form.
+ Okay.
+ Yeah.
+ So what I'm going to do here, I'll publish this later today for you guys.
+ I, what I'll do is I'll give you a kickstarted version of my memory.
+ And then all you need to do is point Claude at my memory and, uh, and say what the heck is in this thing.
+ And that'll give you a, a vector graph memory structure of everything I've done to build everything in this, in this particular repo.
+ That's amazing.
+ We have to give it a link, a link to the RVF crate as well.
+ Right.
+ I can, you know, I can do, I've got a runtime in root vector and the MPX root vector.
+ I can, you, I can make it available as part of my, um, MPX runtime for you.
+ And all you need to do is just execute the, the root vector runtime and it'll just import it and use it.
+ Something like that.
+ Why would that be necessary?
+ Couldn't QDAC just be used so everyone is federating off of your copy roof?
+ Yeah, I could do that too.
+ Spit it up.
+ I've already.
+ Ship it.
+ Let's go.
+ Yeah.
+ I've already, I've already, that's actually not a bad plan.
+ If I do that.
+ Sure.
+ Then I could, then we just, then we could do a federated, you know, model where I'm the.
+ Well, like your intelligence, right?
+ Exactly.
+ Yeah.
+ Collective intelligence.
+ And then anytime I do something crazy, now the only problem with that potentially, and I'll have to do some PII stripping and environmental variable stripping, which I already have.
+ But other than that, yeah, I could use a central node on Google or something, which is probably good enough.
+ And then you just activate the central learning component in maybe MPX root vector.
+ And then you'll automatically get whatever I do.
+ Well, that's what I do, right?
+ What?
+ So that other learnings can be fed into the memory.
+ Hive mind.
+ It's a hive mind structure.
+ Maybe that would be great.
+ Yeah.
+ And then the expectation is everyone's note is functionally decentralized and therefore they learn from each other or each other's learnings and append to their respective corpus in order to solve problems relative to that specific note.
+ Yes.
+ But remember that you mentioned like last year about this proof, about sharing the knowledge.
+ And you say that you implemented it in APF.
+ Yeah.
+ The one that you have for the plugin for the plugin system.
+ I think you have something already in place because I remember we talk about this sharing memory or sharing knowledge.
+ Isn't it not already in place or something like that?
+ Yes.
+ You're talking about my transfer learning.
+ I've got it all.
+ I just got to use the stuff we've already built.
+ Yeah.
+ The transfer learning component would also be a way to do it.
+ And that's how I'm doing it in Cloudflow.
+ There's the ability to export.
+ Actually, this might have been your idea in Cloudflow, the ability to export the Cloudflow learnings amongst different environments.
+ So I've already built that.
+ Yes.
+ Right.
+ Correct.
+ So that would be the best thing to start.
+ I mean, if you want to share knowledge.
+ Yeah, there's certainly no shortage of ways we can handle it.
+ Well, I think what you're suggesting is maybe there's a way for us to federate our knowledge in and share it in basically real time.
+ I think the important part is to keep everything opt in as opposed to opt out.
+ So make available for others, for participants in the network to opt into the knowledge, but do not push the knowledge onto them.
+ Make sense?
+ Yeah.
+ All right.
+ So this.
+ Yeah, I think I think I hear what you're saying.
+ You know, I'm read only kind of thing.
+ You're reading, but not necessarily writing.
+ Well, I'm writing.
+ You're reading.
+ I can read what you write.
+ You can read what I write.
+ I do not write into your space.
+ Correct.
+ But actually, I actually have this kind of blockchain.
+ Yeah.
+ It's already, it's already built in.
+ Can we?
+ So let's, let's just update this particular.
+ So this is the initial RV, the, the spec.
+ And.
+ All right.
+ So where do I get too many things over where did I put it here?
+ RPS knowledge.
+ Yeah, here it is.
+ Can.
+ Oh, it's.
+ I don't want.
+ Oh, it's doing for Falcon.
+ I don't want Falcon DB.
+ It's, it's confused regardless.
+ Um, can we create a fetter, a federated.
+ An optional.
+ An optional federated RVF format that allows real time learning to be exported and shared, uh, with other users as I create new.
+ New.
+ Modules.
+ Great.
+ Stripping.
+ Any PII or V, but including the core learning.
+ I'm going to call that transfer learning.
+ Transfer learning.
+ Uh, using the Google.
+ What should we, we should put that as, uh, Google cloud and let it figure out what that should be.
+ For this, I'm going to give it a little extra helping hand.
+ I'm going to use the goal.
+ Um, not.
+ No.
+ Falcon.
+ What the heck we call it?
+ No, no.
+ No.
+ No.
+ Yeah.
+ I don't want it.
+ I don't want it.
+ I don't want Falcor.
+ Falcor DB.
+ Great.
+ A new branch.
+ Actually, I'm going to do creating branch at the beginning.
+ Cause it's.
+ Um, roof.
+ Sorry.
+ Yeah.
+ I'm late for my Lex call.
+ I think I'm, I feel it.
+ I feel that I feel like phone bees buzz and create new federated RVF.
+ Uh, uh, federated RVF.
+ Start mission.
+ All right.
+ That's where I'm going.
+ We're going to create, uh, a federated hybrid shared learning system using an RVF format.
+ And then we're going to tie that into Stu's, uh, digital.
+ Okay.
+ And then we're going to tie that into Stu's.
+ Yeah.
+ Okay.
+ All right.
+ We're going to create a federated hybrid shared learning system using an RVF format.
+ Okay.
+ We're going to use, uh, dashboard.
+ And, and then we're one.
+ And then I'm going to, then I'm going to include the GitHub, uh, the GitHub synchronization.
+ So any commits will auto, will auto populate one shared brain to rule them all.
+ Wow.
+ That's perfect.
+ I just made my repo public and I invited you roof specifically to do anything you want
+ to it, to take it, change it, add it.
+ I don't think I have Ruby in there.
+ I think I just had to get up repos.
+ So whatever else you want to add.
+ And I, and I didn't have it looking at the ADRs yet.
+ So you're right.
+ That's probably a great call.
+ Yeah, this is cool.
+ So cool.
+ Thank you.
+ Thank you.
+ All right.
+ Sounds good guys.
+ So, uh, sounds good.
+ I'll, I'll, uh, I'll talk to you guys later.
