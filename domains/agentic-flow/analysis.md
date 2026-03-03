@@ -1,25 +1,30 @@
 # Agentic Flow Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~8.5% (60/714 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-08 (Session R40)
+> **Priority**: HIGH | **Coverage**: ~7.7% (330/4264 DEEP) | **Status**: In Progress
+> **Last updated**: 2026-03-03 (Session R142)
 
 ## 1. Current State Summary
 
-The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a TypeScript monorepo containing 5 sub-packages. Published on npm as `agentic-flow` (2.0.6) with 84,541 monthly downloads. Quality bifurcates dramatically — from 100% (hooks.ts pure delegation) to 24% (quic.ts complete facade).
+The agentic-flow domain spans 4,264 files across a TypeScript monorepo with 5 sub-packages, 574 MB installed (96% bundled deps, dominated by onnxruntime-node at 513 MB). Published on npm as `agentic-flow` (2.0.6) with 84,541 monthly downloads. Quality bifurcates dramatically — from 100% (hooks.ts pure delegation) to 12% (ruvector-backend.ts complete facade). Coverage: 330 DEEP / 4,264 total (~7.7%).
 
 **Top-level verdicts:**
 
 - **Agents are prompt templates, not code** — 82 markdown files with YAML frontmatter, loaded by thin SDK wrappers.
 - **MCP tools shell out to `npx claude-flow@alpha`** — circular dependency, not in-process. "213 tools" counts external packages.
-- **Three separate ReasoningBanks** (claude-flow, agentic-flow, agentdb) share zero code. Agentic-flow has the most sophisticated (5 DeepMind algorithms) but claude-flow never calls it.
+- **Four separate ReasoningBanks** (claude-flow, agentic-flow, agentdb, ruvllm Rust) share zero code. Agentic-flow has the most sophisticated (5 DeepMind algorithms) but claude-flow never calls it.
 - **Multi-provider routing is the genuine value** — real Anthropic/OpenRouter/Gemini/ONNX translation with fallback chains (91-95%).
-- **QUIC and Federation are complete stubs** — WASM exists but never loads, all network calls return empty arrays.
-- **AgentDB is substantive** — 23 controllers grounded in published papers (Reflexion, Voyager, Pearl's do-calculus), not thin abstractions.
+- **QUIC TypeScript is a complete stub; QUIC Rust compiles clean** — agentic-flow-quic Rust crate (999 LOC) passes all 8 tests, but the TypeScript → WASM → Rust bridge was never completed. loadWasmModule() returns {}.
+- **AgentDB MCP server IS substantive and initialized** — R136 confirms EmbeddingService is initialized with Xenova/all-MiniLM-L6-v2, all 8 controllers instantiated with proper DI, 28 real tools (not 32 as claimed). This CORRECTS prior R20 root-cause claim that EmbeddingService is never initialized in the MCP path.
 - **Hash-based embeddings are systemic** — 4+ files (optimized-embedder, ruvector-integration, edge-full, agentdb-wrapper) silently degrade to character-frequency matching.
+- **sona-agentdb-integration.ts is DEAD CODE** — SONAAgentDBTrainer never imported by any production file. Both critical imports (@ruvector/sona, agentdb) are NOT installed in workspace. Source of the "150x-12,500x" hardcoded marketing claim (line 45).
 - **Gap between EXISTS and RUNS is vast** — sophisticated learning algorithms exist but claude-flow only uses LocalReasoningBank (patterns.json).
 - **Worker system is functional single-node** — real SQLite persistence, real file I/O, but distributed transport is facade.
-- **Best code:** cli-proxy.ts (95%), hooks.ts (100%), TypeScript sources (80-95%), agentdb controllers (82-95%).
-- **Worst code:** quic.ts (24%), enhanced-consciousness.js (15-20%), neural-coordination-protocol.js (10-15%).
+- **agentic-jujutsu Rust compiles, has security failure** — 83/88 tests pass, but 2 CRITICAL crypto failures: ML-DSA verify() accepts invalid signatures and wrong public keys. Cryptographic rejection property broken.
+- **agent-booster Rust core logic broken** — 6/25 tests fail, strategy selection and similarity-matching assertions fail. Token optimization (Tier 1) logic incorrect.
+- **reasoningbank workspace mixed** — core/learning/storage/network all PASS (46/46 tests total). reasoningbank-mcp FAILS compile (StorageConfig type mismatch). reasoningbank-wasm FAILS native compile (cfg-gated WASM module), PASSES wasm32 cross-compile.
+- **Deployment is demo-only** — docker-compose.yml is a 9-line single-service demo. docker-compose.agent.yml defines 7 hardcoded demo tasks, not production infrastructure.
+- **Best code:** cli-proxy.ts (95%), hooks.ts (100%), TypeScript sources (80-95%), agentdb controllers (82-95%), agentic-flow-quic Rust (clean).
+- **Worst code:** ruvector-backend.ts (12%), quic.ts TypeScript (24%), sona-agentdb-integration.ts (dead code).
 
 ## 2. File Registry
 
@@ -55,6 +60,35 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | standalone-stdio.ts | agentic-flow | 813 | 85% | DEEP | FastMCP server, 15 tools. SHELL INJECTION risk | R22 |
 | p2p-swarm-v2.ts | agentic-flow | 2,280 | 85% | DEEP | Production crypto. Task execution stub. Fake IPFS CIDs | R22 |
 | quic.ts | agentic-flow | 599 | 24% | DEEP | COMPLETE FACADE. loadWasmModule returns {}, all stubs | R40 |
+
+### Integration Hubs & Dead Code (R136)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| sona-agentdb-integration.ts | agentic-flow | ~600 | 62-68% | DEEP | **DEAD CODE** — SONAAgentDBTrainer never imported in production. Both @ruvector/sona + agentdb NOT installed. Source of "150x-12,500x" hardcoded claim (line 45). query() genuinely combines HNSW + SONA paths. 4 well-differentiated config presets. export() stub (saves JSON not LoRA weights). | R136 |
+
+### Deployment (R139)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| docker-compose.yml | agentic-flow | 9 | DEMO | DEEP | 9-line demo config. Single agents service, replicas=1, hardcoded TOPIC. No volumes/networking/healthcheck. | R139 |
+| docker-compose.agent.yml | agentic-flow | ~80 | DEMO | DEEP | 7 agent types as Docker profiles with hardcoded example tasks. Not operational infrastructure. | R139 |
+
+### Rust Crates — Compilation Audit (R141)
+
+| Crate | LOC | Check | Tests | Verdict | Session |
+|-------|-----|-------|-------|---------|---------|
+| crates/agentic-flow-quic | 999 | PASS | 8p/0f | GENUINE — 8/8 clean. QUIC Rust compiles; TS bridge never completed. | R141 |
+| packages/agent-booster | 2,292 | PASS | 19p/6f | BROKEN logic — strategy selection, similarity matching, template detection all fail | R141 |
+| packages/agent-booster-native | 187 | PASS | 0p/0f | PASS — NAPI wrapper, no unit tests | R141 |
+| packages/agent-booster-wasm | 470 | PASS | CFAIL | PASS check, WASM cross-compile PASS, test compile fails (missing .unwrap()) | R141 |
+| packages/agentic-jujutsu | 9,138 | PASS | 83p/5f | SECURITY FAILURE — ML-DSA verify() accepts invalid signatures + wrong public keys | R141 |
+| reasoningbank/reasoningbank-core | 773 | PASS | 12p/0f | GENUINE — fully clean | R141 |
+| reasoningbank/reasoningbank-learning | 788 | PASS | 7p/0f | GENUINE — 8 deprecation warnings (AsyncLearner) | R141 |
+| reasoningbank/reasoningbank-mcp | 1,037 | FAIL | NOT RUN | BROKEN — StorageConfig type mismatch (E0308), 6 errors. Unusable. | R141 |
+| reasoningbank/reasoningbank-network | 2,647 | PASS | 18p/0f | GENUINE — QUIC, NeuralBus gossip all green | R141 |
+| reasoningbank/reasoningbank-storage | 1,403 | PASS | 9p/0f | GENUINE — SQLite/async/migrations pass | R141 |
+| reasoningbank/reasoningbank-wasm | 201 | CFAIL | — | FAIL native (cfg-gated WASM), PASS wasm32 cross-compile | R141 |
 
 ### Core Integration Bridges (R44)
 
@@ -166,10 +200,22 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | C11 | **ruvector-backend.ts COMPLETE FACADE** — Zero ruvector imports, hardcoded "125x speedup" constant, never imported anywhere. isRustAvailable()=always true | ruvector-backend.ts | R44 | Open |
 | C12 | **"FastGRNN" is NOT a neural network** — Just sorts patterns by weight and picks top. Marketing terminology for simple heuristics | RuvLLMOrchestrator.ts | R44 | Open |
 | C13 | **Unguarded optional dependency import** — sona-service.ts will crash if @ruvector/sona not installed | sona-service.ts | R44 | Open |
+| C14 | **sona-agentdb-integration.ts is DEAD CODE with missing deps** — SONAAgentDBTrainer never imported by any production file. @ruvector/sona and agentdb NOT installed in workspace. Will crash with ModuleNotFoundError at any import. Source of "150x-12,500x" hardcoded marketing string (line 45) | sona-agentdb-integration.ts | R136 | Open |
+| C15 | **agentic-jujutsu: ML-DSA cryptographic security failure** — verify() accepts invalid signatures AND wrong public keys (crypto.rs:341, 354). Cryptographic rejection property broken. 2 failing tests prove violation | packages/agentic-jujutsu | R141 | Open |
+| C16 | **reasoningbank-mcp compile failure** — 6 errors from StorageConfig type mismatch (E0308). StorageConfig missing serde::Deserialize. Server.rs:65 uses wrong type. Crate is unusable. | reasoningbank/crates/reasoningbank-mcp | R141 | Open |
 | H24 | **Parallel incompatible SONA integrations** — sona-service.ts uses beginTrajectory() but ruvector-integration.ts expects startTrajectory() | sona-service.ts, ruvector-integration.ts | R44 | Open |
 | H25 | **sona-service.ts unbounded memory** — trajectories Map grows without cleanup | sona-service.ts | R44 | Open |
 | H26 | **ruvector-backend.ts fabricated metrics** — All performance numbers are formula-based constants, not measurements | ruvector-backend.ts | R44 | Open |
 | H27 | **RuvLLMOrchestrator.ts orphaned** — Only imported by llm/index.ts and tests, NOT by execution code | RuvLLMOrchestrator.ts | R44 | Open |
+| H28 | **agentdb-mcp-server.ts: causal graph data model broken** — causal_add_edge hardcodes fromMemoryId=0 / toMemoryId=0. causal_query hardcodes interventionMemoryId=0. All causal edges share same source/target IDs regardless of input. Causal graph is non-functional | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 | Open |
+| H29 | **agentdb factory BackendType union incomplete** — BackendType is "auto|ruvector|rvf|hnswlib" but BackendDetection.available can be "sqljsrvf". If only sql.js backend is available, createBackend() will throw on unknown type | packages/agentdb/src/backends/factory.ts | R136 | Open |
+| H30 | **agent-booster Rust core logic broken** — 6/25 tests fail. Strategy selection (FuzzyReplace vs InsertAfter), normalized-match similarity assertions, async try-catch template detection, and 3 integration tests all fail. Tier 1 token-optimization logic is incorrect | packages/agent-booster/crates/agent-booster | R141 | Open |
+| H31 | **agentdb_init uses wrong db handle** — agentdb_init handler applies initializeSchema(db) to the globally-initialized db regardless of the db_path parameter provided. Different db_path requests silently operate on the wrong database | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 | Open |
+| H32 | **sona-agentdb-integration.ts export() is a stub** — Saves JSON config+stats to file, NOT actual LoRA weights. Comment says "future: use HuggingFaceExporter" (line 328). Trained model state cannot be persisted or reloaded. | sona-agentdb-integration.ts | R136 | Open |
+| H33 | **agentdb_search session_id filter silently ignored** — Filter parameter accepted in schema, TODO comment in handler: "Session ID filter would require custom query" (line 1014). Using session_id filter returns unfiltered results | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 | Open |
+| H34 | **agentdb-mcp-server tool count mismatch** — Server claims 32 tools (5+9+10+5+3) but tools array contains only 28 entries. Documentation overcounts | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 | Open |
+| H35 | **sona-agentdb-integration.ts dimension hardcoded** — validateEmbedding enforces exactly 3072 dimensions regardless of config.vectorDimensions. Configuring any other dimension is silently rejected | sona-agentdb-integration.ts | R136 | Open |
+| H36 | **sona-agentdb-integration.ts batchTrain is serial** — Processes patterns with await-in-loop (O(n) serial latency). No parallelism, no chunking, no batch insert to AgentDB | sona-agentdb-integration.ts | R136 | Open |
 
 ## 4. Positives Registry
 
@@ -192,6 +238,13 @@ The agentic-flow domain spans 714 files / 574 MB (96% bundled deps) across a Typ
 | **82 agent prompt templates** — Well-crafted system prompts for various roles | .claude/agents/ | Initial |
 | **EMA-based performance tracking** — Good pattern in worker-agent-integration (alpha=0.2) | worker-agent-integration.ts | R40 |
 | **sona-service.ts genuine SONA integration** — Real SonaEngine wrapper with 5 vibecast profiles, real trajectory/LoRA delegation, proper EventEmitter lifecycle | sona-service.ts | R44 |
+| **agentdb-mcp-server.ts: EmbeddingService properly initialized** — Xenova/all-MiniLM-L6-v2 (384-dim, transformers provider) awaited at startup. Corrects prior R20 claim. All 8 controllers instantiated with proper dependency injection. 28 real MCP tools with full input validation | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 |
+| **agentdb factory 5-tier resilient fallback** — Auto-mode: RuVector → RVF SDK → HNSWLib → sql.js RVF → none. sql.js built-in zero-dependency last resort. Genuine fallback pattern (confirmed R136, corrects prior 4-tier count) | packages/agentdb/src/backends/factory.ts | R136 |
+| **agentdb-mcp-server production lifecycle** — keepAlive setInterval, auto-save every 5 minutes, graceful shutdown on SIGINT/SIGTERM, uncaughtException handler, WAL mode + 64MB cache, shebang CLI entrypoint | packages/agentdb/src/mcp/agentdb-mcp-server.ts | R136 |
+| **agentic-flow-quic Rust crate is clean** — 999 LOC, cargo check PASS, all 8 tests green (error, client, server, config, message types). Prior SIGABRT (R44) was environment, not code. Real quinn QUIC Rust impl compiles correctly. | crates/agentic-flow-quic | R141 |
+| **sona-agentdb-integration.ts query() is genuinely dual-path** — Combines HNSW nearest-neighbor (via AgentDB) + SONA pattern matching with real weighted merge. Correct trajectory lifecycle sequencing (beginTrajectory → addContext → addStep → endTrajectory) | sona-agentdb-integration.ts | R136 |
+| **reasoningbank Rust workspace largely genuine** — core (12/12 tests), learning (7/7 tests), storage (9/9 tests), network (18/18 tests) all pass. Total 46/46 across 4 crates. NeuralBus gossip, QUIC transport, SQLite migrations all green | reasoningbank/ | R141 |
+| **containerized agent execution proven** — docker-compose.agent.yml defines 7 agent types (goal-planner, coder, reviewer, tester, researcher, flow-nexus-swarm, parallel) with ANTHROPIC_API_KEY and claude-agent-sdk. Proves containerized agents are architecturally real even if demo-only | agentic-flow/deployment/ | R139 |
 
 ## 5. Subsystem Sections
 
@@ -285,7 +338,7 @@ EmbeddingService.ts (1,810 LOC, 80%) has real ONNX embedding, K-means clustering
 
 **quic.ts** (599 LOC, 24%, R40): Zero QUIC protocol implementation. loadWasmModule() returns {} (L288), send() writes nothing (L189-193), receive() returns empty Uint8Array (L194-198), sendRequest() returns hardcoded 200 + empty body (L315-319), getStats() returns all zeros (L274-278).
 
-**Critical context**: Real QUIC exists in Rust crate `agentic-flow-quic` using quinn 0.11 (production QUIC library) with rustls 0.23 (real TLS 1.3). WASM bindings exist (wasm.rs) but are never connected to TypeScript. The TypeScript → WASM → Rust/quinn bridge was never completed (R40).
+**Critical context**: Real QUIC exists in Rust crate `agentic-flow-quic` using quinn 0.11 (production QUIC library) with rustls 0.23 (real TLS 1.3). WASM bindings exist (wasm.rs) but are never connected to TypeScript. The TypeScript → WASM → Rust/quinn bridge was never completed (R40). R141 CONFIRMS the Rust crate compiles cleanly: all 8 tests pass. The fault is entirely in the TypeScript stub layer, not the Rust implementation.
 
 **Impact**: All swarm coordination (quic-coordinator.ts, p2p-swarm-v2.js) is architecturally sophisticated but non-functional without transport. SyncCoordinator (553 LOC, 40%) has real logic built on stub QUIC (Initial).
 
@@ -326,14 +379,71 @@ EmbeddingService.ts (1,810 LOC, 80%) has real ONNX embedding, K-means clustering
 
 **Assessment**: The "213 tools" count combines external packages (claude-flow@alpha 170+, flow-nexus@latest). Agentic-flow itself defines 9-11 tools that are CLI command wrappers, creating circular dependency (C2, Initial).
 
+### 5j. sona-agentdb-integration.ts — Dead Code with Genuine Core (R136)
+
+**sona-agentdb-integration.ts** (~600 LOC, 62-68%) is the most misleading file in the agentic-flow repo:
+
+**Dead / broken:**
+- SONAAgentDBTrainer is NEVER imported by any production source. Only consumer is `tests/sona/sona-training.test.ts`.
+- Both critical dependencies (@ruvector/sona, agentdb) are NOT installed in the workspace — will throw ModuleNotFoundError at any import.
+- `export()` method saves JSON config+stats only, NOT LoRA weights. Comment acknowledges "future: use HuggingFaceExporter".
+- `getStats().combined` returns hardcoded strings: avgQueryLatency="~1.25ms (HNSW + SONA)", storageEfficiency="~3KB per pattern". These are not measurements.
+- validateEmbedding hardcodes 3072 dimensions regardless of config.vectorDimensions.
+- The "150x-12,500x" performance claim on line 45 is a hardcoded marketing string. No benchmark exists anywhere in the codebase.
+
+**Genuine internals:**
+- `query()` method genuinely combines two retrieval paths: HNSW nearest-neighbor (via AgentDB) and SONA pattern matching, with weighted merge.
+- SONA trajectory lifecycle is correctly sequenced: beginTrajectory → addTrajectoryContext → addTrajectoryStep → endTrajectory.
+- 4 well-differentiated config presets (realtime/balanced/quality/largescale) with sensible HNSW parameter gradients.
+- `close()` properly cleans up: removes listeners, closes DB, nullifies sonaEngine reference.
+
+**Assessment**: The architecture is sound and the query path is genuine. But the file cannot run — missing deps make it permanently broken as-is. The "150x-12,500x" claim it contains is the same fabricated figure that appears in sona-tools.ts MCP tool handlers (R138), both contributing to the systemic marketing inflation pattern.
+
 ### 5k. Security Findings
 
 | Severity | Issue | File | Session |
 |----------|-------|------|---------|
 | CRITICAL | Shell injection via unsanitized execSync | standalone-stdio.ts | R22 |
+| CRITICAL | ML-DSA verify() accepts invalid signatures and wrong public keys — cryptographic rejection broken | packages/agentic-jujutsu/crypto.rs:341,354 | R141 |
 | HIGH | SQL injection in incrementStat (string interpolation for column name) | IntelligenceStore.ts | R22 |
 | HIGH | API key prefix leaked in logs | anthropic-to-requesty.ts | R22 |
 | HIGH | Missing request timeout (can hang indefinitely) | anthropic-to-openrouter.ts | R22 |
+| HIGH | agentdb_init applies schema to global db regardless of db_path parameter | agentdb-mcp-server.ts | R136 |
+| MEDIUM | ANTHROPIC_API_KEY passed via env var correctly but TOPIC hardcoded in demo compose | docker-compose.yml | R139 |
+
+### 5n. Rust Compilation Audit Results (R141)
+
+Systematic cargo check + cargo test --lib across the agentic-flow workspace crates:
+
+**PASS (clean or warnings only):**
+- `crates/agentic-flow-quic` — 999 LOC, 8/8 tests green. Prior SIGABRT was environment issue, not code bug. QUIC Rust implementation is genuinely functional.
+- `packages/agent-booster-native` — 187 LOC, 0 tests. NAPI wrapper compiles clean.
+- `reasoningbank/reasoningbank-core` — 773 LOC, 12/12 tests green.
+- `reasoningbank/reasoningbank-learning` — 788 LOC, 7/7 tests green. 8 deprecation warnings for AsyncLearner.
+- `reasoningbank/reasoningbank-storage` — 1,403 LOC, 9/9 tests green.
+- `reasoningbank/reasoningbank-network` — 2,647 LOC, 18/18 tests green. NeuralBus gossip, priority queues, QUIC streams all pass.
+
+**FAIL (test failures):**
+- `packages/agent-booster` — 2,292 LOC, 19p/6f. Strategy selection (FuzzyReplace vs InsertAfter), normalized similarity, async template detection, 3 integration tests fail. Tier 1 token-optimization is broken (H30).
+- `packages/agentic-jujutsu` — 9,138 LOC, 83p/5f. 2 CRITICAL crypto failures: verify() accepts invalid signatures + wrong public keys at crypto.rs:341,354 (C15).
+
+**FAIL (compile failures):**
+- `packages/agent-booster-wasm` — 470 LOC. check PASS, WASM cross-compile PASS, test compile FAIL (missing .unwrap() on Result in lib.rs:435).
+- `reasoningbank/reasoningbank-mcp` — 1,037 LOC. 6 compile errors — StorageConfig type mismatch (E0308), missing serde::Deserialize (C16). Crate unusable.
+- `reasoningbank/reasoningbank-wasm` — 201 LOC. FAIL native check (wasm module cfg-gated), PASS wasm32 cross-compile. Expected for WASM-only crate.
+
+**Summary**: 6/11 agentic-flow Rust crates fully clean. 2/11 have test failures (1 security-critical). 3/11 have compile issues (1 BlockingBug, 2 expected WASM patterns).
+
+### 5o. AgentDB MCP Server — Corrected Assessment (R136)
+
+**agentdb-mcp-server.ts** (2,368 LOC, ~82%) is significantly more genuine than initial assessment suggested:
+
+- **EmbeddingService IS initialized** — Xenova/all-MiniLM-L6-v2 (384-dim) awaited at module startup. This CORRECTS the R20 root cause claim. R20's "never initialized" finding applies to the claude-flow bridge (which uses a different MCP server path), NOT to this standalone server.
+- **All 8 controllers with proper DI** — CausalMemoryGraph(db), ReflexionMemory(db, embeddingService), SkillLibrary(db, embeddingService), etc.
+- **28 real tools** (not 32 as documented) — batch operations have full input validation, parameterized queries, security error handling.
+- **Production lifecycle** — WAL mode + 64MB cache, auto-save every 5 min, graceful SIGINT/SIGTERM, keepAlive.
+- **Broken subsystems**: causal graph data model (hardcoded IDs=0, C14-equivalent), agentdb_init db_path ignored (H31), session_id filter silently ignored (H33), tool count overclaim (H34).
+- **Architecture gotcha**: Top-level await means importing as library triggers DB creation + ONNX model download at require() time. Designed as CLI executable, not importable library.
 
 ### 5l. Package Metadata
 
@@ -374,7 +484,7 @@ EmbeddingService.ts (1,810 LOC, 80%) has real ONNX embedding, K-means clustering
 
 ## 7. Knowledge Gaps
 
-- ~650+ files still NOT_TOUCHED (mostly dist/ JavaScript, node_modules, tests)
+- ~3,865 files still NOT_TOUCHED (mostly dist/ JavaScript, node_modules, tests across all packages)
 - Main entry dist/index.js orchestration logic
 - Agent markdown prompt templates (82 files) content analysis
 - MCP tool implementations beyond stdio servers
@@ -383,9 +493,12 @@ EmbeddingService.ts (1,810 LOC, 80%) has real ONNX embedding, K-means clustering
 - HTTP/3 proxy layer
 - Billing system implementation
 - Browser build internals
-- Rust agentic-flow-quic crate internals
-- Full agentic-jujutsu WASM bindings
+- Full agentic-jujutsu WASM bindings and specific failing test details (crypto.rs:341,354)
 - Remaining TypeScript sources in src/
+- agentic-flow-quic WASM bridge wasm.rs — what exists, why never connected
+- agent-booster failing test root causes (strategy selection logic, similarity normalization)
+- agentdb factory full runtime behavior with each backend tier
+- CI configuration for agentic-flow repo (separate from claude-flow CI)
 
 ## 8. Session Log
 
@@ -400,3 +513,15 @@ Package structure, agent system, MCP tools, ReasoningBank fragmentation, multi-p
 
 ### R44 (2026-02-15): Core integration bridges (LLM, ruvector, SONA)
 3 files, 1,853 LOC, ~68 findings. Integration bridges are mostly facades. RuvLLMOrchestrator.ts (35-40%) is a THIRD parallel routing system — "FastGRNN/TRM/SONA" marketing names hide simple heuristics, zero ruvllm connection, orphaned. ruvector-backend.ts (12%) is COMPLETE FACADE — zero ruvector imports, hardcoded "125x speedup", never imported anywhere. sona-service.ts (78%) is the ONLY genuine bridge — real @ruvector/sona wrapper, but has parallel incompatible API with ruvector-integration.ts (beginTrajectory vs startTrajectory). Confirms R40's "single-node task runner" characterization — bridges don't add real cross-system connectivity.
+
+### R136 (2026-03-01): Ghost DEEP files + Rust integration hubs (ML-C)
+3 files, ~3,200 LOC, 45 findings. sona-agentdb-integration.ts confirmed DEAD CODE — both critical deps not installed, never imported in production. Source of "150x-12,500x" hardcoded claim. agentdb-mcp-server.ts reassessed upward: EmbeddingService IS initialized, all 8 controllers with DI, 28 real tools, production lifecycle. CORRECTS R20 root-cause claim (applies to claude-flow bridge, not this standalone server). agentdb factory: 5-tier fallback (not 4), BackendType union bug (missing sqljsrvf). New CRITICAL findings: C14 (dead code + missing deps), H28 (causal graph broken), H29 (BackendType union incomplete).
+
+### R139 (2026-03-02): CI/Tests/Deployment ground truth (ML-E)
+2 files, ~90 LOC, 7 findings. agentic-flow deployment is demo-only: docker-compose.yml is 9-line single-service demo, docker-compose.agent.yml defines 7 agent types with hardcoded tasks (not operational). Positive: containerized agent execution is architecturally proven — ANTHROPIC_API_KEY pattern correct, 7 agent types defined.
+
+### R141 (2026-03-02): Rust compilation audit
+11 crates across agentic-flow workspace, ~19,700 LOC total, 22 findings. 6/11 crates clean. CRITICAL findings: agentic-jujutsu ML-DSA verify() accepts invalid signatures + wrong public keys (C15); reasoningbank-mcp compile failure (C16). agent-booster 6/25 tests fail (H30). agentic-flow-quic Rust confirmed GENUINE: 8/8 tests pass — fault is entirely in TypeScript bridge. reasoningbank workspace largely genuine: 46/46 tests across core/learning/storage/network.
+
+### R142 (2026-03-03): Synthesis update
+Incorporated findings from R136-R141 (ML-C through ML-F + Rust audit) into this document. Updated coverage stats, corrected R20 agentdb-mcp-server claim, added 3 new CRITICAL findings (C14-C16), 13 new HIGH findings (H28-H36), new subsystem sections 5n-5o, Rust compilation audit table, deployment section. Total domain findings: 1,998 all-time (262 CRITICAL, 575 HIGH).

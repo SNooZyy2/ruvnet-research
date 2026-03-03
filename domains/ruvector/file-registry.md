@@ -510,3 +510,10 @@
 | crates/prime-radiant/tests/ruvllm_integration_tests.rs | prime-radiant | 1,393 | 40-45% | DEEP | 100% mock, zero cross-crate imports, API mismatch with production | R139 |
 | tests/integration/distributed/docker-compose.yml | ruvector-root | 198 | 50-55% | DEEP | 5-node Raft cluster with dummy shell-script nodes, real cargo test runner | R139 |
 
+
+### V3 Intelligence Layer (R140)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| v3/@claude-flow/cli/src/memory/intelligence.ts | claude-flow (v3) | 985 | 55-60% | DEEP | CRITICAL FACADE: claims O(log n) HNSW, actual is O(n) brute-force cosine. LocalSonaCoordinator: LoRA/EWC config fields stored but NEVER used. compactPatterns() O(n²) with maxPatterns=5000. 14+ consumers, zero @ruvector/* imports. NOT dead code — just algorithmically false | R140 |
+| v3/@claude-flow/cli/src/memory/sona-optimizer.ts | claude-flow (v3) | 842 | 72-78% | DEEP | GENUINE agent-routing optimizer. Bayesian confidence update, temporal decay, pattern pruning. Connected to hooks pipeline. Zero HNSW/ruvector connection. Q-learning lazy-load degrades to JS-only silently | R140 |

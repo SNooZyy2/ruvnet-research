@@ -1,7 +1,7 @@
 # Claude Flow CLI Domain Analysis
 
 > **Priority**: HIGH | **Coverage**: ~14.1% (46/326 DEEP) | **Status**: Complete (priority queue empty)
-> **Last updated**: 2026-02-17 (Session R89)
+> **Last updated**: 2026-03-03 (Session R140)
 
 ## 1. Current State Summary
 
@@ -17,6 +17,9 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 - **Three fragmented ReasoningBanks** — claude-flow (Map+JSON), agentic-flow (SQLite+DeepMind), agentdb (SQLite+embeddings). Only claude-flow's runs.
 - **HNSW is pure TypeScript** — real implementation following Malkov & Yashunin but ~60x slower than native. "150x-12,500x" claim is vs brute-force, misleading.
 - **Learning system is architecturally sound but operationally limited** — RL algorithms are tabular (Map-based), not neural. "LoRA" operates on routing tables, not LLM weights.
+- **Lazy loading in commands/index.ts is dead code** (R138) — 31 CommandLoaders defined but all 31 synchronously imported anyway, negating any startup savings.
+- **intelligence.ts CRITICAL facade** (R140) — claims O(log n) HNSW search, delivers O(n) brute-force. LoRA/EWC config stored but never used. 14+ real consumers.
+- **hooks.ts has 30 real MCP subcommands** (R140) but token-optimize unconditionally inflates savings counters (+200 tokens, hardcoded) and statusline uses KB/2 heuristic for vector count.
 - **Graceful degradation everywhere** — dynamic imports with null fallback for all optional deps. Silent failures hide missing functionality.
 - **Best security** — neural.js export has Ed25519 signing, PII stripping, secret detection. Production-grade.
 
@@ -48,6 +51,9 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | migrate.js | cli | 410 | 20% | DEEP | V2→V3 steps hardcoded. Good breaking changes docs | R17 |
 | claims.js | cli | 373 | 40% | DEEP | Real wildcard eval. grant/revoke don't persist | R17 |
 | index.js | cli | 366 | 100% | DEEP | Lazy loading saves ~200ms | R17 |
+| commands/index.ts | cli/v3 | ~400 | 72% | DEEP | 31 commands. Lazy loading nullified by sync imports | R138 |
+| commands/hooks.ts | cli/v3 | ~4,500 | 75% | DEEP | 30 real MCP subcommands. token-optimize fake savings | R140 |
+| memory/intelligence.ts | cli/v3 | ~800 | 68% | DEEP | CRITICAL: claims O(log n) HNSW, actual O(n). LoRA/EWC config stored never used | R140 |
 | deployment.js | cli | 289 | 10% | DEEP | All steps simulated with setTimeout() | R17 |
 | update.js | cli | 276 | 95% | DEEP | Real npm check with rate limiting | R17 |
 | progress.js | cli | 259 | 100% | DEEP | Real MCP integration | R17 |
@@ -120,6 +126,8 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | C8 | **YAML session import broken** — Uses JSON.parse instead of YAML parser | session.js | R17 | Open |
 | C9 | **workflow template create never saves** — Hardcoded metadata in CLI, not persisted | workflow.js | R17 | Open |
 | C10 | **deployment command entirely simulated** — All steps use setTimeout(), no real deployment | deployment.js | R17 | Open |
+| C11 | **intelligence.ts claims O(log n) HNSW, actual O(n) brute-force** — LocalReasoningBank.findSimilar (lines 357-385) does cosine similarity scan over all patterns. No HNSW index, no native bridge. compactPatterns() is O(n²) — 12.5M ops at maxPatterns=5000 | memory/intelligence.ts | R140 | Open |
+| C12 | **intelligence.ts LoRA/EWC config is dead config** — loraLearningRate (0.001), loraRank (8), ewcLambda (0.4) stored in SonaConfig but LocalSonaCoordinator has zero code paths that read or use them | memory/intelligence.ts | R140 | Open |
 
 ### 3b. HIGH Findings
 
@@ -142,6 +150,11 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | H15 | **ruvector-pg migrate dimensions hardcoded** — Uses vector(1536) regardless of config | migrate.js (pg) | R17 | Open |
 | H16 | **ruvector-pg import dimensions hardcoded** — Uses ruvector(384) regardless of config | import.js (pg) | R17 | Open |
 | H17 | **helpers/memory.js is 9th disconnected persistence layer** — plain JSON file-system store with zero connection to AgentDB, better-sqlite3, claude-flow memory CLI, or any other memory system. 5 commands (get/set/delete/clear/keys), no search, no TTL, no namespaces | .claude/helpers/memory.js | R87 | Open |
+| H18 | **Lazy loading nullified** — commands/index.ts defines 31 CommandLoaders (lines 21-70) for deferred require() but then synchronously imports all 31 at module parse time (lines 111-145). The advertised ~200ms startup savings are gone | commands/index.ts | R138 | Open |
+| H19 | **token-optimize hardcodes fake savings** — token-optimize command (L3893-3896) unconditionally adds stats.totalTokensSaved += 200 and sets cacheHits=2, cacheMisses=1 regardless of whether optimization occurred. Metrics are always inflated | commands/hooks.ts | R140 | Open |
+| H20 | **statusline vector count is KB/2 heuristic** — agentdbStats.vectorCount = Math.floor(agentdbStats.dbSizeKB / 2) (L3576-3582). Not an actual DB query; assumes 2KB per vector. Will report wildly incorrect values | commands/hooks.ts | R140 | Open |
+| H21 | **intelligence command may silently return stubs** — hooks_intelligence MCP tool calls getSONAOptimizer(), getMoERouter(), getFlashAttention(), getEWCConsolidator(), getLoRAAdapter() — all optional. If any returns null (when optional deps absent), the response appears successful but contains zeros | commands/hooks.ts | R140 | Open |
+| H22 | **compactPatterns O(n²) performance hazard** — intelligence.ts compactPatterns() compares all pairs in the pattern store. At maxPatterns=5000 (default), this is 12.5M cosine similarity operations with no HNSW acceleration despite the header claim | memory/intelligence.ts | R140 | Open |
 
 ## 4. Positives Registry
 
@@ -165,6 +178,11 @@ The claude-flow CLI domain spans 326 files across the v3/@claude-flow/cli packag
 | **dependency-installer.js multi-manager** — Real detection of npm/pnpm/yarn | dependency-installer.js | R17 |
 | **hnsw-index.ts real HNSW implementation** — Follows Malkov & Yashunin paper correctly | hnsw-index.ts | R1 |
 | **reasoning-bank.ts 4-step learning** — RETRIEVE/JUDGE/DISTILL/CONSOLIDATE from DeepMind | reasoning-bank.ts | R1 |
+| **hooks.ts pre-task has real model routing** — Dynamic import of enhanced-model-router.js, calls router.route(), produces [AGENT_BOOSTER_AVAILABLE]/[ROUTING DIRECTIVE] outputs with genuine fallback heuristic | commands/hooks.ts | R140 |
+| **ruvector command confirmed real** — 8 genuine subcommands (init/setup/import/migrate/status/benchmark/optimize/backup) each mapping to ruvector-pg/*.js handlers | commands/index.ts | R138 |
+| **intelligence.ts circular buffer and disk persistence are real** — LocalSonaCoordinator uses O(1) pre-allocated circular buffer for signal recording; LocalReasoningBank debounce-persists patterns to JSON on disk and loads on construction | memory/intelligence.ts | R140 |
+| **hooks.ts 12 named workers with real dispatch** — ultralearn/optimize/consolidate/predict/audit/map/preload/deepdive/document/refactor/benchmark/testgaps each has priority, estimated duration, real MCP callout | commands/hooks.ts | R140 |
+| **intelligence.ts has 14+ real consumers** — Not dead code: index.ts, headless.ts, neural.ts (9 sites), embeddings-tools.ts confirm it is wired into the runtime | memory/intelligence.ts | R140 |
 
 ## 5. Subsystem Sections
 
@@ -258,6 +276,49 @@ claude-flow uses agentic-flow's ReasoningBank only for `retrieveMemories()` in t
 
 **Two-tier experience** (R1): with optional deps installed, ~60x speedup for memory search, real semantic embeddings, persistent learning. Without them, graceful degradation to non-persistent in-memory Maps, hash-based embeddings, features that appear to work but do nothing.
 
+### 5j. Command Registry — commands/index.ts (R138)
+
+**commands/index.ts registers 31 commands** in the v3 CLI, organized into 5 help groups: primary (10: init/start/status/agent/swarm/memory/task/session/mcp/hooks), advanced (7: neural/security/performance/embeddings/hive-mind/ruvector/guidance), workflow (5: workflow/benchmark/analyze/process/route), developer (5: migrate/config/providers/update/doctor), and utilities (4: issues/claims/completions/categories). There are also hidden commands: progress and possibly others.
+
+**Lazy loading is structurally dead** (H18): lines 21-70 define 31 `CommandLoader` objects with `loader: () => require('./command-name')` for deferred loading. Lines 111-145 immediately and synchronously import all 31 commands at module parse time — the `loadedCommands` cache hits happen before any command is invoked. The "saves ~200ms" comment in index.js refers to the JS file which does real lazy loading; the TS source has the optimization nullified.
+
+**Two orphan command files** are on disk but never registered: `transfer-store.ts` and `appliance-advanced.ts`. These exist in the commands/ directory, cannot be reached via CLI, and are likely dead.
+
+**Triple registration pattern** adds maintenance overhead: each command goes through (1) commandLoaders map, (2) synchronous import + loadedCommands.set cache, (3) commands[] array (only 19 of 31 appear here). The commands[] array is incomplete — missing config, completions, migrate, workflow, process, analyze, route, progress, and others.
+
+**Silent load failures** in production: loadCommand() catch block (lines 97-103) swallows errors unless DEBUG env var is set. Syntax errors or missing dependencies in command modules will produce no user-visible error.
+
+### 5k. Hooks Command — commands/hooks.ts (R140)
+
+**hooks.ts exports 30 subcommands** (documented as 17) organized as: core lifecycle (pre-task, post-task, pre-edit, post-edit, pre-command, post-command, notify), intelligence pipeline (intelligence, pretrain, learn, attention), worker system (worker-list, worker-dispatch, worker-status, worker-detect, worker-cancel), model routing (model-route, model-outcome, model-stats), and swarm coordination (swarm-gate). Plus 4 v2 backward-compat aliases and 3 coverage-aware commands.
+
+**29 of 30 follow the MCP-first pattern** cleanly: `callMCPTool("hooks_<name>", {...})` with zero business logic in the CLI layer. The exception is **statusline** (~470 LOC, L3259-3729) which implements its own filesystem logic, reading memory.db, .claude/settings.json, HNSW index files, session files, and test directories directly.
+
+**statusline has two confirmed bugs** (H19, H20): vector count is `Math.floor(dbSizeKB / 2)` (not a DB query), and token-optimize unconditionally adds 200 to totalTokensSaved with hardcoded cacheHits=2/cacheMisses=1.
+
+**pretrain has cosmetic 800ms delays** (L836-845): `await new Promise(resolve => setTimeout(resolve, 800))` before each of 6 MCP calls. The 6-step "RETRIEVE → JUDGE → DISTILL → CONSOLIDATE → OPTIMIZE → VALIDATE" animation is cosmetic; actual work happens in the MCP call after the delay.
+
+**pre-task has genuine model routing** (GENUINE, R140): dynamic import of enhanced-model-router.js, calls `router.route(description)`, emits `[AGENT_BOOSTER_AVAILABLE]` or `[ROUTING DIRECTIVE]` with real fallback heuristic when router unavailable. This is the actual ADR-008 routing entry point.
+
+**token-optimize has legitimate fallback chain** (R140) despite the fake savings counter: genuinely tries `import('agentic-flow/reasoningbank')` then `retrieveMemories(query, {k:5})`, then falls back to legacy agent context injection. The optimization attempt is real; only the metrics reporting is fabricated.
+
+### 5l. Intelligence Layer — memory/intelligence.ts (R140)
+
+**intelligence.ts is the most significant architectural facade in the CLI** (C11, C12). The file header and SonaConfig type advertise O(log n) HNSW pattern search and LoRA/EWC adaptive learning. Reality:
+
+- **LocalReasoningBank.findSimilar** (lines 357-385): brute-force cosine similarity over all stored patterns. O(n) with no index.
+- **compactPatterns()**: O(n²) all-pairs comparison — 12.5M ops at maxPatterns=5000 default. Will block the event loop.
+- **SonaConfig fields** `loraLearningRate`, `loraRank`, `ewcLambda` exist in the type and are stored in `this.config`, but LocalSonaCoordinator has zero code paths that read them. No LoRA update, no EWC penalty, no gradient step.
+- **LocalSonaCoordinator** uses a pre-allocated circular buffer for signal recording — genuinely O(1) insertion. The <0.05ms benchmark target (validated by headless.ts with 10,000 iterations) is achievable because the buffer is just an array assignment.
+
+**Not dead code** — intelligence.ts has 14+ confirmed consumers: index.ts (re-export), headless.ts (benchmark harness), commands/neural.ts (9 import sites), mcp-tools/embeddings-tools.ts. The file is in the active call graph.
+
+**Real disk persistence** (GENUINE): LocalReasoningBank debounce-persists patterns to JSON with 100ms debounce. Patterns survive process restart. Load-on-construction reads existing patterns.
+
+**Two-tier embedding fallback** in recordStep(): (1) memory-bridge.ts → AgentDB v3 bridge embedder (Xenova/all-MiniLM-L6-v2, 384-dim), (2) memory-initializer.ts generateEmbedding() which falls back to hash-based if AgentDB unavailable. Zero connection to Rust hnsw_router.rs or NAPI bridge.
+
+**No native acceleration**: zero imports of @ruvector/*, hnswlib-node, or any NAPI binding. The SONA branding in LocalSonaCoordinator refers only to the circular buffer and signal recording — it is not connected to sona-optimizer.ts (which is the genuine Bayesian routing system in hooks-tools.ts).
+
 ## 6. Cross-Domain Dependencies
 
 - **memory-and-learning domain**: ReasoningBank implementations, HNSW, embeddings, pattern storage
@@ -269,11 +330,13 @@ claude-flow uses agentic-flow's ReasoningBank only for `retrieveMemories()` in t
 
 - MCP server full implementation at v3/mcp/server.ts (20,632 bytes) — how does it differ from CLI embedded?
 - v3/mcp/tools/ directory — are these duplicates of dist/src/mcp-tools/ or different?
-- Hooks system integration — how do .claude/helpers/ shell scripts wire into MCP?
-- Agent system runtime — how does Task tool invocation work with .claude/agents/ templates?
-- Claims system persistence — where is the real backend vs simulated?
+- Hooks system integration — RESOLVED R87: .claude/helpers/ scripts are standalone, NOT wired to MCP.
+- Agent system runtime — RESOLVED R140: Task tool spawns `claude --print prompt` subprocess; no MCP between orchestrator and workers.
+- Claims system persistence — RESOLVED R140: LOCAL-ONLY JSON file (claim-service.ts), incompatible with claims-tools.ts (3-part vs 2-part claimant format).
 - WASM modules — which exist, which are missing, which are stubs?
 - Browser build — is this real or placeholder?
+- transfer-store.ts and appliance-advanced.ts — discovered as orphan files in commands/ (R138). Purpose unknown, never registered.
+- hooks-tools.ts (3,281 LOC) — the actual MCP handler for all 30 hooks subcommands. What is the sona-optimizer wiring vs the MCP facade layer?
 
 ## 8. Session Log
 
@@ -288,3 +351,9 @@ Package structure, MCP server, HNSW, learning system, dependencies assessed. Thr
 
 ### R89 (2026-02-17): Project closeout
 Priority queue EMPTY. All research tiers cleared. claude-flow-cli at 46 DEEP files (from 45). Final session — synthesis verification only.
+
+### R138 (2026-03-03): CLI command registry deep-read
+1 file (commands/index.ts), ~400 LOC, 7 findings. KEY: lazy loading is structurally nullified — 31 CommandLoaders defined but all 31 synchronously imported at module load. Two orphan command files (transfer-store.ts, appliance-advanced.ts) discovered unregistered. commands[] array is incomplete (19 of 31). Silent load failures in production when DEBUG not set. ruvector command confirmed genuine (8 real subcommands).
+
+### R140 (2026-03-03): Hooks + intelligence layer deep-read
+2 files (commands/hooks.ts + memory/intelligence.ts), ~5,300 LOC, 18 findings (2 CRITICAL, 8 HIGH, 8 MEDIUM). KEY findings: intelligence.ts is the domain's most significant facade — O(n) brute-force behind O(log n) HNSW claim, LoRA/EWC config stored but never used, O(n²) compactPatterns. hooks.ts is 72-78% genuine with 30 real MCP subcommands (not 17 documented); token-optimize hardcodes +200 fake savings; statusline uses KB/2 heuristic for vector count; pre-task has real ADR-008 model routing.

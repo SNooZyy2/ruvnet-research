@@ -1,7 +1,7 @@
 # Swarm Coordination Domain Analysis
 
 > **Priority**: HIGH | **Coverage**: ~21.6% (313/1428 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-02-17 (Session R91)
+> **Last updated**: 2026-03-02 (Session R141)
 
 ## Document Index
 
@@ -17,7 +17,7 @@ This analysis has been split into sub-files for manageability. **Agents: follow 
 | 5b. Subsystems (Extended) | [subsystems-extended.md](subsystems-extended.md) | (Reserved for future subsystem sections) |
 | 6. Cross-Domain | [cross-domain.md](cross-domain.md) | Dependencies on other domains |
 | 7. Knowledge Gaps | [gaps.md](gaps.md) | Remaining coverage gaps |
-| 8. Session Log | [session-log.md](session-log.md) | All session entries (R9 through R91) |
+| 8. Session Log | [session-log.md](session-log.md) | All session entries (R9 through R141) |
 
 ## Agent Instructions
 
@@ -58,9 +58,17 @@ The swarm-coordination domain spans 267+ DEEP files across multi-agent lifecycle
 
 **WASM scoreboard**: 16 genuine vs 13 theatrical (55% genuine — R87 adds temporal-neural-solver-wasm 88-92% genuine, psycho-symbolic test-build.js 13th theatrical). **Persistence layer fragmentation**: 9 disconnected layers (R87: memory-config.js adds 9th). ruv-swarm npm build pipeline is REAL; npm runtime layer remains BIMODAL (genuine infra, fabricated intelligence). **test-wasm-loading.js (95-98%) VALIDATES R84 build.rs** — core WASM binary loads and executes real functions. **verify-db-updates.js (88-92%) GENUINE** — real DB queries confirm persistence layer works despite theatrical CLI metrics.
 
+**R141 key results (Rust compilation audit):**
+
+- **ENTIRE ruv-swarm Rust workspace fails `cargo check`** — All 14 Cargo.toml manifests declare `ruv-fann = "^0.1.5"` but the workspace root provides ruv-fann 0.2.0. The `^0.1.5` semver range does NOT include 0.2.0 (breaking change boundary). This workspace-wide version mismatch causes `cargo check` to fail for every crate: ruv-swarm-core, ruv-swarm-agents, ruv-swarm-cli, ruv-swarm-daa, ruv-swarm-mcp, ruv-swarm-ml, ruv-swarm-persistence, ruv-swarm-transport, ruv-swarm-wasm, ruv-swarm-wasm-unified, claude-parser, swe-bench-adapter, benchmarking, and ml-training.
+- **Binary truth signal** — This single ruv-fann version pin proves that NO crate in the ruv-swarm Rust layer has been integration-tested against the current workspace. Prior sessions (R50, R70-R72, R79-R86) assessed individual files as 85-95% genuine based on source code quality; R141 confirms that quality code cannot reach production because the workspace won't compile.
+- **Impact on earlier findings** — Source-level quality assessments (memory.rs 95-98%, protocol.rs 92-95%, models.rs 92-95%, service.rs 88-92%) remain valid for the code that was written, but all runtime claims about those crates are invalidated. The persistence crate (93% weighted average) and MCP service (rmcp bindings) are non-functional in the current workspace state. Finding C65 added.
+- **NOT affected**: ruv-fann itself (a separate workspace), ruvector-core, and the JS/TS swarm layer (npm package). Only the ruv-swarm Rust workspace is blocked.
+
 **Top verdicts:**
 - **Best infrastructure**: sqlite-pool.js (92%), storage.rs (95-98%), in_process.rs (92%), service.rs (88-92%), config.rs (88-92%), models.rs (92-95%), build.js (90-95%).
 - **Worst gaps**: neural.js (28%), wasm_simple.rs (22-28%), neural-coordination-protocol.js (10-15%), QUIC empty everywhere, GPU operations zero.
+- **Compilation blocker (R141)**: ENTIRE ruv-swarm Rust workspace fails cargo check — ruv-fann ^0.1.5 vs workspace 0.2.0 version mismatch across all 14 Cargo.toml files (C65).
 
 **R82 key results (4 files, ~462 LOC):**
 

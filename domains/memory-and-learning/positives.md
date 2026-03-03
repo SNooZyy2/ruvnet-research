@@ -151,3 +151,13 @@
 - **utils.ts** (92-95%): Production-grade utilities — VectorOperations (15 methods, dot/cosine/normalize), PerformanceMonitor (real timing), ConvergenceChecker, TimeoutController, ValidationUtils. No hash-based embeddings. Best infrastructure code in src/core/.
 - **temporal-attractor.ts** (88%): Genuine nonlinear dynamics MCP schemas — Rosenstein algorithm for Lyapunov exponents, Takens embedding theorem parameters, Echo-State Networks with spectral radius. Pure schema layer with proper delegation to handlers.
 
+
+### R140 Positives
+- **sona-optimizer.ts** (78-82%): The ONLY V3 memory subsystem with genuine Bayesian learning and end-to-end hooks pipeline connection. SONAOptimizer.updateConfidence() implements textbook Bayesian update with temporal decay. Pattern pruning by confidence×recency. Integrated into hooks-tools.ts at hooksTrajectoryEnd, hooksIntelligence, and getSONAStats handlers. Public API exported from @claude-flow/cli index.ts (lines 598-611). Real Q-learning integration (degrades gracefully to JS fallback when @ruvector/core absent).
+- **intelligence.ts circular buffer** (within 60-65% file): LocalSonaCoordinator's circular buffer provides genuine O(1) signal insertion with no memory fragmentation. <0.05ms target validated by headless.ts with 10,000 iterations. Disk persistence (JSON, 100ms debounce on writes) is working functionality that survives process restarts.
+- **intelligence.ts 2-tier embedding fallback**: recordStep() uses memory-bridge.ts → memory-initializer.ts fallback chain. Bridges the broken memory-bridge runtime gap gracefully.
+
+### R141 Positives (Rust Compilation Audit)
+- **reasoningbank workspace 4/5 passing**: reasoningbank-core (12 tests), reasoningbank-storage (9 tests), reasoningbank-learning (7 tests), reasoningbank-network (18 tests) all pass cargo check + cargo test --lib. 46 tests total with zero failures. The Rust ReasoningBank is the most production-ready Rust cluster in the domain.
+- **bit-parallel-search**: 4/4 tests pass. The only fully clean crate in the sublinear-time-solver workspace. Genuine shift-or bitwise algorithm confirmed compilable and tested.
+- **temporal-compare**: 3/3 quantization tests pass. Solid mini-crate.

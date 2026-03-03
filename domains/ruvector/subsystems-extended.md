@@ -421,3 +421,55 @@ R139 deep-reads the test files that should validate cross-crate integration and 
 
 **Overall testing gap:** The ruvector ecosystem has strong algorithm-level unit testing (softmax, sampling, KV cache, speculation, reservoir sampling, LR scheduling, etc.) but a complete absence of cross-crate integration testing. The two files labeled "integration" (2,928 LOC combined) test ZERO cross-module boundaries. This is consistent with the broader pattern documented since C24 (transport-absent distributed protocol) — subsystems are designed and tested in isolation, then never wired together.
 
+
+### 5ag. V3 Intelligence Layer & SONA Dual-System (R140)
+
+**2 files, 1,827 LOC, avg ~65%. Intelligence.ts is a CRITICAL FACADE; sona-optimizer.ts is GENUINE.**
+
+R140 characterizes the V3 CLI intelligence and SONA subsystems, confirming the "genuine Rust algorithms orphaned from TS consumers" pattern: the native HNSW in hnsw_router.rs (90-93% genuine) is completely unreachable from the V3 intelligence layer.
+
+**intelligence.ts (985 LOC, 55-60% — CRITICAL FACADE):** The file header claims O(log n) pattern search via HNSW, but `LocalReasoningBank.findSimilar()` (lines 357-385) performs brute-force linear scan with cosine similarity — O(n), no HNSW index, no @ruvector import, no hnswlib-node. `LocalSonaCoordinator` (lines 150-234) uses SONA branding but implements only a pre-allocated circular buffer for signal recording — no LoRA, no EWC, no gradient updates despite SonaConfig exposing `loraLearningRate` (0.001), `loraRank` (8), `ewcLambda` (0.4) (all stored in `this.config` but never referenced by any computation). `compactPatterns()` (lines 863-928) runs an O(n²) all-pairs cosine similarity with no indexing: maxPatterns=5000 means 12.5M operations. The file has 14+ consumers (headless.ts, benchmarks, CLI commands) but ZERO @ruvector/* imports. `benchmarkAdaptation()` (lines 762-799) runs 10,000 iterations and targets <0.05ms — achievable only because the "adaptation" is a trivial circular buffer write, not real ML. The intelligence layer IS NOT dead code (it runs and is consumed), but its core algorithmic claims are false.
+
+**sona-optimizer.ts (842 LOC, 72-78% — GENUINE agent-routing optimizer):** Despite the "SONA" name, this is an AGENT-ROUTING optimizer (learns which agent type to dispatch), not a vector-search optimizer. It implements a genuine Bayesian confidence update loop: success increments via `CONFIDENCE_INCREMENT*(1-conf)`, failure decrements via `CONFIDENCE_DECREMENT*conf`, with temporal decay `exp(-DECAY_RATE*days)` and pattern pruning by `score=confidence*recency`. This is a real ML feedback loop with JSON-file persistence to `.swarm/sona-patterns.json`. Connected to hooks-tools.ts via lazy import — it IS wired into the production hooks pipeline. Lazy-loads `q-learning-router.js` from `../ruvector/q-learning-router.js` which attempts `@ruvector/core` native import with JS fallback — the Q-learning integration degrades silently to pure-JS in production (H228 equivalent). Zero imports from hnsw-index.ts, sona-tools.ts, or hnsw_router.rs — the "150x-12,500x via HNSW" claim in sona-tools.ts is completely disconnected from this module.
+
+**SONA dual-system architecture:** Two independent SONA subsystems exist in V3 with zero cross-reference:
+1. `sona-optimizer.ts` — agent dispatch routing, Bayesian learning, trajectory-based, persists to `.swarm/sona-patterns.json`. GENUINE ML feedback loop.
+2. `sona-tools.ts` (MCP tool handlers) — fabricated HNSW speedup via `estimatedBruteForce = searchLatency * 1000` producing always-~1000x "improvement". FAKE.
+
+Both import different dependencies, serve different purposes, and share only the "SONA" brand name. `intelligence.ts` is the third member of this family — LocalSonaCoordinator with circular buffer — equally disconnected from the other two.
+
+**Cross-subsystem orphaning confirmed:** The V3 intelligence layer (intelligence.ts → LocalReasoningBank → brute-force cosine) sits adjacent to but completely disconnected from hnsw_router.rs (90-93% genuine, real HnswIndex from ruvector-core, SONA trajectory recording, complete online learning pipeline). A one-import change could wire intelligence.ts into the genuine HNSW backend, but no such bridge exists.
+
+### 5ah. Rust Compilation Audit (R141)
+
+**115 crates audited via cargo check + cargo test --lib across 4 workspaces. Binary truth signal: 87% check pass, 42 crates with 3,984 passing tests.**
+
+R141 provides ground-truth compilation and test status for the entire ruvector Rust codebase. Prior realness scores were based on code reading; this session adds binary compilation evidence.
+
+**Package-level summary:**
+
+| Status | Count | Key crates | LOC impact |
+|--------|-------|-----------|------------|
+| PASS check + test | 42 | temporal-tensor (269p), nervous-system (359p), GNN (198p), math (148p) | ~250K LOC confirmed genuine |
+| PASS check, no tests | 52 | dag, crv, metrics, replication, raft, many delta-* | ~300K LOC compiles |
+| FAIL check (CRITICAL) | 2 | ruvllm (120K LOC), sona (10K LOC) | 130K LOC broken |
+| FAIL check (HIGH) | 5 | ruvector-cli, ruvllm-cli, ruQu root, + 2 others | ~35K LOC broken entry points |
+| CFAIL (test binary) | 6 | prime-radiant (52K), mincut (42K), ruvector-graph (17K), delta-index, + 2 | ~115K LOC untestable |
+
+**CRITICAL compilation failures:**
+- **ruvllm (120,345 LOC)**: The largest crate in the repo cannot compile. All downstream crates depending on ruvllm (ruvllm-cli, ruvllm integration) fail as consequences. 120K LOC of LLM inference — the BitNet backend, Flash Attention, GGUF loading, serving engine — is currently unintegrable into the workspace.
+- **sona (10,582 LOC)**: The Rust SONA crate (distinct from npm sona-napi) fails check. Consistent with C59 (dual-instance state divergence) and C60 (synchronous background loop).
+
+**Strong genuine signal in core subsystems:**
+- ruvector-gnn: 198 tests passing, 8,083 LOC
+- ruvector-temporal-tensor: 269 tests passing, 11,446 LOC
+- ruvector-nervous-system: 359 tests passing, 14,708 LOC (MOST tests in repo)
+- ruvector-math: 148 tests passing, 13,166 LOC
+- ruvector-sparse-inference: 88 tests passing, 8,248 LOC
+- ruvector-dag: 77 tests, 8,188 LOC
+
+**CFAIL pattern (pass check, fail test binary):** prime-radiant (52,466 LOC), ruvector-mincut (42,157 LOC), and ruvector-graph (16,840 LOC) compile but cannot produce runnable test binaries. This means: the algorithmic bugs documented for these crates (C36-C49 for prime-radiant, C52-C74 for mincut, C5 for graph) have ZERO test coverage and cannot be caught by running `cargo test`. The test binary compilation failures likely stem from feature flag conflicts, missing test dependencies, or proc-macro issues — distinct from the logic bugs in source.
+
+**ruQu anomaly:** The ruQu workspace root (14,251 LOC, C14) fails check, but individual sub-crates pass AND have tests: ruqu-core (602 tests), ruqu-algorithms (23 tests), ruqu-exotic (57 tests). This is a workspace dependency aggregation issue, not a per-crate compilation failure.
+
+**Compilation audit vs. realness scores:** The audit confirms the asymmetry between algorithmic quality (what code reading reveals) and integration quality (what compiling reveals). A crate can be 90%+ genuine algorithmically but fail to compile due to workspace dependency issues. Conversely, crates that compile successfully may still contain logical bugs (C68-C74). Both signals are necessary and neither is sufficient alone.

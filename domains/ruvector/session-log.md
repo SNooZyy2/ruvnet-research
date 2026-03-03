@@ -233,3 +233,10 @@ Hash embedding confirmed at CLI layer (C104) and MCP server (C105) — extends C
 
 ### R140 (2026-03-02): V3 intelligence.ts — consumer of ruvector-adjacent intelligence layer
 1 file (memory-and-learning primary domain), cross-touch: intelligence.ts has zero connection to hnsw_router.rs (90-93% genuine) or any @ruvector/* import. Confirms that the V3 CLI intelligence layer operates entirely in userspace TS without any ruvector integration path. The genuine native HNSW layer (ruvector-core, hnsw_router.rs) remains unreachable from intelligence.ts. Extends the "genuine Rust algorithms orphaned from TS consumers" finding. DEEP: 446->446 (no new ruvector files read).
+
+### R141 (2026-03-02): Rust Compilation Audit — Binary truth signal for ruvector repo
+20 Cargo.toml files audited (cargo check + cargo test --lib), 0 LOC direct reads. **Package-level verdict: 100/115 crates pass cargo check (87%), 42 crates have passing tests (3,984 total tests passing, 0 failures), 6 CFAIL (test binary fails to compile), 9 fail check (including ruvllm at 120K LOC — CRITICAL).**
+
+CRITICAL: ruvllm (120,345 LOC) and sona (10,582 LOC) cannot compile at cargo check level. ruvector-cli (6,679 LOC) and ruvllm-cli (3,737 LOC) fail check. ruQu workspace root (14,251 LOC) fails despite sub-crates passing individually (ruqu-core 602 tests, ruqu-algorithms 23 tests, ruqu-exotic 57 tests). CFAIL test binaries in ruvector-mincut (42,157 LOC), prime-radiant (52,466 LOC), ruvector-graph (16,840 LOC), ruvector-delta-index (1,630 LOC), plus 2 others.
+
+GENUINE (compile+test passing): ruvector-gnn (198p), temporal-tensor (269p), math (148p), nervous-system (359p), GNN (198p), sparse-inference (88p), dag (77p), crv (40p), delta-core (30p), replication (26p), raft (23p), delta-wasm (18p), delta-consensus (19p), snapshot (10p), metrics (15p). Strong genuine signal across 42 core crates. 2C (C111-C112), 3H (H265-H267) inserted. DEEP: 446->446 (Cargo.toml reads only).

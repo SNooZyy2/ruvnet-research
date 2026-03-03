@@ -1,7 +1,7 @@
 # Production Infrastructure Domain Analysis
 
 > **Priority**: MEDIUM | **Coverage**: ~19% (78/~400 DEEP) | **Status**: In Progress
-> **Last updated**: 2026-03-02 (Session R140, ML-F execution engine)
+> **Last updated**: 2026-03-03 (Sessions R134-R140, full middle-layer sweep)
 
 ## Section 1: Current State Summary
 
@@ -17,7 +17,7 @@ Production infrastructure spans deployment, operations, self-healing, monitoring
 
 **R140 traced the V3 execution engine** — 7 files, ~10,542 LOC. Cluster A (Service Layer): headless-worker-executor.ts (1,342 LOC) spawns `claude --print <prompt>` as a one-shot subprocess with no MCP protocol and no AgentDB/memory connection; worker-daemon.ts (942 LOC) is a foreground Node.js class (not a daemon) where 9 of 12 local workers are facade stubs; claim-service.ts (1,118 LOC) uses JSON file persistence but its claimant format (2-part `agentId:taskId`) is incompatible with MCP claims-tools.ts (3-part `agentId:taskId:timestamp`), making them two parallel systems that cannot interoperate; container-worker-pool.ts (783 LOC) implements real Docker CLI integration but silently drops `prompt` and `contextPatterns` fields in `buildWorkerCommand()` — every containerized task runs without its instructions. Cluster B (Memory Intelligence): intelligence.ts (985 LOC) advertises O(log n) HNSW routing but is actually O(n) brute-force, and its LocalSonaCoordinator is a circular buffer with no HNSW; sona-optimizer.ts (842 LOC) implements real Bayesian confidence updates for agent routing but is not a vector search optimizer. Cluster C (Hooks CLI): hooks.ts (4,530 LOC) exposes 30 subcommands (vs 17 documented) with genuine ADR-008 pre-task model routing via enhanced-model-router.js, but token-optimize hardcodes +200 saved tokens unconditionally regardless of actual compression.
 
-The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/R135 remain valid. Systemic patterns: (1) real primitives disconnected from semantic layers; (2) governance with unverified crypto; (3) strong in-memory, no production backends; (4) algebraic-topology correctness bugs; (5) hash embedding end-to-end from CLI through engine to storage; (6) V2→V3 tool regression — more infrastructure, fewer working tools, zero memory bootstrap in any MCP server; (7) CI/testing facade pattern — pipelines and "integration tests" exist structurally but provide near-zero quality gate; (8) NEW: worker execution is subprocess-only with zero memory integration — the actual agent spawning mechanism (`claude --print`) is a one-shot subprocess with no MCP, no AgentDB, no session continuity, extending the zero-memory-bootstrap pattern from MCP servers all the way through the worker execution chain.
+The V3 MCP tool chain, CLI entrypoints, V3 memory layer, AgentDB MCP server, and prior subsystem summaries from R138/R134-R136 remain valid. Systemic patterns: (1) real primitives disconnected from semantic layers; (2) governance with unverified crypto; (3) strong in-memory, no production backends; (4) algebraic-topology correctness bugs; (5) hash embedding end-to-end from CLI through engine to storage; (6) V2→V3 tool regression — more infrastructure, fewer working tools, zero memory bootstrap in any MCP server; (7) CI/testing facade pattern — pipelines and "integration tests" exist structurally but provide near-zero quality gate; (8) worker execution is subprocess-only with zero memory integration — the actual agent spawning mechanism (`claude --print`) is a one-shot subprocess with no MCP, no AgentDB, no session continuity, extending the zero-memory-bootstrap pattern from MCP servers all the way through the worker execution chain; (9) V3 memory is a misnamed facade — AgentDBAdapter uses a plain JS Map with no AgentDB connection, loadFromDisk/saveToDisk are empty stubs, and the path traversal check in controller-registry is a no-op; (10) claim coordination is bifurcated — ClaimService uses a local JSON file while MCP claims-tools operate inline with incompatible 2-part vs 3-part claimant formats, making the two systems non-interoperable.
 
 ---
 
@@ -46,17 +46,25 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 | **crates/prime-radiant/src/cohomology/cocycle.rs** | 471 | **75-80%** | R110 | Cocycle/Coboundary/SheafCocycle/SheafCoboundary. CRITICAL: is_coboundary() always false for degree>0; apply_adjoint() dimension bug. Doubly-broken Hodge Laplacian. 4 tests. |
 | **crates/ruvector-attention/src/transport/cached_projections.rs** | 242 | **88-92%** | R110 | Genuine sliced-Wasserstein OT utility. ProjectionCache (unit-norm directions), WindowCache (sorted per projection), CDF histograms. 3 tests. dot_product_simd is scalar unroll only. |
 
-### CLI Entrypoints (R135)
+### CLI Entrypoints (R134)
 
 | File | LOC | Real% | Session | Key Feature |
 |------|-----|-------|---------|-------------|
-| **npm/packages/ruvector/bin/cli.js** | 7,357 | **72-78%** | R135 | Monolith CLI, ~70% genuine. Uses VectorDB (working). Hash embedding at CLI layer. 4 facade commands (graph/router/server/cluster). |
-| **npm/packages/ruvector/bin/mcp-server.js** | 3,007 | **78-82%** | R135 | 55-tool MCP server (largest). Heterogeneous delegation (library, execSync, agentic-flow). sanitizeShellArg() destroys SQL/Cypher/SPARQL. |
-| **v3/@claude-flow/cli/bin/cli.js** | 156 | **N/A** | R135 | Cold dispatcher. Zero subsystem init at boot. Everything lazy-loaded. |
-| **v3/@claude-flow/cli/bin/mcp-server.js** | 189 | **72-78%** | R135 | Near-duplicate MCP. Async ordering race. False resources capability. |
-| **ruflo/bin/ruflo.js** | 50 | **70-75%** | R135 | Pure claude-flow rebrand. Resolves @claude-flow/cli, fails silently if missing. |
-| **npm/packages/rvlite/bin/cli.js** | 1,686 | **80-85%** | R135 | Independent alternative. Own vector store, O(n) search, genuine WASM. Zero code sharing with ruvector CLI. |
-| **npm/packages/ruvllm/bin/cli.js** | 1,005 | **72-78%** | R135 | Native-binary-dependent. JS fallback = all facades. Training simulated. Benchmark uses hash embeddings. |
+| **npm/packages/ruvector/bin/cli.js** | 7,357 | **72-78%** | R134 | Monolith CLI, ~70% genuine. Uses VectorDB (working). Hash embedding at CLI layer. 4 facade commands (graph/router/server/cluster). |
+| **npm/packages/ruvector/bin/mcp-server.js** | 3,007 | **78-82%** | R134 | 55-tool MCP server (largest). Heterogeneous delegation (library, execSync, agentic-flow). sanitizeShellArg() destroys SQL/Cypher/SPARQL. |
+| **v3/@claude-flow/cli/bin/cli.js** | 156 | **N/A** | R134 | Cold dispatcher. Zero subsystem init at boot. Everything lazy-loaded. |
+| **v3/@claude-flow/cli/bin/mcp-server.js** | 189 | **72-78%** | R134 | Near-duplicate MCP. Async ordering race. False resources capability. |
+| **ruflo/bin/ruflo.js** | 50 | **70-75%** | R134 | Pure claude-flow rebrand. Resolves @claude-flow/cli, fails silently if missing. |
+| **npm/packages/rvlite/bin/cli.js** | 1,686 | **80-85%** | R134 | Independent alternative. Own vector store, O(n) search, genuine WASM. Zero code sharing with ruvector CLI. |
+| **npm/packages/ruvllm/bin/cli.js** | 1,005 | **72-78%** | R134 | Native-binary-dependent. JS fallback = all facades. Training simulated. Benchmark uses hash embeddings. |
+
+### V3 Memory Layer (R135) and AgentDB MCP Server (R136)
+
+| File | LOC | Real% | Session | Key Feature |
+|------|-----|-------|---------|-------------|
+| **v3/@claude-flow/memory/src/agentdb-adapter.ts** | 1,038 | **35-45%** | R135 | MISNAMED: stores data in plain JS Map, zero AgentDB imports. loadFromDisk/saveToDisk are EMPTY STUBS. R20 root cause NOT fixed. |
+| **v3/@claude-flow/memory/src/controller-registry.ts** | 1,026 | **55-65%** | R135 | Path traversal validation is a no-op. createEmbeddingService() fallback returns zero-filled Float32Array. causalRecall stub never reached. |
+| **packages/agentdb/src/mcp/agentdb-mcp-server.ts** | 2,368 | **75-80%** | R136 | 28 actual tools (not 32 claimed). EmbeddingService IS initialized (Pipeline 1 only). causal_add_edge hardcodes fromMemoryId=0. |
 
 ### V3 MCP Tool Chain (R138)
 
@@ -108,6 +116,9 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 | File | LOC | Real% | Session | Key Feature |
 |------|-----|-------|---------|-------------|
 | **v3/@claude-flow/cli/src/services/headless-worker-executor.ts** | 1,342 | **78-83%** | R140 | GENUINE subprocess executor. Spawns `claude --print <prompt>` via child_process.spawn. Process pool (maxConcurrent=2) + pending queue. Zero MCP, zero memory layer. 8 worker types (2 enabled by default). Prompt injected as raw CLI argument — potential shell injection. Double timeout bug. |
+| **v3/@claude-flow/cli/src/services/worker-daemon.ts** | 942 | **55-65%** | R140 | NOT a daemon — foreground EventEmitter class. 9 of 12 local workers are FACADE stubs. Integrates with HeadlessWorkerExecutor for AI-powered workers only. Signal handlers present but stop() bug saves state as running=false. |
+| **v3/@claude-flow/cli/src/services/container-worker-pool.ts** | 783 | **72-78%** | R140 | REAL Docker CLI integration (docker --version, docker run). CRITICAL BUG: prompt + contextPatterns silently dropped in buildWorkerCommand(). ANTHROPIC_API_KEY passed via -e flag. Hard-coded image ghcr.io/ruvnet/claude-flow-headless:latest. |
+| **v3/@claude-flow/cli/src/services/claim-service.ts** | 1,118 | **68-75%** | R140 | LOCAL-ONLY JSON file persistence (.claude-flow/claims/claims.json). Format incompatible with MCP claims-tools.ts (2-part vs 3-part claimant). rebalance() generates suggestions only, never moves claims. getAvailableIssues() stub — always returns []. |
 
 ### Hooks CLI Command Layer (R140)
 
@@ -141,15 +152,23 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 
 **F-PRODINFRA-010** (R110): `apply_adjoint()` in cocycle.rs has a dimension indexing bug — to compute delta^*(f) at degree n, must iterate (n+1)-simplices and distribute to n-faces. The method instead iterates simplices at `cochain.dimension` (n) and applies their boundary to (n-1)-faces, computing delta^* using wrong source dimension. The Hodge Laplacian composed via `laplacian()` is therefore incorrect. Combined with laplacian.rs eigensolver bugs from R109, the Hodge decomposition is doubly corrupted.
 
-**F-PRODINFRA-011** (R135): Hash embedding fallback at CLI layer — ruvector cli.js:2784 Intelligence.embed() uses IntelligenceEngine only if ALREADY initialized; most hook invocations pass skipEngine:true, falling through to 64-dim hash embedding. Confirms R20/R117 systemic hash-embedding pattern at the user-facing CLI layer. No user-visible warning that embeddings are hash-based.
+**F-PRODINFRA-011** (R134): Hash embedding fallback at CLI layer — ruvector cli.js:2784 Intelligence.embed() uses IntelligenceEngine only if ALREADY initialized; most hook invocations pass skipEngine:true, falling through to 64-dim hash embedding. Confirms R20/R117 systemic hash-embedding pattern at the user-facing CLI layer. No user-visible warning that embeddings are hash-based.
 
-**F-PRODINFRA-012** (R135): Hash embedding fallback in MCP server — mcp-server.js:230 is the 9th confirmed instance of the systemic hash-embedding pattern. IntelligenceEngine unavailable is the common case since no MCP startup path initializes it.
+**F-PRODINFRA-012** (R134): Hash embedding fallback in MCP server — mcp-server.js:230 is the 9th confirmed instance of the systemic hash-embedding pattern. IntelligenceEngine unavailable is the common case since no MCP startup path initializes it.
 
-**F-PRODINFRA-013** (R135): SQL/Cypher/SPARQL query destruction — mcp-server.js:2888 sanitizeShellArg() strips (), ;, ', ", $, {}, | from query strings before passing to rvlite. This destroys most legitimate SQL (`SELECT * FROM t WHERE x IN (1,2)`), Cypher (`MATCH (n)-[:R]->(m)`), and SPARQL queries. The sanitizer also fails to prevent actual SQL injection since it strips shell metacharacters, not SQL injection vectors.
+**F-PRODINFRA-013** (R134): SQL/Cypher/SPARQL query destruction — mcp-server.js:2888 sanitizeShellArg() strips (), ;, ', ", $, {}, | from query strings before passing to rvlite. This destroys most legitimate SQL (`SELECT * FROM t WHERE x IN (1,2)`), Cypher (`MATCH (n)-[:R]->(m)`), and SPARQL queries. The sanitizer also fails to prevent actual SQL injection since it strips shell metacharacters, not SQL injection vectors.
 
-**F-PRODINFRA-014** (R135): ruvllm CLI all-facades without native binary — ruvllm cli.js:121 query/generate/route/embed ALL return hardcoded or hash values in the JS fallback path. Without the .node native addon the entire CLI is non-functional for its stated purpose.
+**F-PRODINFRA-014** (R134): ruvllm CLI all-facades without native binary — ruvllm cli.js:121 query/generate/route/embed ALL return hardcoded or hash values in the JS fallback path. Without the .node native addon the entire CLI is non-functional for its stated purpose.
 
-**F-PRODINFRA-015** (R135): ruvllm training SIMULATED — ruvllm cli.js:624 ContrastiveTrainer.train() outputs "Training loss (simulated)". No actual gradient computation or model weight updates occur. Training command exists in help text with no disclaimer.
+**F-PRODINFRA-015** (R134): ruvllm training SIMULATED — ruvllm cli.js:624 ContrastiveTrainer.train() outputs "Training loss (simulated)". No actual gradient computation or model weight updates occur. Training command exists in help text with no disclaimer.
+
+**F-PRODINFRA-015b** (R135): AgentDBAdapter is a MISNAMED facade — v3/@claude-flow/memory/src/agentdb-adapter.ts stores all data in a plain JS Map<string, MemoryEntry> (line 97). Zero imports from any AgentDB package. loadFromDisk() and saveToDisk() are empty stubs (lines 872-881) that emit events and return without reading/writing anything. createHybridService() claims to create SQLite+AgentDB hybrid but creates a plain UnifiedMemoryService. The R20 root cause (EmbeddingService never initialized in the claude-flow bridge) is NOT fixed in V3 — embeddingGenerator is optional and defaults to undefined.
+
+**F-PRODINFRA-015c** (R135): Path traversal validation is a no-op in controller-registry.ts — path.resolve() normalizes ".." away BEFORE the includes("..") check. Any input including `../../etc/passwd` resolves to an absolute path, which then passes the test. The validation provides no security for path traversal attacks.
+
+**F-PRODINFRA-015d** (R136): agentdb-mcp-server.ts tool count mismatch — the server documentation claims 32 tools (5 core + 9 frontier + 10 learning + 5 AgentDB + 3 batch ops = 32) but the actual tools array contains only 28 entries. 4 tools are documented but not registered.
+
+**F-PRODINFRA-015e** (R136): causal_add_edge and causal_query handlers hardcode memory IDs to 0 — causal_add_edge sets fromMemoryId=0 and toMemoryId=0 (lines 1201-1204), meaning all causal edges point from episode 0 to episode 0 regardless of input. causal_query sets interventionMemoryId=0 (line 1229). The causal graph data model is entirely broken.
 
 **F-PRODINFRA-016** (R138): SONA tools fabricate HNSW speedup metrics — v3/mcp/tools/index.ts computes `estimatedBruteForce = searchLatency * 1000` then `speedup = estimatedBruteForce / searchLatency`, which algebraically always yields ~1000x regardless of actual search method. This is the source of the "150x-12,500x" marketing claim. The fabrication is not a bug — it is a deliberate formula that manufactures impressive-looking numbers from a tautological multiplication.
 
@@ -213,29 +232,37 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 
 **F-PRODINFRA-H-026** (R110): cocycle.rs `Cocycle.add()` calls `set()` after summing values, and `set()` drops values below 1e-10 for sparsity. Near-cancellation between two cocycles silently removes simplex entries, breaking linearity: (c1 + c2) loses entries where values nearly cancel. The result does not satisfy delta(c1 + c2) = delta(c1) + delta(c2) at those entries. The cochain group addition is not mathematically well-defined with this truncation.
 
-**F-PRODINFRA-H-027** (R135): ruvector CLI 4 facade commands — cli.js:1625-1824 graph, router, server, and cluster commands all print "Coming Soon" or delegate to missing packages. These appear in `--help` output with no indication they are non-functional.
+**F-PRODINFRA-H-027** (R134): ruvector CLI 4 facade commands — cli.js:1625-1824 graph, router, server, and cluster commands all print "Coming Soon" or delegate to missing packages. These appear in `--help` output with no indication they are non-functional.
 
-**F-PRODINFRA-H-028** (R135): Export vectors returns EMPTY — cli.js:1853 export command always exports an empty array regardless of database content. Data export is a critical operational capability.
+**F-PRODINFRA-H-028** (R134): Export vectors returns EMPTY — cli.js:1853 export command always exports an empty array regardless of database content. Data export is a critical operational capability.
 
-**F-PRODINFRA-H-029** (R135): MCP 55-tool monolith — mcp-server.js is a 3,060-line single file with all 55 tool handlers in one switch statement. No modularization, no per-tool error isolation.
+**F-PRODINFRA-H-029** (R134): MCP 55-tool monolith — mcp-server.js is a 3,060-line single file with all 55 tool handlers in one switch statement. No modularization, no per-tool error isolation.
 
-**F-PRODINFRA-H-030** (R135): CLI delegation via execSync with cold-start penalty — mcp-server.js:1348 delegates 14 tools via `npx ruvector hooks ...` adding 2-5s cold-start per invocation. Another 11 tools depend on `npx agentic-flow@alpha` with similar latency.
+**F-PRODINFRA-H-030** (R134): CLI delegation via execSync with cold-start penalty — mcp-server.js:1348 delegates 14 tools via `npx ruvector hooks ...` adding 2-5s cold-start per invocation. Another 11 tools depend on `npx agentic-flow@alpha` with similar latency.
 
-**F-PRODINFRA-H-031** (R135): Claude-flow CLI cold entry point — cli.js:1-156 performs zero subsystem initialization at boot. No memory, AgentDB, HNSW, or ruvector is loaded until first use. Combined with execSync delegation in MCP, first-use latency can exceed 5-10s.
+**F-PRODINFRA-H-031** (R134): Claude-flow CLI cold entry point — cli.js:1-156 performs zero subsystem initialization at boot. No memory, AgentDB, HNSW, or ruvector is loaded until first use. Combined with execSync delegation in MCP, first-use latency can exceed 5-10s.
 
-**F-PRODINFRA-H-032** (R135): Claude-flow MCP resources false advertisement — mcp-server.js:109 declares `resources` capability in the MCP handshake but implements zero resource handlers. Clients may request resource listings and receive empty or error responses.
+**F-PRODINFRA-H-032** (R134): Claude-flow MCP resources false advertisement — mcp-server.js:109 declares `resources` capability in the MCP handshake but implements zero resource handlers. Clients may request resource listings and receive empty or error responses.
 
-**F-PRODINFRA-H-033** (R135): Claude-flow MCP async message ordering race — mcp-server.js:35 uses async/await inside a synchronous readline callback. Multiple rapid incoming messages can interleave, producing out-of-order JSON-RPC responses.
+**F-PRODINFRA-H-033** (R134): Claude-flow MCP async message ordering race — mcp-server.js:35 uses async/await inside a synchronous readline callback. Multiple rapid incoming messages can interleave, producing out-of-order JSON-RPC responses.
 
-**F-PRODINFRA-H-034** (R135): rvlite O(n) brute-force search — rvlite cli.js:283 searches all vectors via brute-force cosine similarity. Despite ruvector-core having a genuine HNSW implementation, rvlite does not use it. At scale this is unusable.
+**F-PRODINFRA-H-034** (R134): rvlite O(n) brute-force search — rvlite cli.js:283 searches all vectors via brute-force cosine similarity. Despite ruvector-core having a genuine HNSW implementation, rvlite does not use it. At scale this is unusable.
 
-**F-PRODINFRA-H-035** (R135): rvlite ZERO integration with ruvector CLI — rvlite cli.js shares zero code, zero imports, and zero protocol compatibility with the main ruvector CLI or MCP server. Two completely independent vector stores with no migration or interop path.
+**F-PRODINFRA-H-035** (R134): rvlite ZERO integration with ruvector CLI — rvlite cli.js shares zero code, zero imports, and zero protocol compatibility with the main ruvector CLI or MCP server. Two completely independent vector stores with no migration or interop path.
 
-**F-PRODINFRA-H-036** (R135): rvlite advertises SQL/Cypher/SPARQL but provides none — cli.js:957 query interface references structured query languages in help text but the implementation only supports vector similarity search. No query parser exists.
+**F-PRODINFRA-H-036** (R134): rvlite advertises SQL/Cypher/SPARQL but provides none — cli.js:957 query interface references structured query languages in help text but the implementation only supports vector similarity search. No query parser exists.
 
-**F-PRODINFRA-H-037** (R135): ruvllm embedding benchmark uses hash — ruvllm cli.js:470 benchmark command computes embeddings via Math.sin of character hash codes. Benchmark results are meaningless without the native binary and do not reflect actual embedding quality or latency.
+**F-PRODINFRA-H-037** (R134): ruvllm embedding benchmark uses hash — ruvllm cli.js:470 benchmark command computes embeddings via Math.sin of character hash codes. Benchmark results are meaningless without the native binary and do not reflect actual embedding quality or latency.
 
-**F-PRODINFRA-H-038** (R135): ruflo missing error on unresolved @claude-flow/cli — ruflo.js:27 attempts to require('@claude-flow/cli') but produces no user-friendly error message if the package is not installed, yielding a raw Node.js MODULE_NOT_FOUND stack trace.
+**F-PRODINFRA-H-038** (R134): ruflo missing error on unresolved @claude-flow/cli — ruflo.js:27 attempts to require('@claude-flow/cli') but produces no user-friendly error message if the package is not installed, yielding a raw Node.js MODULE_NOT_FOUND stack trace.
+
+**F-PRODINFRA-H-038b** (R135): createEmbeddingService() fallback in controller-registry.ts returns zero-filled Float32Array for ALL embed() calls — any controller (including the critical embedding controller) silently gets useless zero vectors when the actual embedding service fails to load. No error is raised; callers receive plausible-looking Float32Array results with no quality indicator.
+
+**F-PRODINFRA-H-038c** (R135): causalRecall controller is registered in the AgentDBControllerName type and has a createController case (line 760-768) but is never added to the controllers Map and never initialized. The controller is effectively unreachable at runtime despite appearing in the public API surface.
+
+**F-PRODINFRA-H-038d** (R136): agentdb-mcp-server.ts agentdb_init handler re-uses the globally-initialized db object (line 908) regardless of what database path the caller specifies. Any attempt to reinitialize AgentDB against a different path silently re-uses the first-opened database.
+
+**F-PRODINFRA-H-038e** (R136): agentdb_search session_id filter has a TODO comment — "Session ID filter would require custom query" (line 1014). The filter parameter is accepted but never applied, so session-scoped searches return results from all sessions.
 
 **F-PRODINFRA-H-039** (R138): SONA tools (14 tools) are full facades — v3/mcp/tools/index.ts registers 14 SONA-prefixed tools but `agentic-flow/core` is NOT installed. All handlers fall to in-memory Maps with no persistence. LoRA handlers are no-ops. SONAState singleton stores all data in Maps, lost on process restart.
 
@@ -309,9 +336,9 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 
 **F-PRODINFRA-M-007** (R110): cached_projections.rs `dot_product_simd` is 4-way scalar unrolling only — no SIMD intrinsics (no std::arch::x86_64, no packed_simd). Named _simd but is portable scalar loop unroll. Named contract violated; compiler auto-vectorization not guaranteed.
 
-**F-PRODINFRA-M-008** (R135): Claude-flow MCP near-duplicates CLI MCP path — mcp-server.js contains significant code duplication with the CLI's own MCP serving code. Two separate implementations for the same protocol with divergent behavior.
+**F-PRODINFRA-M-008** (R134): Claude-flow MCP near-duplicates CLI MCP path — mcp-server.js contains significant code duplication with the CLI's own MCP serving code. Two separate implementations for the same protocol with divergent behavior.
 
-**F-PRODINFRA-M-009** (R135): Zero cross-CLI code sharing — all four CLI tools (ruvector, claude-flow, rvlite, ruvllm) implement independent vector store init, independent embedding paths, and independent MCP servers with no shared library extraction. Maintenance burden scales linearly with CLI count.
+**F-PRODINFRA-M-009** (R134): Zero cross-CLI code sharing — all four CLI tools (ruvector, claude-flow, rvlite, ruvllm) implement independent vector store init, independent embedding paths, and independent MCP servers with no shared library extraction. Maintenance burden scales linearly with CLI count.
 
 **F-PRODINFRA-M-010** (R138): V3 MCP server ConnectionPool pools lightweight state wrappers — v3/mcp/server.ts ConnectionPool manages in-memory state objects, not real I/O connections (no socket pools, no database handles, no HTTP keep-alive).
 
@@ -384,12 +411,16 @@ The V3 MCP tool chain, CLI entrypoints, and prior subsystem summaries from R138/
 - **governance/lineage.rs**: hash-of-hashes Merkle-like structure (EntityRef.content_hash() nested in LineageRecord.compute_content_hash()) is consistent with coherence module fingerprinting. Dependency sorting before hashing is correct
 - **cached_projections.rs** (R110): GENUINE, non-facade OT utility — zero hash shortcuts, zero imports from ruvector-core, 3 substantive tests. WindowCache pre-sorts key projections per direction enabling O(1) sorted-order access for sliced Wasserstein. `project_into()` writes into caller-supplied buffer (zero-allocation hot path) with ergonomic `project()` counterpart — good design for hot-loop usage in sliced_wasserstein.rs
 - **cocycle.rs** (R110): `Coboundary.apply()` correctly implements signed simplicial coboundary — delta(f)(sigma) = sum_{i=0}^{n+1} (-1)^i f(d_i sigma) — using `boundary()` face/sign pairs from simplex.rs. `SheafCoboundary.apply()` correctly implements graph sheaf coboundary per Hansen & Ghrist 2021. `Cocycle.inner_product()` correctly computes sparse L2 inner product on n-cochains. Integration with SimplicialComplex infrastructure is genuine and exercised in tests.
-- **ruvector CLI uses VectorDB** (R135): The main ruvector CLI correctly wires VectorDB (the working vector store path) rather than RuVectorBackend (which is broken). Vector operations actually function when used via CLI.
-- **ONNX embed commands are REAL** (R135): ruvector CLI embed commands using the ONNX path provide genuine neural embeddings when the onnx-embedder is available, not hash fallbacks.
-- **55-tool MCP server is genuine and functional** (R135): Despite being a monolith, the ruvector MCP server's 55 tools are real implementations with working delegation chains. This is the largest functional MCP server in the ecosystem.
-- **rvlite hyperbolic geometry correct** (R135): rvlite implements Poincare disk and Lorentz models with mathematically correct distance/embedding operations. Hyperbolic search is genuine.
-- **rvlite genuine WASM integration** (R135): rvlite has real WASM bindings to SONA and Attention modules — not stubs or facades.
-- **ruvllm model downloading is REAL** (R135): The ruvllm CLI's HuggingFace model download command performs actual HTTP fetches with progress bars and file validation. One of the few fully functional paths without the native binary.
+- **ruvector CLI uses VectorDB** (R134): The main ruvector CLI correctly wires VectorDB (the working vector store path) rather than RuVectorBackend (which is broken). Vector operations actually function when used via CLI.
+- **ONNX embed commands are REAL** (R134): ruvector CLI embed commands using the ONNX path provide genuine neural embeddings when the onnx-embedder is available, not hash fallbacks.
+- **55-tool MCP server is genuine and functional** (R134): Despite being a monolith, the ruvector MCP server's 55 tools are real implementations with working delegation chains. This is the largest functional MCP server in the ecosystem.
+- **rvlite hyperbolic geometry correct** (R134): rvlite implements Poincare disk and Lorentz models with mathematically correct distance/embedding operations. Hyperbolic search is genuine.
+- **rvlite genuine WASM integration** (R134): rvlite has real WASM bindings to SONA and Attention modules — not stubs or facades.
+- **agentdb-mcp-server.ts EmbeddingService initialized** (R136): DIRECTLY CONTRADICTS R20 — EmbeddingService IS initialized with Xenova/all-MiniLM-L6-v2 (384-dim) via top-level await. This is the one path in the ecosystem that successfully loads a real embedding model at startup.
+- **agentdb-mcp-server.ts production-grade lifecycle** (R136): keepAlive setInterval, auto-save every 5 minutes, SIGTERM/SIGINT handlers, proper shutdown sequence — well-engineered operational lifecycle for a long-running MCP server process.
+- **agentdb-mcp-server.ts batch operations** (R136): skill_create_batch, reflexion_store_batch, agentdb_pattern_store_batch all handle arrays with proper iteration and error aggregation. Rare example of genuine batch API in the ecosystem.
+- **ControllerRegistry dependency injection** (R135): All 8 controllers are instantiated with proper DI patterns — each controller type receives only the dependencies it needs, enabling clean testing and substitution.
+- **ruvllm model downloading is REAL** (R134): The ruvllm CLI's HuggingFace model download command performs actual HTTP fetches with progress bars and file validation. One of the few fully functional paths without the native binary.
 - **V3 MCP server AJV schema validation** (R138): v3/mcp/server.ts ToolRegistry uses AJV for JSON Schema validation of tool inputs — production-grade input validation, correctly rejecting malformed requests before tool execution.
 - **V3 library MCP server 9 sub-registries** (R138): v3/@claude-flow/mcp/src/server.ts has 9 dedicated sub-registry modules (ToolRegistry, ResourceRegistry, PromptRegistry, SamplingManager, RootsManager, LoggingManager, CompletionHandler, ProgressManager, NotificationManager) totaling 3,040 LOC — clean separation of concerns with real implementations.
 - **V3 library MCP server Anthropic sampling provider** (R138): SamplingManager contains a real Anthropic API provider implementation with proper request/response mapping — genuinely functional once a provider is registered.
@@ -495,9 +526,9 @@ Two files from adjacent mathematical infrastructure tagged production-infra due 
 
 **cached_projections.rs** (242 LOC, DEEP, ~88-92%): A pure sliced-Wasserstein optimal transport utility. `ProjectionCache` generates L2-normalized random directions; `WindowCache` pre-sorts key vectors per projection for O(1) sorted-order access during sliced Wasserstein computation. CDF histogram approximation avoids full sort on query. Three substantive tests (unit-norm directions, shape correctness, CDF sum-to-1). Genuine, self-contained, no hash shortcuts. The only weakness: `dot_product_simd` is 4-way scalar unrolling, not actual SIMD.
 
-### 5.7 CLI Entrypoints (R135) — 7 files, ~13,450 LOC
+### 5.7 CLI Entrypoints (R134) — 7 files, ~13,450 LOC
 
-R135 analyzed all four CLI front doors in the ruvnet ecosystem for the first time, revealing the user-facing layer through which all external consumers interact with the underlying Rust crates and JS libraries.
+R134 analyzed all four CLI front doors in the ruvnet ecosystem for the first time, revealing the user-facing layer through which all external consumers interact with the underlying Rust crates and JS libraries.
 
 **Architecture Overview:**
 
@@ -531,6 +562,18 @@ User Commands
 **ruvllm CLI** (1,005 LOC, ~72-78%): Entirely dependent on a native .node binary addon. Without it, all core commands (query, generate, route, embed) return hardcoded or hash-based values. Training is explicitly simulated ("Training loss (simulated)"). The embedding benchmark computes Math.sin of character hash codes, making results meaningless. Only HuggingFace model downloading works without native support.
 
 **Key Verdict**: The CLI layer confirms the systemic hash-embedding pattern end-to-end: from CLI user input, through Intelligence.embed(), through IntelligenceEngine (if initialized, which it usually is not), down to the 64-dim hash fallback. The user-facing tools are more functional than the Rust subsystem analysis might suggest (VectorDB works, ONNX works when available), but the four CLIs share zero code and each maintains independent vector stores, embedding paths, and MCP implementations.
+
+### 5.7b V3 Memory Layer (R135) — 2 files, ~2,064 LOC
+
+R135 analyzed the V3 @claude-flow/memory package — the nominal "brain" of claude-flow V3 that was supposed to connect AgentDB, HNSW, and the MCP toolchain.
+
+**AgentDBAdapter (1,038 LOC, ~35-45%)**: The most misleadingly named file in the V3 codebase. Despite its name and doc comments, it does NOT adapt AgentDB. Storage is a plain `Map<string, MemoryEntry>` (line 97). Zero imports from any AgentDB package. The three factory functions (`createInMemoryService`, `createPersistentService`, `createHybridService`) all return a `UnifiedMemoryService` with the same in-memory Map backend. `loadFromDisk()` and `saveToDisk()` (lines 872-881) emit events and immediately return — no disk I/O. The R20 root cause (EmbeddingService not initialized) persists in V3: `embeddingGenerator` is an optional field defaulting to undefined, and `createInMemoryService()` + `createPersistentService()` create services WITHOUT embedding generators. A binary quantizer (line 956) packs 32 floats into 1 Float32Array element via bitwise OR on float values, but the distance function uses standard float comparison — the quantized values are never decoded correctly.
+
+**ControllerRegistry (1,026 LOC, ~55-65%)**: Manages 8 controller types (episodic, semantic, procedural, working, causal, meta, temporal, contextual) plus the embedding service. The path traversal validation for storage paths is a no-op: `path.resolve()` normalizes ".." before the `includes("..")` check, so `../../etc/passwd` passes validation. `createEmbeddingService()` fallback returns a zero-filled Float32Array stub with no error — callers silently receive useless vectors. `causalRecall` is declared in the type but never added to the controllers Map. `healthCheck()` only inspects the init-time error flags, never probing actual controller liveness.
+
+### 5.7c AgentDB MCP Server (R136) — 1 file, 2,368 LOC
+
+**agentdb-mcp-server.ts (2,368 LOC, ~75-80%)**: The standalone AgentDB MCP server that DIRECTLY CONTRADICTS the R20 finding that EmbeddingService is never initialized. In this file, EmbeddingService IS initialized with Xenova/all-MiniLM-L6-v2 (384-dim, transformers provider) at module load time via top-level await. This is Pipeline 1 (all-JS, no Rust bridge). Key positives: all 8 controllers instantiated with proper DI, batch operations with full array handling, production-grade lifecycle management (keepAlive setInterval, 5-min auto-save, SIGTERM/SIGINT handlers). Key failures: (1) tool count discrepancy — documentation claims 32, actual array has 28; (2) causal_add_edge hardcodes fromMemoryId=0 and toMemoryId=0 for ALL edges — the causal graph data model is broken; (3) agentdb_init re-uses the global db regardless of caller-specified path; (4) agentdb_search session_id filter has a TODO and is never applied.
 
 ### 5.8 V3 MCP Tool Chain (R138) — 6 files, ~4,200 LOC
 
@@ -684,13 +727,13 @@ governance/repository.rs is the 12th persistence layer stub identified in the ru
 
 Three subsystems reached MODULE COMPLETE status in R107-R108. In each case, the internal composition is coherent and well-tested (integration tests confirm sub-system APIs compose). But each subsystem is isolated from the adjacent semantic layer: serving/ from actual GPU backends, storage/ from sheaf coherence, governance/ from coherence engine.
 
-### Pattern 4: CLI Island Architecture (R135)
+### Pattern 4: CLI Island Architecture (R134)
 
 All four CLIs (ruvector, claude-flow, rvlite, ruvllm) are completely independent: zero shared code, zero shared vector stores, zero shared MCP protocol implementations. Each reinvents embedding, storage initialization, and tool registration. This parallels the Rust-side persistence proliferation (12+ layers) but at the user-facing layer. The pattern suggests independent development timelines rather than coordinated architecture.
 
 ### Pattern 5: Hash Embedding End-to-End Confirmation (R135)
 
-R20 identified the root cause (EmbeddingService never initialized in AgentDB bridge). R117 traced it through onnx-embedder.ts vs intelligence-engine.ts sync path. R135 closes the loop at the CLI layer: ruvector CLI, ruvector MCP, and ruvllm CLI all fall through to hash embeddings as the common case. The user-facing embedding quality is 64-dim hash unless ONNX or native binaries are explicitly available and initialized — which no standard startup path ensures.
+R20 identified the root cause (EmbeddingService never initialized in AgentDB bridge). R117 traced it through onnx-embedder.ts vs intelligence-engine.ts sync path. R134 closes the loop at the CLI layer: ruvector CLI, ruvector MCP, and ruvllm CLI all fall through to hash embeddings as the common case. The user-facing embedding quality is 64-dim hash unless ONNX or native binaries are explicitly available and initialized — which no standard startup path ensures.
 
 ### Pattern 6: V2→V3 Regression with Infrastructure Inflation (R138)
 
@@ -703,6 +746,31 @@ Two V3 MCP server implementations (v3/mcp/server.ts and v3/@claude-flow/mcp/src/
 ### Pattern 8: CI/Testing Facade Pattern (R139)
 
 CI pipelines and "integration tests" exist structurally but provide near-zero quality gate. Both claude-flow CI pipelines use `continue-on-error: true` on all test/typecheck/audit steps so only lint blocks. ruvector pipelines have `skip_tests` and `|| true` bypasses. Both Rust "integration" test suites (2,928 LOC) are 100% mock-only with zero cross-crate imports. The distributed Raft test deploys shell scripts with netcat instead of Rust binaries. The ecosystem has accumulated ~5,000 LOC of CI/test infrastructure that provides the appearance of quality assurance without the substance — the green badge pattern. V3 has 11 named test scripts that exist in package.json but none are wired into CI.
+
+### Pattern 9: Worker Execution Zero-Memory Chain (R134-R140)
+
+The zero-memory-bootstrap pattern identified in R20 (EmbeddingService never initialized in the AgentDB bridge) extends all the way through the complete worker execution chain:
+
+```
+CLI entry (cli.js) → zero memory init
+MCP server (mcp-server.js, v3/mcp/server.ts) → zero memory/AgentDB init
+Memory layer (agentdb-adapter.ts) → plain JS Map, zero AgentDB imports
+Tool handlers (v3/mcp/tools/index.ts) → SONA facade, in-memory Maps only
+Execution layer (headless-worker-executor.ts) → spawn('claude --print') → zero memory layer
+Container layer (container-worker-pool.ts) → Docker CLI → zero memory integration
+```
+
+Not a single step in the end-to-end chain from user CLI invocation to agent subprocess execution reads from or writes to AgentDB, HNSW, or any vector store. The memory system is architecturally absent from the operational path despite being the stated core value proposition of the platform.
+
+### Pattern 10: Bifurcated Coordination with Incompatible Formats (R140)
+
+Multiple pairs of supposedly coordinating subsystems use incompatible data formats:
+- **ClaimService vs MCP claims-tools**: ClaimService formats claimants as `agentId:taskId` (2-part); claims-tools.ts formatClaimant() produces `userId:name` or `agentId:taskId:timestamp` (3-part). Neither can parse the other's claims.
+- **Two V3 MCP servers** (v3/mcp/server.ts vs v3/@claude-flow/mcp/src/server.ts): Different protocol versions (2024-11-05 vs 2025-11-25), different registry counts, zero code sharing.
+- **Two backend factories** (agentdb root factory.ts vs packages/agentdb factory.ts): 2-tier vs 5-tier fallback chains with different priority orders, both exporting `createBackend()`.
+- **Two AgentDB init paths** (agentdb-mcp-server.ts vs agentdb-adapter.ts): One initializes EmbeddingService (Pipeline 1), the other never does. They cannot be interchanged.
+
+The pattern suggests parallel development without cross-team coordination, producing systems that look compatible from their interface names but are structurally incompatible at runtime.
 
 ---
 
@@ -732,6 +800,12 @@ CI pipelines and "integration tests" exist structurally but provide near-zero qu
 - Whether ruvllm_integration_tests.rs cfg(feature="ruvllm") was originally wired to real imports that were later removed
 - What the intended relationship is between the test-runner cargo tests and the shell-script node services in the distributed setup
 - Whether the V3 Docker lite profile (<100MB) has been validated against all claude-flow features
+- Whether agentdb-mcp-server.ts Pipeline 1 (Xenova/all-MiniLM-L6-v2) is actually integrated into claude-flow's runtime, or is a standalone server never used by the main claude-flow CLI
+- What the correct claimant format should be — whether ClaimService (2-part) or claims-tools.ts (3-part) represents the canonical spec
+- Whether the binary quantizer in agentdb-adapter.ts was intended to be used (broken math) or is dead experimental code
+- Whether causal_add_edge hardcoding of memoryId=0 in agentdb-mcp-server.ts is a known bug or intended placeholder
+- Whether the ghost DEEP files from R136 were previously analyzed under different session IDs or are genuinely unexplored
+- What initializes the agentdb-mcp-server.ts — whether it is invoked by the main claude-flow CLI or must be run as a separate process
 
 ---
 
@@ -755,8 +829,14 @@ CI pipelines and "integration tests" exist structurally but provide near-zero qu
 ### R114 (2026-02-19): mcp-gate crate + ruvllm policy_store + hnsw_rs patches + prime-radiant error boundary
 5 files in prod-infra scope, ~2,080 LOC. **mcp-gate CRATE EFFECTIVELY COMPLETE (3/3 DEEP, ~91% avg)**: types.rs (92%) clean MCP DTO re-exporting 8 cognitum-gate-tilezero types + 12 envelope types; server.rs (90-93%) genuine stdio JSON-RPC 2.0 MCP server, 3 tools only, env-var config, Arc injection; tools.rs (88-92% from R113). **CONFIRMS 7th parallel MCP protocol implementation** — distinct from rmcp, strange-loop, psycho-symbolic, claudeFlowSdk, bin/mcp-server.js, ruvector-cli/mcp_server.rs. PermitToken crypto stripped to base64 at API boundary (extends unverified-crypto to 5 files). **ruvllm/policy_store.rs (72%) FUNCTIONALLY BROKEN persistence** — get() cache-only (data lost on restart), delete() ghost entries, search_by_type() cache-only. Uses REAL AgenticDB (not hash). Two non-interoperating policy systems (PolicyStore runtime vs PolicyBundle governance). 13th persistence layer. **hnsw_rs/datamap.rs (88-92%) vendored upstream copy** — zero algorithmic changes, process::exit() in library code, rand 0.8/0.9 mismatch (stated patch purpose contradicted). **prime-radiant error.rs (90-93%) high-quality thiserror** — 26 variants → 5 ADRs, WitnessId/String boundary asymmetry, pure error taxonomy.
 
-### R135 (2026-03-01): CLI Entrypoints — The Front Door
-7 files, ~13,450 LOC, 5 CRITICAL + 12 HIGH + 2 MEDIUM findings. First analysis of all four CLI front doors (ruvector, claude-flow, rvlite, ruvllm). ruvector CLI (7,357 LOC, ~72-78%) is a substantial monolith using VectorDB (working path); hash embedding CONFIRMED at CLI layer (extends R20/R117 end-to-end). ruvector MCP registers 55 tools (largest in ecosystem) but sanitizeShellArg() destroys SQL/Cypher/SPARQL queries. claude-flow CLI is a cold 156-LOC dispatcher; ruflo is a pure rebrand. rvlite (1,686 LOC, ~80-85%) is a fully independent alternative with genuine WASM and correct hyperbolic geometry but O(n) search and zero ruvector integration. ruvllm CLI (1,005 LOC) is entirely native-binary-dependent — JS fallback is all facades, training is simulated. Zero cross-CLI code sharing across all four tools.
+### R134 (2026-03-01): CLI Entrypoints — The Front Door (ML-A)
+7 files, ~13,450 LOC, 6 CRITICAL + 28 HIGH + 47 MEDIUM findings. First analysis of all four CLI front doors (ruvector, claude-flow, rvlite, ruvllm). ruvector CLI (7,357 LOC, ~72-78%) is a substantial monolith using VectorDB (working path); hash embedding CONFIRMED at CLI layer (extends R20/R117 end-to-end). ruvector MCP registers 55 tools (largest in ecosystem) but sanitizeShellArg() destroys SQL/Cypher/SPARQL queries. claude-flow CLI is a cold 156-LOC dispatcher; ruflo is a pure rebrand. rvlite (1,686 LOC, ~80-85%) is a fully independent alternative with genuine WASM and correct hyperbolic geometry but O(n) search and zero ruvector integration. ruvllm CLI (1,005 LOC) is entirely native-binary-dependent — JS fallback is all facades, training is simulated. Zero cross-CLI code sharing across all four tools.
+
+### R135 (2026-03-01): V3 Memory Layer — AgentDB Adapter and Controller Registry
+2 files, ~2,064 LOC, 4 CRITICAL + 8 HIGH + 9 MEDIUM findings. First analysis of the V3 @claude-flow/memory package. AgentDBAdapter (1,038 LOC) is the most misleadingly named file in the codebase — stores data in a plain JS Map with zero AgentDB imports. loadFromDisk/saveToDisk are empty stubs. R20 root cause NOT fixed in V3. createHybridService() creates a plain UnifiedMemoryService. Binary quantizer logic is mathematically broken (packs bits but distance function never decodes). ControllerRegistry (1,026 LOC) — path traversal validation is a no-op, createEmbeddingService() fallback emits zero vectors silently, causalRecall controller is never added to the controllers Map.
+
+### R136 (2026-03-01): Ghost DEEP Files and AgentDB MCP Server (ML-C partial)
+3 files in this domain, 2,368 LOC for agentdb-mcp-server.ts, 2 CRITICAL + 6 HIGH + 7 MEDIUM findings. agentdb-mcp-server.ts DIRECTLY CONTRADICTS R20 — EmbeddingService IS initialized (Pipeline 1: Xenova/all-MiniLM-L6-v2 via top-level await). Tool count mismatch: 28 actual vs 32 documented. CRITICAL: causal_add_edge/causal_query hardcode memory IDs to 0, making the entire causal graph data model broken. agentdb_init re-uses global db regardless of caller path. agentdb_search session_id filter has TODO and is never applied.
 
 ### R138 (2026-03-02): V3 MCP Tool Chain — ML-D
 6 files, ~4,200 LOC, 1 CRITICAL + 10 HIGH + 9 MEDIUM findings. End-to-end analysis of V3 MCP tool chain from tool registry through two competing servers to CLI dispatch, plus V2 predecessor comparison. CRITICAL: SONA tools fabricate HNSW speedup via tautological multiplication (source of "150x-12,500x" claim). V2→V3 regression confirmed — V2 had AuthManager, LoadBalancer with circuit breaker, and 3 real tool factories; all LOST in V3. Two competing V3 MCP servers (792 LOC internal + 1,134 LOC library) share zero code. Zero memory/AgentDB/EmbeddingService bootstrap in ANY MCP server (V2 or V3). CLI command registry has 31 commands with dead lazy loading and 2 orphans. ruvector setup generates production-quality PostgreSQL schema but has zero bridge to backend factory or memory-initializer. **External validation**: ruflo#1207 (Henrik Pettersen) independently maps the V2→V3 AgentDB integration gap with a 16-op fix across 8 files in 4 packages (WM-008, status: OPEN).

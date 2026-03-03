@@ -1,7 +1,8 @@
 # Brainstorm: How to Reason Over the Whole Project
 
-> Date: 2026-02-19
-> Context: After 112 research sessions, 1,518 DEEP files, 10,954 findings — the index itself exceeds a single context window. How do we create a navigable "state description" of the ecosystem?
+> Date: 2026-03-03 (updated)
+> Original: 2026-02-19 (112 sessions, 1,518 DEEP, 10,954 findings)
+> Current: 142 sessions, 1,696 DEEP files, 12,877 findings — the index exceeds a single context window. How do we create a navigable "state description" of the ecosystem?
 
 ---
 
@@ -29,6 +30,9 @@ The problem isn't *size* — it's *navigation*.
 | Feature-by-feature verdict | README-REALITY-CHECK.md | Complete |
 | Extraction manifest | GENUINE-ASSETS.md | Complete |
 | Build specification | SPEC.md | Complete |
+| Middle Layer trace | ML-A through ML-F (R135-R140) | Complete — CLI→MCP→tool→memory→backend fully traced |
+| Compilation audit | R141 binary pass/fail for 115 crates | Complete — 100/115 pass cargo check |
+| MEMORY.md navigation layer | Evolved across 142 sessions | Partially fulfills "Architectural Reality doc" role |
 
 ## What's Missing: Two Intermediate Layers
 
@@ -49,6 +53,8 @@ mincut/theory       --broken--> expander O(n^3), witness tautology
 
 This is maybe 20-30 nodes with ~50-80 edges. It fits in one page. It tells you the *architecture as it actually exists*, not as claimed. And it's directly actionable for v4 decisions.
 
+> **STATUS (2026-03-03)**: ADR-v4-007 was designed (see `ADR-v4-007-subsystem-graph.md`) but NEVER EXECUTED. The design remains valid. The Middle Layer sessions (R135-R140) would significantly enrich Phase 3's prose mining — ~500+ new findings with cross-subsystem signals are now available. R141's compilation audit adds a binary truth signal (pass/fail) that wasn't available when this was designed.
+
 ### Missing Layer 2: v4 Reuse Inventory
 
 For each v4 promise/feature, a mapping:
@@ -67,6 +73,8 @@ Graph queries        | rvlite Cypher executor    | 82-86% | REUSE
 ```
 
 This is the **bridge document** from research to implementation. It's small, fits in one window, and directly answers "what do I build vs. what do I reuse?"
+
+> **STATUS (2026-03-03)**: ADR-v4-008 was designed and written (see `ADR-v4-008-reuse-inventory.md`). It needs revision: L2-01 action should change from BUILD to ADAPT (onnx-embedder.ts found in R117), NAPI should be primary bridge (R116), ruvllm marked as non-compilable (R141).
 
 ## Concrete Next Steps (in order)
 
@@ -104,9 +112,22 @@ Only after steps 1-3. This is the executive summary that fits in one context win
 
 This replaces the need to ever load the full index or all 14 synthesis docs.
 
+### Status Update (2026-03-03)
+
+| Step | Status | Notes |
+|------|--------|-------|
+| Step 1: Subsystem Graph | DESIGNED, NOT EXECUTED | ADR-v4-007 complete, needs ~6-7 hours to build |
+| Step 2: Reuse Inventory | BUILT, NEEDS REVISION | ADR-v4-008 exists, needs R115-R142 updates |
+| Step 3: Question Router | NOT STARTED | MEMORY.md partially serves this role |
+| Step 4: Architectural Reality doc | NOT STARTED | Conversation summaries partially serve this role |
+
+The Middle Layer deep-dive (R135-R140) and compilation audit (R141) have provided the remaining data needed for Steps 1-2. The research is now complete enough to execute these steps with high confidence.
+
 ## The Key Insight
 
 **You don't need a document that describes the whole project. You need a *navigation system* that can answer any question about the project by loading the right 5% of data.**
+
+**Post-R142 addendum**: MEMORY.md has evolved into a partial navigation system over 142 sessions — it captures stable patterns, key corrections, and cross-subsystem signals in ~200 lines. Combined with the research DB's queryable views (`smart_priority_gaps`, `domain_coverage`, `integration_hotspots`), the "navigation system" is partially operational even without the formal Subsystem Graph. The graph would still be valuable for cold-start sessions that don't have MEMORY.md loaded.
 
 The DB is already that system — it just lacks the intermediate aggregation layer (subsystems) and the decision-oriented views (reuse inventory). The synthesis docs are narratives for humans; what you need for v4 is a *queryable decision support system* with a thin summary layer on top.
 

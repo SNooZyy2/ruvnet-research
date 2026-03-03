@@ -122,3 +122,32 @@ SWE-bench adapter (R31): prompts.rs (534 LOC, 98%) — BEST quality file with 4 
 CLI commands (R31): init.rs (538 LOC, 65%) — interactive config real, actual spawning simulated (sleep 200-500ms). status.rs (687 LOC, 60%) — display logic production-ready, loads stale JSON files not live swarm state. orchestrate.rs (662 LOC, 45%) — 4 strategies architecturally correct, execute_subtask() sleeps 1-2s and returns success:true, build_consensus() hardcodes agreement_level: 0.85.
 
 **Systemic finding**: CLI layer inversion — prompt generation (98%) > persistence (95%) > data loading (75%) > framework integration (70%) > config generation (65%) > status display (60%) > orchestration execution (45%). The further from actual task execution, the more real the code becomes.
+
+### 5m. Rust Workspace Compilation Status (R141)
+
+R141 performed a systematic `cargo check` audit across all 4 workspaces (~140 crates). For the ruv-swarm workspace, the audit revealed a single root-cause failure blocking the entire Rust layer:
+
+**Root cause**: All 14 Cargo.toml manifests in the ruv-swarm workspace pin `ruv-fann = "^0.1.5"`, but the workspace root provides ruv-fann 0.2.0. Semver rules mean `^0.1.5` only allows `>=0.1.5, <0.2.0` — the 0.2.0 version (a breaking change boundary) is excluded. `cargo check` fails with a dependency resolution error for every crate before any Rust code is compiled.
+
+**Affected crates (14 total)**:
+
+| Crate | Cargo.toml path | Status |
+|-------|----------------|--------|
+| ruv-swarm-core | ruv-swarm/crates/ruv-swarm-core/Cargo.toml | FAIL |
+| ruv-swarm-agents | ruv-swarm/crates/ruv-swarm-agents/Cargo.toml | FAIL |
+| ruv-swarm-cli | ruv-swarm/crates/ruv-swarm-cli/Cargo.toml | FAIL |
+| ruv-swarm-daa | ruv-swarm/crates/ruv-swarm-daa/Cargo.toml | FAIL |
+| ruv-swarm-mcp | ruv-swarm/crates/ruv-swarm-mcp/Cargo.toml | FAIL |
+| ruv-swarm-ml | ruv-swarm/crates/ruv-swarm-ml/Cargo.toml | FAIL |
+| ruv-swarm-persistence | ruv-swarm/crates/ruv-swarm-persistence/Cargo.toml | FAIL |
+| ruv-swarm-transport | ruv-swarm/crates/ruv-swarm-transport/Cargo.toml | FAIL |
+| ruv-swarm-wasm | ruv-swarm/crates/ruv-swarm-wasm/Cargo.toml | FAIL |
+| ruv-swarm-wasm-unified | ruv-swarm/crates/ruv-swarm-wasm-unified/Cargo.toml | FAIL |
+| claude-parser | ruv-swarm/crates/claude-parser/Cargo.toml | FAIL |
+| swe-bench-adapter | ruv-swarm/crates/swe-bench-adapter/Cargo.toml | FAIL |
+| benchmarking | ruv-swarm/benchmarking/Cargo.toml | FAIL |
+| ml-training | ruv-swarm/ml-training/Cargo.toml | FAIL |
+
+**Implications for source-quality findings**: Individual file assessments from R21, R50, R70-R72, R79-R86 remain valid as code-quality judgments (the algorithms, APIs, and data structures described were genuinely assessed). However, none of these crates are runnable or testable from source in their current state. The persistence crate (93% weighted average — best complete crate), the MCP rmcp service, and the WASM training bindings assessed as genuine in prior sessions are all blocked by this single dependency pin.
+
+**Fix path**: Update ruv-fann dependency to `"^0.2"` across all 14 Cargo.toml files, or pin the workspace ruv-fann member to 0.1.x. Single-line fix per crate; no source code changes required. This is a workspace management failure, not an algorithmic deficiency in the Rust code itself.

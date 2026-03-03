@@ -2,7 +2,8 @@
 
 > **Status**: Initial outline
 > **Date**: 2026-02-17
-> **Based on**: 90 research sessions, 1,332 DEEP files, 9,171 findings across 4 repos
+> **Based on**: 142 research sessions, 1,696 DEEP files, 12,877 findings across 4 repos
+> **Last updated**: 2026-03-03 (revised with Middle Layer R135-R140 + Rust compilation audit R141)
 > **Predecessor**: claude-flow-self-implemented (76 commits, abandoned — built on broken foundation)
 
 ## Executive Summary
@@ -31,6 +32,23 @@ The single most impactful fix: **initialize the EmbeddingService** (R20 root cau
 | RAC consensus | sublinear-time-solver | `rac.rs`, `p2p.rs` | ~1,500 | 92% | Raft consensus + real libp2p transport |
 | shard partitioner | ruvector | `shard.rs` | 596 | 70-80% | EdgeCutMinimizer (multilevel Kernighan-Lin), xxh3/blake3 hashing |
 
+> **WARNING (R141)**: `ruvllm` (120K LOC) fails `cargo check`. The serving subsystem files listed above (batch.rs, scheduler.rs, kv_cache_manager.rs) are algorithmically genuine but the crate as a whole cannot compile. Extract individual files only — do not copy the entire crate.
+
+### Tier 1b: Newly Validated Rust Assets (R115-R141)
+
+| Crate | Source Repo | Key Files | LOC | Realness | What It Does |
+|-------|------------|-----------|-----|----------|-------------|
+| RVF store + runtime | ruvector | `store.rs`, `witness.rs`, `write_path.rs`, `hnsw.rs` | ~3,000 | 85-92% | Cryptographic witness chains (SHAKE-256), tamper-evident vector storage. R122-R124. |
+| rvf-node NAPI bridge | ruvector | `rvf-node/lib.rs` | ~500 | 85-90% | Native Node.js bridge for RVF operations. R121. |
+| ruvector-domain-expansion | ruvector | entire crate | ~1,200 | 82-88% | Thompson Sampling, cross-domain transfer, population search, cost curves. R128. |
+| ruvector-raft | ruvector | consensus crate | ~800 | 78-85% | Raft consensus implementation. R129. |
+
+**R141 Compilation Audit Results (binary truth signal):**
+- 100/115 crates pass `cargo check` (87% compilation rate)
+- 3,984 tests pass across passing crates
+- Key FAILURES: ruvllm (120K LOC, largest crate) fails compilation. All 14 ruv-swarm crates blocked by `ruv-fann ^0.1.5` vs `0.2.0` version pin. neural-network-implementation (17,294 LOC) produces 106 errors — UNCOMPILABLE.
+- Key VALIDATIONS: ruvector-core, ruvector-nervous-system (359 tests), temporal-tensor, ruQu — all compile and pass tests.
+
 ### Tier 2: Genuine TS/JS (adapt and keep)
 
 | Module | Source | LOC | Realness | What It Does |
@@ -39,6 +57,9 @@ The single most impactful fix: **initialize the EmbeddingService** (R20 root cau
 | ReasoningBank (TS) | claude-flow-cli | ~800 | 92-95% | Statistical ranking, decay coefficients, MMR search |
 | ReasoningBank (Rust) | sublinear-time-solver | ~600 | 92-95% | WASM-compatible, v1->v2 migration complete |
 | pre-task.ts hook | claude-flow-cli | ~200 | 88-92% | ReasoningBank hook with 4-factor scoring |
+| sona-optimizer.ts | claude-flow-cli | ~842 | 72-78% | Genuinely functional Bayesian agent-routing with temporal decay. The ONLY V3 memory subsystem wired into hooks pipeline. R140. |
+| onnx-embedder.ts | ruvector umbrella | ~400 | 85-90% | REAL ONNX embeddings via Tract/WASM — potential R20 fix without building from scratch. R117. |
+| HeadlessWorkerExecutor | claude-flow-cli | ~600 | 78-83% | Real process pool with context caching and output parsing. R140. |
 
 ### Tier 3: Salvage from self-implemented repo
 
@@ -71,12 +92,18 @@ The single most impactful fix: **initialize the EmbeddingService** (R20 root cau
 | Dead code | Multiple | callbacks.rs (defined but never invoked), performance_benchmark.rs (orphaned) |
 | lib_simple.rs facade | 1 | Deliberately excludes genuine algorithms from WASM surface |
 | Distributed transport stubs | 4 | rpc.rs (15-20%), coordinator.rs (30-35%), gossip transport, federation transport |
+| intelligence.ts facade | 1 | Claims O(log n) HNSW, actual O(n) brute-force. LoRA/EWC config stored but NEVER used. 14+ consumers. R140. |
+| sona-tools.ts fake speedup | 1 | Fabricates "1000x speedup" via `estimatedBruteForce = searchLatency * 1000`. R138/R140. |
+| worker-daemon facade stubs | 9 of 12 | 9/12 local worker types are FACADE stubs. R140. |
+| V3 memory layer | 3 | memory-bridge.ts (1,773 LOC) not compiled into npm dist. agentdb-adapter.ts is a plain Map. R135/R136. |
+| neural-network-implementation | 1 | Previously rated 75-85%, now UNCOMPILABLE (106 cargo errors). R141. |
 
 ### Packages to remove entirely
 
 - `@claude-flow/guidance` — 56% theatrical WASM, hash embeddings systemic
 - `agentic-flow` npm — single-node task runner (R40), fabricated emergence
 - All `SublinearSolver` TS wrappers — routes through theatrical facade
+- `neural-network-implementation` — 17,294 LOC Rust crate, 106 cargo errors, UNCOMPILABLE (R141)
 
 ---
 
@@ -142,6 +169,22 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 **Context**: These packages are the broken integration layer. The genuine code is in standalone Rust crates that can be compiled independently.
 
 **Consequence**: All Rust functionality accessed via direct WASM imports or FFI. No npm intermediary packages.
+
+### ADR-v4-007: NAPI as Primary Rust Bridge (NEW — R116-R117)
+
+**Decision**: Prefer NAPI (`napi-rs`) over WASM for the Rust-to-TS bridge.
+
+**Context**: R116 confirmed the ruvector NAPI binary WORKS. R117 confirmed `onnx-embedder.ts` uses real ONNX via NAPI. The original SPEC assumed WASM-only (Phase 3). NAPI provides: (1) no serialization overhead across boundary, (2) full access to system resources (filesystem, threads), (3) proven working path already exists.
+
+**Consequence**: Phase 3 changes from "WASM bridge (~2-3 days)" to "NAPI bridge (~1-2 days)" using existing `napi-rs` patterns from ruvector umbrella.
+
+### ADR-v4-008: Execution Engine Reuse (NEW — R140)
+
+**Decision**: Adapt `HeadlessWorkerExecutor` rather than relying solely on Claude Code Task tool.
+
+**Context**: R140 revealed the execution engine is `spawn('claude', ['--print', prompt])` — primitive but functional. HeadlessWorkerExecutor (78-83% genuine) has: real process pool, context caching, output parsing. It drops context silently (CRITICAL bug in `buildWorkerCommand()`), but the architecture is sound.
+
+**Consequence**: v4 should fix `buildWorkerCommand()` context dropping and reuse the process pool, rather than building execution from scratch.
 
 ---
 
@@ -211,6 +254,8 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 3. Verify: store 100 text documents, search returns semantically relevant results
 4. No hash-based fallback — fail fast if model unavailable
 
+> **UPDATE (R117)**: `onnx-embedder.ts` in the ruvector umbrella package already implements real ONNX embeddings via Tract/WASM. This may reduce Phase 1 from BUILD (~200 LOC) to ADAPT (~50 LOC of wiring).
+
 **Validation gate**: `search("authentication")` returns auth-related documents, not random results.
 
 ### Phase 2: Single MCP + Single Persistence (~2-3 days)
@@ -223,12 +268,14 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 
 **Validation gate**: All MCP tools callable from Claude Code. Data persists across sessions.
 
-### Phase 3: WASM Bridge (~2-3 days)
+### Phase 3: NAPI/WASM Bridge (~1-2 days)
 
 1. Add `wasm_bindgen` exports to genuine Rust crate entry points (`lib.rs`, NOT `lib_simple.rs`)
 2. Build with `wasm-pack build --target nodejs`
 3. Create TS wrapper that imports WASM and exposes to service layer
 4. Wire HNSW search, backward_push, PQ compression through WASM to MCP tools
+
+> **UPDATE (R116-R117)**: The NAPI bridge path is proven working. Phase 3 effort reduced. Use `napi-rs` patterns from ruvector umbrella as reference. WASM remains available as fallback for browser targets.
 
 **Validation gate**: `backward_push` callable from MCP tool and returns correct PageRank approximation.
 
@@ -250,9 +297,9 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 | Phase 0: Extraction | 0 | 0 | ~15K LOC Rust + ~2K TS | 1-2 days |
 | Phase 1: R20 Fix | ~200 LOC | 0 | 0 | 1 day |
 | Phase 2: MCP + Persistence | ~1,500 LOC | ~3,000 LOC (self-impl) | 0 | 2-3 days |
-| Phase 3: WASM Bridge | ~1,000 LOC | 0 | 0 | 2-3 days |
+| Phase 3: NAPI/WASM Bridge | ~1,000 LOC | 0 | 0 | 1-2 days |
 | Phase 4: Tests | ~500 LOC | ~9,000 LOC (self-impl tests) | 0 | 1-2 days |
-| **Total** | **~3,200 LOC new** | **~12,000 LOC adapted** | **~17,000 LOC copied** | **~7-11 days** |
+| **Total** | **~3,200 LOC new** | **~12,000 LOC adapted** | **~17,000 LOC copied** | **~6-10 days** |
 
 ---
 
@@ -265,10 +312,33 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 | WASM build breaks with `wasm_bindgen` on complex types | Start with simple primitives (f32 arrays, u32 indices), avoid complex structs across boundary |
 | Self-implemented DDD services have implicit upstream deps | Grep for all `@claude-flow` and `agentic-flow` imports, replace with direct adapters |
 | ruvector-graph distributed module tempting to include | DO NOT include — it's 15-55% with no transport. Defer to v5 if needed |
+| ruvllm crate fails compilation (120K LOC) | Extract individual genuine files (batch.rs, scheduler.rs) — do not depend on whole crate compiling. R141 confirmed. |
+| neural-network-implementation uncompilable | Remove from Tier 1. Was rated 75-85%, actual: 106 cargo errors. R141. |
+| intelligence.ts facade in hot path | 14+ consumers use O(n) brute-force thinking it's O(log n). Replace with real HNSW call or stub early. R140. |
 
 ---
 
-## 8. Success Criteria
+## 8. Consolidation Targets (from Synthesis Docs)
+
+> 14 domain synthesis documents reveal systemic duplication that v4 must resolve. Each row identifies parallel implementations that should be unified.
+
+| What | Count | Best Candidate | Evidence |
+|------|-------|----------------|----------|
+| ReasoningBank implementations | 4 (claude-flow TS, agentic-flow TS, agentdb TS, ruvllm Rust) | agentic-flow's 5-step pipeline (Retrieve→Judge→Distill→Consolidate→MaTTS) + Rust core | memory-and-learning, agentic-flow domains |
+| Persistence layers | 15+ (9 previously known, 6 more from synth docs) | better-sqlite3 (ADR-v4-002) OR ruv-swarm-persistence (3-backend trait, 93%) | all domains |
+| MCP protocol implementations | 6+ | @modelcontextprotocol/sdk (ADR-v4-001); consciousness-explorer MCP server (94.8%) as template | agentic-flow, claude-flow-cli domains |
+| Routing systems | 7 (hook-based, Q-learning, MoE, API proxy, intelligence.ts, Rust model_router, Sheaf) | Hook-based + Q-learning/MoE (these actually run) | model-routing domain |
+| Agent lifecycle patterns | 3 (CLI-based AgentManager, LongRunningAgent, EphemeralAgent) | Need to choose one canonical pattern for v4 | agent-lifecycle domain |
+| Embedding fallback chains | 5+ (ONNX, hash, Xenova, charCode, sin/cos) | ONNX via onnx-embedder.ts (ADR-v4-003) | all domains |
+| Claim coordination systems | 2 (claim-service.ts 2-part, claims-tools.ts 3-part) | Unify to 3-part format | production-infra domain |
+
+**Cross-cutting issues**:
+- **Routing threshold mismatch** (model-routing domain): TS ADR-008 uses `<0.30` for haiku tier, Rust `model_router.rs` uses `<0.35`. V4 must reconcile to a single threshold set.
+- **HNSW disabled by default** (hook-pipeline domain): `intelligence-bridge.js` line 347 sets `enableHnsw: false` due to "API compatibility issue". V4 must either fix the compatibility issue or remove the bridge entirely.
+
+---
+
+## 9. Success Criteria
 
 1. **Semantic search works**: Query returns contextually relevant results (not hash-based random)
 2. **Single MCP protocol**: All tools registered via @modelcontextprotocol/sdk, callable from Claude Code
@@ -304,3 +374,11 @@ await embeddingService.initialize(); // Uses @xenova/transformers
 | R88 | ruvector/index.ts 88-92% — R20 backend is genuine | Copy RuVectorBackend.ts |
 | R90 | PQ 88-92%, conformal 88-93% — ruvector-core advanced features genuine | Copy to v4 crates |
 | R90 | Distributed module 15-55% — design-doc-as-code, no transport | DO NOT include in v4 |
+| R116-R117 | NAPI bridge works, onnx-embedder real ONNX, 8 key Rust crates compile | NAPI as primary bridge option |
+| R122-R124 | RVF witness chains genuine (SHAKE-256), store.rs real | Cryptographic provenance available |
+| R135 | V3 memory layer: bridge not compiled, adapter is plain Map | ADR-v4-002 confirmed |
+| R136 | Ghost DEEP + Rust integration hubs assessed | Integration gap total |
+| R138 | MCP tool chain: SONA fabricated speedup, V2->V3 regression | MCP consolidation critical |
+| R139 | CI pipelines are facades (continue-on-error on all tests) | Cannot trust CI as validation |
+| R140 | Execution engine real but primitive, intelligence.ts biggest active facade | Phase 3 + risk registry updates |
+| R141 | 100/115 crates compile, 3,984 tests pass, ruvllm/neural-net FAIL | Binary truth for Tier 1 assets |

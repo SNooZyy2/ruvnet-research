@@ -1,7 +1,7 @@
 # ADR-v4-007: Subsystem Dependency Graph
 
-> **Status**: Proposed (revised 2026-02-19)
-> **Date**: 2026-02-19
+> **Status**: Proposed (revised 2026-03-03 with R115-R142 data)
+> **Date**: 2026-02-19 (original), 2026-03-03 (updated)
 > **Deciders**: Research project lead
 > **Supersedes**: None
 > **Related**: ADR-v4-008 (Reuse Inventory), SPEC.md, README-REALITY-CHECK.md
@@ -10,7 +10,7 @@
 
 ## Context
 
-After 112 research sessions producing 1,518 DEEP file reads across 14,633 files, no single artifact captures how the ecosystem's components *connect to each other*. The existing artifacts are:
+After 142 research sessions producing 1,696 DEEP file reads across 15,612 files, no single artifact captures how the ecosystem's components *connect to each other*. The existing artifacts are:
 
 | Artifact | What it captures | What it misses |
 |----------|-----------------|----------------|
@@ -18,7 +18,7 @@ After 112 research sessions producing 1,518 DEEP file reads across 14,633 files,
 | 14 domain synthesis docs | Per-domain narratives and findings | Cross-domain connections buried in prose; too large combined |
 | README-REALITY-CHECK.md | Feature-by-feature verdicts | Organized by marketing claims, not by subsystem topology |
 | GENUINE-ASSETS.md | File extraction manifest | No dependency relationships between assets |
-| research.db | Raw data (files, findings, 1,704 deps) | File-level granularity too fine; no subsystem aggregation |
+| research.db | Raw data (files, findings, 2,247 deps) | File-level granularity too fine; no subsystem aggregation |
 
 The result: when starting a v4 implementation session, you must either:
 1. Load multiple large docs (exceeding context), or
@@ -89,6 +89,8 @@ Derived from actual DB data: packages × crate directories, filtered to those wi
 |----|------|----------|--------|
 | EXT1 | claude-flow-self-implemented | ~/claude-flow-self-implemented/ | Not in research.db. ~80 files, 76 commits. DDD architecture sound per SPEC.md |
 
+> **Note (2026-03-03)**: File counts above are approximate as of R112. R115-R142 added ~178 DEEP reads and ~31 new files to the DB. The exact per-subsystem counts should be recomputed from the DB during Phase 1 execution. Key changes: T1 (claude-flow-cli) gained significant DEEP coverage from ML-A through ML-F sessions.
+
 ## Edge Types
 
 Edges between subsystems carry a **type** and **strength**:
@@ -117,7 +119,7 @@ This section is critical for honest construction. The research DB has real limit
 |------|--------|-------------|
 | File → subsystem mapping | `files.relative_path` + `files.package_id` | HIGH — path heuristics are deterministic |
 | Intra-subsystem dependency counts | `dependencies` table (1,597 intra-package) | HIGH — but doesn't reveal subsystem-level structure |
-| Cross-package dependency skeleton | `dependencies` table (107 cross-package edges) | MEDIUM — real but extremely sparse (6.3% of all deps) |
+| Cross-package dependency skeleton | `dependencies` table (~150+ cross-package edges, up from 107 at R112) | MEDIUM — real but still sparse relative to 2,247 total deps |
 | Finding severity distribution | `findings` table (1,294 CRITICAL, 2,923 HIGH) | HIGH — useful as quality signal |
 | File depth and LOC | `files` table | HIGH |
 
@@ -129,6 +131,20 @@ This section is critical for honest construction. The research DB has real limit
 | **Cross-subsystem semantic edges** | 93.7% of deps are intra-package. The 107 cross-package deps are a skeleton, not the full graph. | Synthesis docs prose, findings descriptions, MEMORY.md |
 | **BROKEN/IGNORES/COMPETES edges** | These are architectural judgments, not import relationships. The DB records `imports` relationships, not "should import but doesn't." | Synthesis docs, MEMORY.md "Key Corrections" sections |
 | **Normalized edge types** | 300+ distinct relationship strings in DB, ranging from `"imports"` to `"EdgeFullSonaEngine fallback stores training state via IntelligenceStore persistence layer"` | Would require normalization pass |
+
+### New Data Sources (R115-R142)
+
+The Middle Layer sessions and compilation audit provide data that wasn't available when this ADR was drafted:
+
+| Data Source | Session(s) | What It Adds |
+|-------------|-----------|-------------|
+| **R141 Compilation Audit** | R141 | Binary pass/fail for 115 crates. Replaces subjective realness estimates with ground truth for "can this code actually run?" |
+| **Middle Layer trace** (ML-A to ML-F) | R135-R140 | Complete CLI→MCP→tool→memory→backend chain traced. ~500 new findings with rich cross-subsystem signal. |
+| **RVF ecosystem** | R119-R124 | New subsystem not in original list: RVF store/runtime/NAPI bridge. Would be ~R19 in the subsystem graph. |
+| **Consensus/Distribution** | R129 | ruvector-raft, delta-consensus assessed. Enriches R2 (ruvector-graph) and adds potential R19 (rvf) edges. |
+| **NAPI bridge verification** | R116-R117 | Confirms working Rust→TS bridge path. Adds STRONG edges between R1 and T1/T2. |
+
+These sources would make Phase 3 (prose mining) significantly richer and reduce the need for synthesis doc reading.
 
 ### Implication
 
@@ -375,6 +391,10 @@ graph LR
     R9b -.->|BROKEN Loop C| R9a
     T1a -->|FEEDS| T1b
     T2 -.->|BROKEN R20: no embeddings| R1
+    R19[RVF runtime<br/>85-92%]
+    R19 -->|CRYPTO PROVENANCE| R1
+    T1a -->|REAL ROUTING| T1b
+    R9a -.->|UNCOMPILABLE R141| R9a
     R5a -.- R5b
 ```
 
@@ -424,6 +444,15 @@ Subsystems that *should* connect but don't: sona orch → sona algo (Loop C), ru
 ### 4. The Island Pattern
 Subsystems with zero cross-subsystem edges (genuine but orphaned): temporal-compare, ruQu, bit-parallel-search (within R13). Excellent code, zero integration. v4 must build the bridges these crates never had.
 
+### 5. The Compilation Truth Pattern (NEW — R141)
+
+R141's cargo check audit provides binary ground truth that crosscuts all subsystems. The graph should annotate each Rust subsystem with checkmark (compiles) or cross (fails). Key implications:
+- R8 (ruvllm) FAILS — the LARGEST crate (120K LOC) cannot compile. Individual files may be genuine but the crate is not extractable as a unit.
+- R9 (sona Rust) FAILS — broken workspace integration. The TS `sona-optimizer.ts` is the real asset, not the Rust crate.
+- R14 (neural-net) FAILS — 106 errors, downgraded from 75-85% to UNCOMPILABLE.
+- R17 (ruv-swarm) FAILS — all 14 sub-crates blocked by a single version pin (`ruv-fann ^0.1.5` vs `0.2.0`).
+- R1 (ruvector-core) PASSES, R10 (ruQu) PASSES, R16 (temporal-compare) PASSES — confirmed genuine.
+
 ## How This Supports v4
 
 With the subsystem graph, a single context window can:
@@ -451,11 +480,13 @@ With the subsystem graph, a single context window can:
 
 This is honest: the previous version claimed "~1 session" which was an underestimate of the prose mining work.
 
+> **Revised estimate (2026-03-03)**: With R135-R142 data now available, Phase 3 (prose mining) would be faster — the Middle Layer findings are concentrated in MEMORY.md and session summaries rather than scattered across 14 synthesis docs. Phase 3A (mine MEMORY.md) alone would yield ~40-50 edges (up from estimated 20-30) due to the rich cross-subsystem signals from ML-A through ML-F. Total estimate revised to **~5-6 hours** (down from 6-7) given the higher data density.
+
 ## Validation Criteria
 
 The subsystem graph is considered complete when:
 
-1. Every DEEP file (1,518) is assigned to exactly one subsystem (via Phase 1 path heuristics — automatable)
+1. Every DEEP file (1,696) is assigned to exactly one subsystem (via Phase 1 path heuristics — automatable)
 2. The 107 cross-package DB dependencies are aggregated to subsystem edges (via Phase 2 — automatable)
 3. Every `BROKEN` and `IGNORES` edge known from MEMORY.md is represented (via Phase 3A — requires review)
 4. Every `COMPETES` pattern from REALITY-CHECK.md is represented (via Phase 3B — requires review)

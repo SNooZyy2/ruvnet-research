@@ -1,7 +1,7 @@
 # Agent Lifecycle Domain Analysis
 
 > **Priority**: HIGH | **Coverage**: 32% (LOC deep) | **Status**: In Progress
-> **Last updated**: 2026-02-15 (Session R37 — Rust agent training, routing, and lifecycle data)
+> **Last updated**: 2026-03-03 (Session R136 — Rust claude_integration.rs deep-read; claude_flow execution facade confirmed)
 
 ## Overview
 
@@ -184,12 +184,14 @@ All v3 templates follow a common pattern:
 
 **Pattern**: Templates that reference concrete tools (git, gh CLI, shell commands, standard patterns) are real. Templates that reference ML/attention/HNSW features are aspirational — they describe desired behavior that depends on MCP tools that may return fabricated results.
 
-## CRITICAL Findings (2)
+## CRITICAL Findings (4)
 
 1. **agent-booster-migration.js entirely fabricated** — Hardcoded 352ms timing, `sleep(352)` as delay, `isWasmAvailable()` returns true unconditionally, migrateCodebase() returns estimates without migration. The "WASM Agent Booster" is a marketing facade.
 2. **agent-booster-tools.js broken at runtime** — Three MCP tools crash on null reference. Missing "agent-booster" module. Any user calling these tools gets a runtime error.
+3. **claude_integration.rs execute_workflow() is a complete facade** — `StepResult` always returns `success=true`, `tokens_used=500`, `cost=0.001`. No actual Claude API call is made. The entire Rust-side workflow execution infrastructure produces mock results. (R136)
+4. **ClaudeClient is missing from claude_integration.rs** — Architecture doc-comment references `ClaudeClient` as a core component ("API interface") but no `ClaudeClient` struct or impl exists anywhere in the file. The primary API integration layer is absent. (R136)
 
-## HIGH Findings (12)
+## HIGH Findings (17)
 
 1. **AgentManager is solid production code** — 9 methods, deduplication, frontmatter parsing, no external deps.
 2. **Three agent lifecycle patterns coexist** — CLI-based, long-running, and ephemeral agents with no common interface.
@@ -203,8 +205,13 @@ All v3 templates follow a common pattern:
 10. **V3 templates split 40/60 real/aspirational** — Security and planning templates are most grounded.
 11. **validate-agent.sh is production-ready** — 95% real, proper YAML validation, regex enforcement.
 12. **migration-plan.md is highest-quality template** — 80% real, concrete taxonomy, backwards compatibility.
+13. **Rust agent training datasets are static templates** — claude_dataset.rs has 60+ templates but no mechanism to incorporate real agent execution outcomes. Training data is synthetic, not experiential. (R37)
+14. **Dead imports indicate abandoned Rust/TS integration** — claude_integration.rs imports `ClaudeFlowAgent` and `ClaudeFlowTask` from `super` but neither is used anywhere in the file body. Suggests planned integration never completed. (R136)
+15. **ResponseStreamer has processing logic but no data source** — Full token-by-token processing with quality monitoring via mpsc channels, but there is no HTTP client, no SSE parser, and no real input. Infrastructure is complete, data feed is absent. (R136)
+16. **hooks_integration.rs is the sole consumer of ModelRouter** — ModelRouter is used in exactly one location (hooks_integration.rs, line 338). The Rust model routing is not wired to any agent dispatching path. (R136)
+17. **Workflow dependency resolution uses correct topological sort** — execute_workflow iterates pending steps, finds those with all dependencies satisfied, executes them in order. The algorithm is correct but operates on mock StepResults. (R136)
 
-## MEDIUM Findings (6)
+## MEDIUM Findings (12)
 
 1. sona-agent-training depends on @ruvector/sona SonaEngine. Code chunking uses regex with brace-counting.
 2. EphemeralAgent federation is a placeholder ("simulate connection with WebSocket fallback").
@@ -212,6 +219,12 @@ All v3 templates follow a common pattern:
 4. Performance claims in templates (2.49x-7.47x Flash Attention, 150x-12500x HNSW) are aspirational design targets stated as facts.
 5. MoE routing in adaptive-coordinator is implementable (capability*0.5 + performance*0.3 + availability*0.2) but unvalidated.
 6. resource-allocator and performance-monitor templates are ~70% aspirational ML features.
+7. **Model IDs in claude_integration.rs will become stale** — Uses specific dated versions (`claude-3-5-haiku-20241022`, `claude-sonnet-4-20250514`, `claude-opus-4-20250514`). No mechanism to update without code change. (R136)
+8. **AgentCoordinator manages lifecycle with RwLock concurrency** — `spawn`/`terminate`/`update` with `parking_lot::RwLock`. Dependency resolution in `execute_workflow` uses correct topological sort, but the overall lifecycle management is undercut by mock step execution. (R136)
+9. **Unit tests cover supporting infrastructure but not workflow execution** — Seven unit tests cover cost calculation, context compression, token estimation, quality monitor, agent coordinator lifecycle, cost estimator, and latency tracker. No test calls execute_workflow end-to-end against a real API. (R136)
+10. **calibration_bias() in model_router.rs is dead code** — Computes signed mean error (lines 660-688) but is never called by hooks_integration.rs or any other consumer. (R136)
+11. **hooks_integration.rs instantiates duplicate TaskComplexityAnalyzer** — Instantiates both ModelRouter (which contains its own TaskComplexityAnalyzer) and a separate standalone TaskComplexityAnalyzer, creating duplicated state and potential routing divergence. (R136)
+12. **Token estimation in model_router.rs is a rough heuristic** — `estimate_tokens` uses `len()/4` as base then multiplies by keyword-derived factors (1.2x-3.0x). Adequate for routing but not precise billing. (R136)
 
 ## Positive
 
@@ -224,6 +237,13 @@ All v3 templates follow a common pattern:
 - **benchmark-suite.md** has real CUSUM change-point detection algorithm
 - **goal/agent.md** has textbook-correct A* search and PageRank algorithms
 - **Security templates** use real STRIDE/DREAD/OWASP methodologies
+- **reasoning_bank.rs** provides genuine trajectory-based learning for agents (K-means + EWC++) — theoretical foundation for self-improving agents (R37)
+- **model_router.rs** is a significantly more sophisticated agent routing system than the JS agent-converter.js substring matching (R37)
+- **ClaudeModel enum** has accurate, current pricing (haiku $0.25/$1.25, sonnet $3/$15, opus $15/$75 per 1M tokens) and 200K context windows for all models (R136)
+- **ContextWindow compression** is functional: keeps first + last N messages, removes middle, targets 60% utilization (R136)
+- **CostEstimator** has correct arithmetic with per-model usage tracking and cumulative breakdown (R136)
+- **LatencyTracker** has TTFT tracking, p95 percentile, tokens/sec calculation, and ring-buffer with configurable max_samples (R136)
+- **Claude Messages API types** (MessageRole, ContentBlock, Message, ClaudeRequest, ClaudeResponse) are correctly structured matching the Anthropic API specification (R136)
 
 ## The Agent Template Problem
 
@@ -260,14 +280,42 @@ R37 deep-read of ruvllm crate files reveals the Rust-side agent lifecycle compon
 
 3. **Agent memory via reasoning_bank**: Each agent's trajectory (action → outcome) is stored and clustered via K-means. EWC++ prevents catastrophic forgetting across agent sessions — theoretically enabling agents to learn from past interactions.
 
-### R37 Updated Findings
+### R37 Key Takeaways
 
-**HIGH** (+1):
-13. **Rust agent training datasets are static templates** — claude_dataset.rs has 60+ templates but no mechanism to incorporate real agent execution outcomes. Training data is synthetic, not experiential. (R37)
+The Rust-side training pipeline (claude_dataset.rs) is static — 60+ hardcoded templates with no real execution feedback. model_router.rs is the most capable routing system in the repo (see HIGH #13, Positive section). reasoning_bank.rs provides genuine trajectory learning infrastructure (K-means + EWC++). All findings folded into main sections above.
 
-**Positive** (+2):
-- **reasoning_bank.rs** provides genuine trajectory-based learning for agents (K-means + EWC++) — the theoretical foundation for self-improving agents (R37)
-- **model_router.rs** is a significantly more sophisticated agent routing system than the JS agent-converter.js substring matching (R37)
+## R136: Rust claude_flow Integration Hub Deep-Read (Session 136)
+
+### Overview
+
+R136 performed a full DEEP read of the two primary Rust agent lifecycle files: `claude_integration.rs` (1,341 LOC) and `model_router.rs` (1,322 LOC), both in `crates/ruvllm/src/claude_flow/`. These are the Rust-side implementations of the agent lifecycle infrastructure.
+
+### Files Read
+
+| File | LOC | Depth | Lines Read | Real% |
+|------|-----|-------|------------|-------|
+| `crates/ruvllm/src/claude_flow/claude_integration.rs` | 1,341 | DEEP | 1,341 | ~65-70% |
+| `crates/ruvllm/src/claude_flow/model_router.rs` | 1,322 | DEEP | 1,322 | 88-92% |
+
+### claude_integration.rs: Supporting Infrastructure Real, Core Missing
+
+The file contains well-engineered supporting components — `ClaudeModel` enum with correct pricing, `ContextWindow` compression, `CostEstimator`, `LatencyTracker`, `AgentCoordinator`, `ResponseStreamer`, and Claude Messages API types — but the central integration point is absent.
+
+**The facade pattern here is architectural**: every supporting component is genuine, but `execute_workflow()` always returns hardcoded mock `StepResult` values (`success=true`, `tokens_used=500`, `cost=0.001`), and `ClaudeClient` (the HTTP API interface described in the doc-comment) does not exist in the file. The building is complete; the electrical wiring to the grid is missing.
+
+`AgentCoordinator` manages agent spawn/terminate/update with `parking_lot::RwLock`, and `execute_workflow` uses a correct topological sort for dependency resolution. These run correctly on mock data but cannot perform real agent coordination without a real API client.
+
+`ResponseStreamer` has full token-by-token processing with quality monitoring via mpsc channels — but receives no data because there is no HTTP client or SSE parser feeding it.
+
+### model_router.rs: Genuine 3-Tier Routing with One Consumer
+
+The Rust `ModelRouter` is confirmed at 88-92% genuine — a 7-factor weighted complexity analyzer with byte-level optimizations. However, `hooks_integration.rs` is its sole consumer. The router is not wired into any agent dispatch path.
+
+An additional structural issue: `hooks_integration.rs` instantiates both a `ModelRouter` (which internally contains a `TaskComplexityAnalyzer`) and a separate standalone `TaskComplexityAnalyzer`, creating duplicated state. The `calibration_bias()` method (lines 660-688) that would enable self-correction via signed mean error is implemented but never called anywhere.
+
+### Cross-Domain Connection
+
+The Rust model routing in `model_router.rs` is parallel to the TS ADR-008 3-tier system (confirmed R37/R137) but uses different thresholds (haiku cutoff `<0.35` vs TS `<0.30`). Neither system is wired to the other — they are independent implementations of the same concept.
 
 ## Remaining Gaps
 
@@ -277,3 +325,11 @@ R37 deep-read of ruvllm crate files reveals the Rust-side agent lifecycle compon
 - Build artifacts and type definitions
 - Agent pool/scaling infrastructure (genuinely unread)
 - Agent health monitoring and metrics (genuinely unread)
+
+## Session Log
+
+### R37 — 2026-02-15
+Deep-read 4 Rust ruvllm files: claude_dataset.rs (static training templates, 75-80% real), model_router.rs (7-factor routing, 88-92% real), reasoning_bank.rs (K-means + EWC++, 92-95% real), claude_integration.rs (70-75% — execute_workflow simulation flagged). Confirmed Rust routing is more capable than JS substring matching. Rust training pipeline is synthetic-only.
+
+### R136 — 2026-03-03
+Full DEEP read of both `claude_integration.rs` (1,341 LOC) and `model_router.rs` (1,322 LOC) in `crates/ruvllm/src/claude_flow/`. Two new CRITICAL findings: `execute_workflow()` is a complete mock (hardcoded tokens/cost), and `ClaudeClient` is referenced in doc-comments but does not exist. Supporting infrastructure (ClaudeModel pricing, ContextWindow compression, CostEstimator, LatencyTracker, ResponseStreamer, Claude Messages API types) is genuine. ModelRouter confirmed 88-92% real but wired to only one consumer (hooks_integration.rs). Dead code: `calibration_bias()` never called. Structural bug: duplicate TaskComplexityAnalyzer instances in hooks_integration.rs. 18 total findings added (2 CRITICAL, 4 HIGH, 6 MEDIUM, 6 INFO).

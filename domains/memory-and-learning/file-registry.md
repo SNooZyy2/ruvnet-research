@@ -776,3 +776,28 @@
 | File | Package | LOC | Real% | Depth | Key Verdict | Session |
 |------|---------|-----|-------|-------|-------------|---------|
 | v3/@claude-flow/cli/src/memory/sona-optimizer.ts | claude-flow | 842 | 78-83% | DEEP | Real Bayesian confidence update with temporal decay. Agent-routing optimizer (NOT vector search). TWO independent SONA subsystems: sona-optimizer (this file — real routing) vs sona-tools.ts (fake HNSW speedup). Lazy-loads q-learning-router.js (tries @ruvector/core, likely absent). Wired into hooks pipeline via hooks-tools.ts. writeFileSync on every trajectory — "debounced" comment is false (synchronous on hot path) | R140 |
+
+### Rust Compilation Audit — reasoningbank workspace (R141)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| reasoningbank/crates/reasoningbank-core/Cargo.toml | reasoningbank | 773 | 88-92% | SURFACE | PASS check+test. 12/12 tests pass (engine, pattern, similarity, error). Clean. | R141 |
+| reasoningbank/crates/reasoningbank-storage/Cargo.toml | reasoningbank | 1403 | 94% | SURFACE | PASS check+test. 9/9 tests pass. SQLite/async/migrations confirmed working. 2 dead-code warnings. | R141 |
+| reasoningbank/crates/reasoningbank-learning/Cargo.toml | reasoningbank | 788 | 92-95% | SURFACE | PASS check+test. 7/7 tests pass. 8 deprecation warnings (AsyncLearner self-references). | R141 |
+| reasoningbank/crates/reasoningbank-network/Cargo.toml | reasoningbank | 2647 | ~78% | SURFACE | PASS check+test. 18/18 tests pass (QUIC, NeuralBus, gossip, priority, snapshot, streams). 2 dead-code warnings. | R141 |
+| reasoningbank/crates/reasoningbank-mcp/Cargo.toml | reasoningbank | 1037 | 0% compilable | SURFACE | FAIL check (6 errors). Two StorageConfig types used interchangeably (C197). StorageConfig missing serde Deserialize. MCP entry point is unusable. | R141 |
+| reasoningbank/crates/reasoningbank-wasm/Cargo.toml | reasoningbank | 201 | WASM-only | SURFACE | FAIL native check (cfg-gated wasm module). PASS wasm32-unknown-unknown. Expected for WASM-only crate. | R141 |
+
+### Rust Compilation Audit — sublinear-time-solver workspace (R141)
+
+| File | Package | LOC | Real% | Depth | Key Verdict | Session |
+|------|---------|-----|-------|-------|-------------|---------|
+| Cargo.toml | sublinear-time-solver | 35136 | PASS/FAIL-test | SURFACE | PASS check (413 warnings). FAIL test (7 errors: f64 not Ord, missing EntanglementValidator methods, H275). Tests NEVER run against this codebase. | R141 |
+| crates/bit-parallel-search/bit-parallel-search/Cargo.toml | sublinear-time-solver | 197 | 92-95% | SURFACE | PASS check+test. 4/4 tests pass (test_count, test_edge_cases, test_find, test_find_all). Only fully clean crate. | R141 |
+| crates/neural-network-implementation/Cargo.toml | sublinear-time-solver | 17294 | UNCOMPILABLE | SURFACE | FAIL check (106 errors). E0038 dyn-incompatible ModelParams trait (fundamental architectural defect, C196). Never compiled. "Best code in project" claim invalidated. | R141 |
+| crates/psycho-symbolic-reasoner/graph_reasoner/Cargo.toml | sublinear-time-solver | 14708 | HOLLOW | SURFACE | PASS check+test. 0 tests across 3 crates (graph_reasoner, extractors, planner). Compiles but has no test assertions. | R141 |
+| crates/temporal-compare/Cargo.toml | sublinear-time-solver | 3841 | 90-95% | SURFACE | PASS check+test. 3/3 tests pass (quantization round-trip x2, quantized_mlp). 26 lib warnings, 44 bin warnings. Solid. | R141 |
+| crates/temporal-lead-solver/Cargo.toml | sublinear-time-solver | 2337 | UNCOMPILABLE | SURFACE | FAIL check (21 errors). E0616 private nalgebra .data field access (7x, H273). Code written without running cargo check. Never compiled. | R141 |
+| crates/rustc-hyperopt/Cargo.toml | sublinear-time-solver | 1175 | UNCOMPILABLE | SURFACE | FAIL check (3 errors). blake3::Hash missing LowerHex, borrow conflict (H274). Trivially fixable but never attempted. Claims 3x-100x speedups with zero benchmarks. | R141 |
+| crates/temporal-neural-solver-wasm/Cargo.toml | sublinear-time-solver | 274 | WASM-only | SURFACE | PASS wasm32-unknown-unknown check. 1 warning. Genuine WASM artifact. | R141 |
+| crates/wasm-solver/Cargo.toml | sublinear-time-solver | 425 | WASM-only | SURFACE | PASS wasm32-unknown-unknown check. 6 dead_code warnings. Genuine WASM artifact. | R141 |

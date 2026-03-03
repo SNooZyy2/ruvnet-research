@@ -127,3 +127,52 @@ The ACTUAL runtime path is: index.ts UnifiedMemoryService (14 x 1-line delegatio
 
 **Verdict**: The V3 memory layer is architecturally ambitious (ADR-053 7-phase bridge, 29 controllers, hybrid scoring) but the intended architecture is dead at runtime. The actual runtime path is an in-memory Map with a pure JS HNSW that has a fundamentally broken level distribution and zero persistence. R20's root cause (embeddings never initialized) is structurally replicated. The best code (memory-bridge.ts) is not compiled; the worst code (agentdb-adapter.ts) is the sole runtime backend.
 
+### 5q. V3 Intelligence Layer — intelligence.ts and sona-optimizer.ts (R140)
+
+R140 deep-reads the two memory-adjacent files in `v3/@claude-flow/cli/src/memory/` that implement the CLI-visible intelligence and routing optimization layers.
+
+**intelligence.ts (985 LOC, 60-65% weighted)**:
+
+The module header (line 8) claims "Pattern search: O(log n) with HNSW" but `LocalReasoningBank.findSimilar()` (lines 357-385) is a brute-force linear scan with cosine similarity — O(n) over the patternList array. Zero HNSW index is instantiated, zero hnswlib-node import, zero @ruvector import. This is a CRITICAL false complexity claim (C194, confirmed by R140 DEEP read).
+
+`LocalSonaCoordinator` implements a pre-allocated circular buffer for signal recording — O(1) insertion, genuine and benchmarked at <0.05ms in headless.ts (10,000 iterations). However `SonaConfig` exposes `loraLearningRate` (0.001), `loraRank` (8), and `ewcLambda` (0.4) fields — none of which are ever read or used in any code path. The SONA branding is applied to what is literally a circular buffer with a JSON persistence layer (C195, H264).
+
+The module is NOT dead code — it has 14+ real consumers: index.ts re-exports (line 583), runtime/headless.ts benchmark harness (line 24), commands/neural.ts (9 import sites), and mcp-tools/embeddings-tools.ts (4 import sites). `compactPatterns()` runs an O(n^2) all-pairs cosine similarity with no indexing for up to maxPatterns=5000 (12.5M comparisons, H264). `recordStep()` has a genuine 2-tier embedding fallback: memory-bridge.ts → memory-initializer.ts (H272). Zero imports of @ruvector/*, hnswlib-node, or hnsw_router.rs — no native acceleration path (H265).
+
+**sona-optimizer.ts (842 LOC, 78-82%)**:
+
+SONAOptimizer implements real Bayesian-style confidence updates: success increments `conf += CONFIDENCE_INCREMENT * (1 - conf)`, failure decrements `conf -= CONFIDENCE_DECREMENT * conf`. Temporal decay via `exp(-DECAY_RATE * days)`. Pattern pruning by `score = confidence * recency`. This is a genuine ML feedback loop for agent routing decisions (H266, finding tagged positive).
+
+Critical naming conflict: `sona-optimizer.ts` is an AGENT-ROUTING optimizer (learns which agent type to dispatch). `sona-tools.ts` claims to provide HNSW vector search speedup (R138 finding: fabricated via `estimatedBruteForce = searchLatency * 1000`). Neither imports the other. The "SONA" brand covers two entirely unrelated subsystems (H267). This confirms the systemic finding that claude-flow V3 has TWO independent SONA subsystems with zero architectural connection.
+
+`getSONAOptimizer()` singleton is invoked in `hooks-tools.ts` at `hooksTrajectoryEnd` handler, `hooksIntelligence` handler, and `getSONAStats` — making sona-optimizer.ts the ONLY V3 memory subsystem actually wired into the hooks pipeline end-to-end (H271). The Q-learning integration lazy-loads `q-learning-router.js` from `../ruvector/q-learning-router.js` (882 LOC) but that file attempts `@ruvector/core` native import — likely absent in production, silently degrading to JS Q-table (H268).
+
+**Performance bug**: `saveToDisk()` is synchronous `writeFileSync` called on every `processTrajectoryOutcome` invocation, with no debounce or throttle despite the comment at line 314 saying "Persist to disk (debounced)". For rapid trajectory processing in the hooks pipeline, this is a blocking I/O bottleneck (H270).
+
+**Subsystem verdict**: intelligence.ts is a genuine-but-mislabeled subsystem (circular buffer sold as HNSW, O(n) sold as O(log n), dead LoRA config). sona-optimizer.ts is the most genuine V3 memory module — real Bayesian routing optimization, the only end-to-end hooks pipeline connection, with a fixable sync-IO bug as the main production concern. The two SONA subsystems (optimizer + tools) share a brand name but serve entirely different purposes and should not be confused.
+
+### 5r. Rust Compilation Audit Results (R141)
+
+R141 systematically ran `cargo check` and `cargo test --lib` across all 4 workspaces: reasoningbank, sublinear-time-solver, ruvector (agentdb context), ruv-FANN. The following findings are directly relevant to memory-and-learning:
+
+**reasoningbank workspace** (4 of 5 crates PASS, 1 FAIL):
+- reasoningbank-core: PASS check+test, 12/12 tests green. 773 LOC.
+- reasoningbank-storage: PASS check+test, 9/9 tests green. 1,403 LOC. SQLite/async/migrations confirmed working.
+- reasoningbank-learning: PASS check+test, 7/7 tests green. 788 LOC. 8 deprecation warnings (AsyncLearner self-references). Confirms R85 assessment.
+- reasoningbank-network: PASS check+test, 18/18 tests green. 2,647 LOC. QUIC, NeuralBus, gossip, streams confirmed compiling.
+- **reasoningbank-mcp: FAIL (6 errors, C197)** — Two distinct StorageConfig types used interchangeably. MCP entry point for the Rust ReasoningBank layer is broken and unusable.
+- reasoningbank-wasm: FAIL native check (cfg-gated wasm module), PASS wasm32-unknown-unknown — expected for WASM-only crate.
+
+**sublinear-time-solver workspace** (mixed):
+- Root crate: PASS check (413 warnings), FAIL test (7 errors: f64 not Ord, missing EntanglementValidator methods, H275). Tests have NEVER run.
+- bit-parallel-search: PASS check+test. 4/4 tests pass. Only fully clean crate.
+- **neural-network-implementation: FAIL check (106 errors, C196)** — ModelParams trait not dyn-compatible (E0038). 17,294-LOC "best code in project" has never compiled.
+- psycho-symbolic-reasoner: PASS check+test, but 0 tests across 3 crates (hollow test suite).
+- temporal-compare: PASS check+test, 3/3 tests green (quantization).
+- **temporal-lead-solver: FAIL check (21 errors, H273)** — E0616 private nalgebra .data field access (7x).
+- **rustc-hyperopt: FAIL check (3 errors, H274)** — blake3::Hash missing LowerHex.
+- temporal-neural-solver-wasm: PASS wasm32 check.
+- wasm-solver: PASS wasm32 check.
+
+**Overall Rust audit verdict for this domain**: The ReasoningBank workspace is the most production-ready Rust cluster (4/5 crates compile and have passing tests). The sublinear-time-solver workspace is severely degraded — the flagship neural-network-implementation crate and 3 others fail compilation. The "never compiled" pattern is systemic: 106 errors in neural-network-implementation prove the "best code in project" claim was based on code reading alone, not compilation evidence.
+

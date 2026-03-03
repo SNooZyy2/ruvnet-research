@@ -1,26 +1,41 @@
 # Model Routing Domain Analysis
 
-> **Priority**: HIGH | **Coverage**: ~96% DEEP (~59/62 files) | **Status**: ACTIVE (re-opened R107)
-> **Last updated**: 2026-02-18 (Session R107)
+> **Priority**: HIGH | **Coverage**: ~96% DEEP (~92/96 files) | **Status**: ACTIVE
+> **Last updated**: 2026-03-03 (Sessions R134, R136, R140)
 
-## Section 1: Current State Summary (as of R137, 2026-03-01)
+## Section 1: Current State Summary (as of R140, 2026-03-02)
 
 Model routing is the most fragmented domain in the ruvnet ecosystem. At least **seven distinct routing surfaces** have been confirmed across three languages (Shell, JavaScript, Rust) and four packages (claude-flow-cli, agentic-flow, agentdb, ruvllm). None of these surfaces compose at runtime — each accumulates independently learned patterns in separate state stores.
 
 The JS layer (R11/R17) is what actually runs in production: Q-Learning TD(0) and MoE 2-layer network in claude-flow CLI, plus a seven-file API proxy layer in agentic-flow. The Rust layer (R37, R107, R137) is more sophisticated (HNSW semantic routing, 7-factor complexity analysis, real K-means clustering) but is never called by the CLI.
 
-**R137 ghost DEEP correction + ML-C integration review** re-read the 3 core `ruvllm/claude_flow/` files with full integration context from ML-B (R136):
-- **hnsw_router.rs (90-93%)**: R37 "BEST ruvector-core integration" **CONFIRMED** at DEEP with 100% coverage. Real HnswIndex instantiation, SONA trajectory recording, complete online learning pipeline (add→search→route→learn→prune→consolidate), HybridRouter blending keyword+semantic, 10 unit tests on real HnswIndex. Ghost DEEP corrected (was 0 lines read).
-- **claude_integration.rs (68-73%)**: Ghost DEEP corrected — setup toolkit NOT API client (matches R43 TS pattern). NO HTTP client, NO API key handling. Architecture doc references `ClaudeClient` that doesn't exist. `execute_workflow()` hardcodes mock results. Genuine: context window compression, cost/latency tracking, Claude API type system.
-- **model_router.rs (88-92%)**: Re-read confirmed **PARALLEL to TS ADR-008 with zero bridge**. Thresholds differ (<0.35 vs <0.30 haiku, <0.70 vs <0.50 sonnet). hooks_integration.rs always passes `None, None` for agent/task overrides, making the override map system dead code.
+**R134 (ML-A)** added two CLI entry-point files to the domain. ruvector/bin/cli.js (7,357 LOC) is the user-facing surface for all ruvector commands including the hooks subsystem that wires PreToolUse/PostToolUse routing into Claude. Its Intelligence class is self-contained Q-learning with lazy-loaded IntelligenceEngine, but the ROUTER command prints "Status: Coming Soon" and SERVER/CLUSTER commands are full facades. Hash-based embedding confirmed at the CLI layer: Intelligence.embed() only uses engine embedding if already initialized, otherwise falls back to 64-dim charCode hash. ruvllm/bin/cli.js (1,005 LOC) exposes the ruvllm benchmark/query/models surface — query and generate commands are fully non-functional if the native .node binary is absent, and the training pipeline is simulated (ContrastiveTrainer.train() exports JSONL but does not actually train).
 
-The sheaf/router.rs (ruvector-attention crate) represents a different routing layer — energy-gated compute dispatch at the token level, not model selection. Its 4-lane architecture (Reflex/Standard/Deep/Escalate) is genuinely correct, but theta_deep config field is dead, and confidence is hardcoded to 1.0.
+**R136 (ML-C)** re-confirmed the three core ruvllm/claude_flow/ files and added factory.ts:
+- **hnsw_router.rs (90-93%)**: BEST ruvector-core integration CONFIRMED. Real HnswIndex instantiation, SONA trajectory recording, HybridRouter blending keyword+semantic. Bugs: pattern metadata inserted before index add_batch (race-condition corruption), SONA trajectory uses same embedding for query and response (degenerate delta), routing_features is 2-element sparse vector.
+- **claude_integration.rs (68-73%)**: Setup toolkit, NOT API client. execute_workflow() hardcodes mock results. ClaudeClient struct referenced in architecture doc but does not exist. Genuine: topological workflow dependency resolution, context compression, cost/latency tracking, AgentCoordinator with parking_lot RwLock.
+- **model_router.rs (88-92%)**: PARALLEL to TS ADR-008 with zero bridge. Thresholds differ (<0.35 vs <0.30 for haiku, <0.70 vs <0.50 for sonnet). hooks_integration.rs always passes None,None for agent/task overrides — the entire override map system is unreachable dead code. calibration_bias() computed but never called.
+- **factory.ts (88-92%)**: 5-tier fallback confirmed (not 4): RuVector > RVF SDK > HNSWLib > sql.js RVF > none. BackendType union omits "sqljsrvf", causing a type error if only sql.js is available. detectBackends() called on every createBackend() (6 dynamic imports each time — no caching).
 
-The hash-based embedding problem (R37) remains the root cause of non-semantic HNSW routing across all Rust routing surfaces. No routing surface has been connected to real embeddings.
+**R140 (ML-F)** read hooks.ts (4,530 LOC), the V3 CLI hooks command. The pre-task command integrates enhanced-model-router.js for real ADR-008 3-tier routing — the ONLY place in V3 where tier routing is wired to a user-facing command. model-route/outcome/stats connect to model-router.js (tiny-dancer-neural) via hooks-tools.ts. However, hooks-tools.ts semantic routing uses sin/cos character hash (NOT ONNX), so hash-based non-semantic routing extends to the hooks layer. token-optimize unconditionally adds +200 saved tokens and 2 cache hits regardless of actual activity. statusline vector count uses a dbSizeKB/2 file-size heuristic, not a real DB query.
+
+The hash-based embedding problem (R37) is now confirmed systemic: present in pretrain_pipeline.rs (Rust), hnsw_router.rs (Rust, degenerate trajectory), ruvector/bin/cli.js (JS CLI fallback), ruvllm/bin/cli.js (benchmark fallback), and hooks-tools.ts (sin/cos hash). No routing surface uses real learned embeddings end-to-end.
 
 ## Overview
 
-Determines which LLM handles each task, routes tasks to agent types, and provides multi-provider API proxying. ~62 files / ~18K LOC. ~59 files DEEP-read.
+Determines which LLM handles each task, routes tasks to agent types, and provides multi-provider API proxying. ~96 files / ~45K LOC. ~92 files DEEP-read.
+
+### File Registry (recent additions — sessions R134, R136, R140)
+
+| File | LOC | Real% | Session | Key Finding |
+|------|-----|-------|---------|-------------|
+| **npm/packages/ruvector/bin/cli.js** | 7,357 | **55-65%** | R134 | Intelligence class is real Q-learning. ROUTER/SERVER/CLUSTER commands are facades ("Coming Soon"). Hash fallback 64-dim charCode embedding confirmed. HOOKS init (692 lines) generates .claude/settings.json wiring. Export command broken (vectors: []). |
+| **npm/packages/ruvllm/bin/cli.js** | 1,005 | **60-70%** | R134 | query/generate/route non-functional without native .node binary. SIMD benchmark genuine. Model download genuine. Training pipeline simulated. Hash embedding in benchmark fallback. ZERO ruvector RAG integration. |
+| **crates/ruvllm/src/claude_flow/hnsw_router.rs** | 1,288 | **90-93%** | R136 | Best ruvector-core integration confirmed. HybridRouter + SONA trajectory. Bug: metadata inserted before index batch (race corruption). Degenerate SONA trajectory (same embedding for query+response). |
+| **crates/ruvllm/src/claude_flow/claude_integration.rs** | 1,341 | **68-73%** | R136 | Setup toolkit NOT API client. execute_workflow() mocks results. ClaudeClient struct missing. Genuine: topological workflow resolution, cost/latency, AgentCoordinator with parking_lot. |
+| **crates/ruvllm/src/claude_flow/model_router.rs** | 1,322 | **88-92%** | R136 | 7-factor complexity, 45 routing patterns. Override maps dead (hooks_integration passes None,None). calibration_bias() computed but never called. Different thresholds from TS ADR-008. |
+| **packages/agentdb/src/backends/factory.ts** | 235 | **88-92%** | R136 | 5-tier fallback (not 4). BackendType union omits "sqljsrvf" causing type gap. detectBackends() on every createBackend() (no caching, 6 dynamic imports). GNN/graph assumed present for monolithic ruvector package. |
+| **v3/@claude-flow/cli/src/commands/hooks.ts** | 4,530 | **72-78%** | R140 | 30 subcommands (not 17 documented). Real ADR-008 pre-task routing via enhanced-model-router.js. hooks-tools.ts uses sin/cos hash (NOT ONNX). token-optimize adds +200 hardcoded savings. statusline vector count = dbSizeKB/2 heuristic. |
 
 ## The Big Picture
 
@@ -171,15 +186,21 @@ Provider chain: RuvLLM → OpenRouter → Gemini → Anthropic → ONNX. Externa
 
 These systems **do not coordinate**. Provider-manager selects LLM providers. Route.js selects agent types. Agent-booster caches code edits. No orchestration layer connects them.
 
-## CRITICAL Findings (7)
+## CRITICAL Findings (11)
 
 1. **Gemini API key in query parameter** — Exposed in HTTP logs, URLs, referrer headers across 3 files (gemini proxy, websocket proxy, http2 proxy).
 2. **SemanticRouter HNSW is fabricated** — Claims HNSW-powered routing but code implements brute-force cosine similarity. Comments acknowledge this.
 3. **agent-booster compression fabricated** — TensorCompress not real. Claims 87.5-96.9% savings but embeddings stored uncompressed. GNN search calls non-existent function.
 4. ~~**RuVector intelligence facade**~~ **RESOLVED R14** — intelligence-bridge.js EXISTS (1,038 LOC). routeTaskIntelligent() at L382 and findSimilarPatterns() at L542 both confirmed working. Research synchronization error, not code deficiency.
 5. **Three fragmented ReasoningBanks** — Learning system informing decisions broken across 3 packages.
+6. **Hash-based embeddings SYSTEMIC across all routing layers** (R134) — Confirmed in ruvector/bin/cli.js (Intelligence.embed() 64-dim charCode fallback), ruvllm/bin/cli.js (Math.sin() benchmark fallback), hooks-tools.ts (sin/cos character hash for semantic routing), hnsw_router.rs (degenerate SONA trajectory using same embedding for query and response), and pretrain_pipeline.rs (character sum % dim). No routing surface uses real learned embeddings end-to-end. All HNSW semantic routing is non-semantic.
+7. **ruvllm CLI non-functional without native binary** (R134) — ruvllm/bin/cli.js query(), generate(), route() fallback returns hardcoded "[Fallback] Response to: ..." with confidence 0.5 (engine.ts L121-131). Without the native .node binary, ALL query/generate/route/embed commands are decoration. Training is simulated (ContrastiveTrainer.train() exports JSONL for external GPU use but does not train).
+8. **execute_workflow() hardcodes mock results** (R136) — claude_integration.rs execute_workflow() always returns success=true, tokens_used=500, cost=0.001. No Claude API call. The entire workflow orchestration layer is simulation.
+9. **ClaudeClient struct missing** (R136) — claude_integration.rs architecture doc references ClaudeClient as the core API interface but the struct does not exist anywhere in the file or crate. The Rust API integration layer is entirely absent.
+10. **ROUTER/SERVER/CLUSTER commands are facades** (R134) — ruvector/bin/cli.js ROUTER prints "Status: Coming Soon", SERVER prints "Status: Coming Soon" with planned features list, CLUSTER prints "Status: Coming Soon" with Raft/failover features list. Zero implementation in all three. These are the most user-visible commands in the ruvector CLI.
+11. **hooks-tools.ts semantic routing uses sin/cos hash** (R140) — The hooks model-route command's semantic embedding uses generateSimpleEmbedding() (sin/cos character hash) even when native VectorDb/HNSW is loaded. The HNSW index contains hash-embedded routing patterns — extends hash-embedding failure to the V3 hooks layer that surfaces ADR-008 routing to users.
 
-## HIGH Findings (20)
+## HIGH Findings (34)
 
 1. **Q-Learning router is REAL** — TD(0), experience replay, 3 epsilon decay, MurmurHash3 features all correct.
 2. **MoE router is REAL** — Xavier init, REINFORCE gradients, forward pass all correct. Load balance loss computed but not backpropagated.
@@ -193,20 +214,46 @@ These systems **do not coordinate**. Provider-manager selects LLM providers. Rou
 10. **THREE disconnected routing systems** — No integration between hook advisory, provider selection, and agent task routing.
 11. **TinyDancerRouter native binary is REAL** — @ruvector/tiny-dancer compiled FastGRNN. JS fallback is cosine similarity.
 12. **agent-booster REAL components** — Exact cache, fuzzy matching, error patterns, persistence all genuinely work.
+13. **Rust routing is BEST but unused** — hnsw_router.rs at 90-93% real is the most sophisticated routing in the ecosystem, but claude-flow uses JS Q-learning instead. (R37)
+14. **Four distinct ReasoningBanks** — Rust reasoning_bank.rs is the fourth independent implementation with zero code sharing. (R37)
+15. **6th routing surface: AgentRouter runs parallel with no composition** — AgentRouter (keyword+SONA), HnswRouter (HNSW semantic), ModelRouter (token-count complexity), LLMRouter, RuvLLMOrchestrator, and claude_flow_bridge CLI each hold separate SonaIntegration instances, accumulating different learned patterns independently. (R107)
+16. **theta_deep config field dead in sheaf/router.rs** — route_by_energy() 4-lane dispatch skips theta_deep threshold entirely. Config field validated and documented but never read. (R107)
+17. **RoutingDecision.confidence hardcoded to 1.0** — All routing decisions from sheaf/router.rs report confidence=1.0 regardless of energy proximity to thresholds. (R107)
+18. **SONA adaptive interface in sheaf/router.rs is passive** — tune_thresholds() provides API for feedback-driven threshold tuning but TokenRouter has no internal feedback loop. Caller must externally invoke manually. (R107)
+19. **stop_sequences silently ignored in serving/request.rs** — should_stop() delegates to is_complete() (token count only). Stop finish_reason never populated. (R107)
+20. **AgentRouter tests never exercise SONA path** — All tests use SonaConfig::default() (cold-start). CRITICAL model-index mismatch is completely untested. (R107)
+21. **claude_integration.rs dead imports** — ClaudeFlowAgent and ClaudeFlowTask imported but never referenced. (R137)
+22. **claude_integration.rs ResponseStreamer has no data source** — Token processing with mpsc channels is real but nothing generates tokens. No HTTP client, SSE parser, or stream reader. (R137)
+23. **model_router.rs override maps dead code** — hooks_integration.rs always passes None,None for agent/task overrides, making the AgentType/TaskType override map system unreachable. (R137)
+24. **model_router.rs parallel to TS ADR-008 with different thresholds** — Rust <0.35 haiku / <0.70 sonnet vs TS <0.30 / <0.50. No FFI bridge, no WASM interface, no mechanism connecting the two. (R137)
+25. **hooks.ts pre-task embeds real ADR-008 3-tier model routing** — enhanced-model-router.js integration at L1529-1576 provides legitimate [TASK_MODEL_RECOMMENDATION] directives. The ONLY place in V3 where ADR-008 tier routing is wired to a user-facing command. (R140)
+26. **hooks-tools.ts semantic routing uses sin/cos hash embeddings** — route command's generateSimpleEmbedding() used even when native VectorDb/HNSW is loaded. Hash-embedding failure propagated to hooks routing layer. (R140)
+27. **ruvector/bin/cli.js Intelligence class genuine** — Self-contained Q-learning + vector memory + trajectory tracking + co-edit patterns + error learning. Lazy-loads IntelligenceEngine. PRETRAIN phase (549 lines, 11 phases) is real: git co-edit patterns, AST patterns, dir-agent mappings. (R134)
+28. **ruvector/bin/cli.js export command broken** — Line 1858 exports {vectors: []} regardless of DB content. Vector data never serialized. Export/import pipeline is broken by design. (R134)
+29. **ruvllm/bin/cli.js SIMD benchmark genuine** — Creates test vectors, measures real Date.now() timing for dotProduct, cosineSimilarity, l2Distance, softmax. Reports ops/sec. (R134)
+30. **hnsw_router.rs metadata-before-index race** — add_patterns() inserts metadata into DashMaps BEFORE calling index.add_batch(). If add_batch() fails, metadata exists without index entries creating orphaned entries. (R136)
+31. **factory.ts BackendType union gap** — BackendType omits "sqljsrvf" but BackendDetection.available CAN be "sqljsrvf". If only sql.js available, createBackend() throws an unhandled type error. (R136)
+32. **factory.ts detectBackends() called on every create** — 6 dynamic imports on every createBackend() invocation with no caching. Any application creating backends repeatedly pays full detection cost each time. (R136)
+33. **hooks.ts token-optimize fabricates savings** — Unconditionally adds +200 totalTokensSaved and sets cacheHits=2 regardless of optimization activity. Cumulative display is inflation not measurement. (R140)
+34. **hooks.ts statusline vector count is heuristic** — agentdbStats.vectorCount = Math.floor(agentdbStats.dbSizeKB / 2). Size-based proxy, not actual DB query. Intelligence stats output is systematically wrong. (R140)
 
-## MEDIUM Findings (11)
+## MEDIUM Findings (selected new additions — R134/R136/R140)
 
-1. route.js CLI: No input validation on task descriptions.
-2. q-learning-router: Tabular only, not deep RL. State space can explode.
-3. moe-router: Gradients isolated per update, no momentum.
-4. coverage-router: Cache TTL 60s with no invalidation.
-5. CircuitBreakerRouter: Uncertainty weights arbitrary (0.5/0.3/0.2).
-6. websocket-proxy: Gemini API key in URL, hardcoded model.
-7. onnx-local: Greedy decoding only, streaming throws error.
-8. onnx.js: Streaming simulated (word chunking + 10ms delays). Token count = length/4.
-9. openrouter.js: Cost hardcoded at $0.00001/$0.00003, inaccurate.
-10. LLMRouter: Circular fallback (RuvLLM→RuvLLM→local).
-11. route.js MCP hook: Q-learning state oversimplified as `edit:${ext}`.
+Existing findings 1-11 unchanged (see prior session entries above). New additions:
+
+12. **ruvector/bin/cli.js monolithic structure risk** — 7,357 LOC single file with 14+ top-level commands. No modular separation. All routing, intelligence, and hook commands co-located. (R134)
+13. **ruvllm/bin/cli.js ZERO ruvector RAG integration** — No imports from ruvector-core, no HNSW index creation, no vector store connection. Memory commands use RuvLLM.addMemory/searchMemory (native binary or in-memory map). (R134)
+14. **ruvector/bin/cli.js intelligence path resolution has no sanitization** — getIntelPath() checks .ruvector/.claude directories then falls back to HOME/.ruvector/. No path sanitization against directory traversal if cwd() is manipulated. (R134)
+15. **hnsw_router.rs distance-to-similarity conversion incorrect for non-cosine metrics** — 1.0 - score.max(0.0).min(2.0) is only correct for cosine distance (range 0-2). For Euclidean/DotProduct produces incorrect similarity values. (R136)
+16. **hnsw_router.rs SONA trajectory sparse features** — routing_features vector is only 2 elements: [agent_type_as_f32/10, success_rate]. Extremely sparse for a learning system — no task complexity, latency, or embedding characteristics. (R136)
+17. **hnsw_router.rs SIMD comment misleading** — normalize_embedding() uses scalar loop, not SIMD despite comment "SIMD-friendly". Actual SIMD is in ruvector-core distance calculations. (R136)
+18. **model_router.rs calibration_bias() never called** — Lines 660-688 computes signed mean error but no consumer invokes it. Accuracy calibration dead code. (R136)
+19. **model_router.rs dual TaskComplexityAnalyzer** — hooks_integration.rs instantiates BOTH ModelRouter (containing its own TaskComplexityAnalyzer) AND a separate standalone TaskComplexityAnalyzer. Two independent analyzers running in parallel, no shared state. (R136)
+20. **model_router.rs token estimation heuristic** — estimate_tokens() uses len()/4 as base multiplied by keyword-derived factors (1.2x-3.0x). "Fix typo" (8 chars) gets 2 base tokens * 1.2 = 2 tokens, severely underestimating. (R136)
+21. **claude_integration.rs model IDs hardcoded as dated versions** — claude-3-5-haiku-20241022, claude-sonnet-4-20250514, claude-opus-4-20250514. Will become stale as Anthropic releases new versions. No dynamic model resolution. (R136)
+22. **hooks.ts pretrain command cosmetic delay** — Calls await new Promise(resolve => setTimeout(resolve, 800)) BEFORE each real MCP call. 6-step progress animation is theatrical delay not actual work. (R140)
+23. **hooks.ts exports 30 subcommands vs 17 documented** — Includes 4 v2 backward-compat aliases and 3 coverage-aware commands absent from all documentation. Undocumented routing surface. (R140)
+24. **factory.ts GNN/graph capability falsely assumed for monolithic ruvector** — When "ruvector" package detected, GNN and graph capabilities set true unconditionally ("Main package includes GNN/Graph" comment). Actual capability depends on which submodules compiled. (R136)
 
 ## Positive
 
@@ -217,6 +264,14 @@ These systems **do not coordinate**. Provider-manager selects LLM providers. Rou
 - **TinyDancerRouter** has real compiled native binary (FastGRNN in Rust)
 - **provider-manager** has real exponential backoff, circuit breaking, and cost optimization
 - **agent-booster** has genuine pattern caching, fuzzy matching, and persistence
+- **hnsw_router.rs** has real HNSW with M/ef configuration and pattern consolidation — production-quality semantic routing (R37)
+- **model_router.rs** has genuine 7-factor complexity analysis with feedback tracking (R37)
+- **reasoning_bank.rs** has real K-means + EWC++ — best mathematical foundation of all 4 ReasoningBank implementations (R37)
+- **ruvector/bin/cli.js PRETRAIN** is genuinely implemented (549 lines, 11 phases): git co-edit patterns, key-file vector memories, dir-agent mappings, AST patterns — real data from real project artifacts (R134)
+- **ruvllm/bin/cli.js model management** is real infrastructure — ModelDownloader handles HuggingFace downloads with progress bars, force re-download, per-model status tracking. SIMD benchmark is genuine timing measurement. (R134)
+- **claude_integration.rs AgentCoordinator** implements genuine topological workflow dependency resolution with circular dependency detection and parking_lot RwLock concurrency. 7 unit tests cover cost, compression, token estimation. (R136)
+- **hooks.ts pre-task ADR-008 routing** is genuinely wired to enhanced-model-router.js — the only place in V3 where 3-tier model routing reaches a user-facing CLI command (R140)
+- **sona-optimizer.ts** is GENUINELY FUNCTIONAL Bayesian agent-routing with temporal decay, wired into hooks pipeline (R140, from ML-F session)
 
 ## R17 Closeout (2026-02-14)
 
@@ -432,3 +487,4 @@ Routing-adjacent infrastructure for the vLLM-style serving layer. Provides the s
 | R114 | 2026-02-19 | 3 | ~1,108 | mcp-gate server.rs (90-93%) confirms **7th parallel MCP protocol**. SNN mod.rs (65-70%) tagged model-routing (RL reward signal wrong). prime-radiant error.rs (90-93%) maps to 5 ADRs including confidence routing. |
 | R137 | 2026-03-01 | 3 | ~3,951 | **Ghost DEEP corrections + ML-C integration review**. hnsw_router.rs R37 CONFIRMED (90-93%). claude_integration.rs 68-73% setup toolkit (2 CRITICAL: mock workflow, missing ClaudeClient). model_router.rs 88-92% PARALLEL to TS ADR-008 (override maps dead). |
 | R140 | 2026-03-02 | 1 | 4,530 | **hooks.ts CLI hooks command** — model-route/model-outcome/model-stats commands confirmed to connect to model-router.js (tiny-dancer-neural) via hooks-tools.ts lazy-loading. pre-task command integrates enhanced-model-router.js for real ADR-008 tier routing (Tier 1 Agent Booster / Tier 2 Haiku / Tier 3 Sonnet/Opus). hooks-tools.ts semantic routing uses sin/cos hash embeddings (NOT ONNX) even when native HNSW VectorDb is loaded. ADR-008 thresholds in hooks.ts (<0.3 haiku, 0.3-0.5 sonnet, >0.5 opus) parallel but do NOT bridge to model_router.rs Rust layer. |
+| R134+R136+R140 | 2026-03-03 | 7 | ~17K | **Synthesis update**: Section 1 rewritten to include ML-A/ML-C/ML-F findings. File Registry extended with 7 new files. CRITICAL findings expanded to 11 (hash-based embedding systemic across ALL layers confirmed, ruvllm CLI non-functional without native binary, ROUTER/SERVER/CLUSTER CLI facades, hooks-tools.ts sin/cos hash routing). HIGH findings expanded to 34. MEDIUM findings extended to 24. Positives extended with 8 new entries. Coverage updated to ~96% DEEP (~92/96 files). |
