@@ -1,7 +1,7 @@
-# Research database (binary, manually backed up)
-db/research.db
+# SQLite WAL/SHM (transient, not needed in git)
 db/research.db-wal
 db/research.db-shm
+# Backups (keep local only)
 db/*.db-backup-*
 
 # Temporary analysis files
