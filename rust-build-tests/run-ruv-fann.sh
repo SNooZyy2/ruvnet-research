@@ -12,7 +12,8 @@ set -euo pipefail
 # --- CONFIGURE THESE ---
 REPO="${RUVFANN_REPO:-$HOME/repos/ruv-FANN}"
 RESEARCH="${RESEARCH_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
-export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-}"
+# Only export if user explicitly set a value; empty breaks cargo
+if [ -z "${CARGO_BUILD_JOBS:-}" ]; then unset CARGO_BUILD_JOBS; fi
 export RUSTFLAGS="${RUSTFLAGS:--C debuginfo=0}"
 # -----------------------
 

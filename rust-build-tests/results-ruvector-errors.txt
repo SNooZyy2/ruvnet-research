@@ -1,0 +1,61 @@
+--- sona CHECK ERRORS ---
+error: package ID specification `sona` did not match any packages
+
+--- rvf CHECK ERRORS ---
+error: package ID specification `rvf` did not match any packages
+
+--- rvf-cli TEST ERRORS ---
+error: no library targets found in package `rvf-cli`
+
+--- ruvllm CHECK ERRORS ---
+error: failed to run custom build command for `openssl-sys v0.9.111`
+
+--- ruvector-cli CHECK ERRORS ---
+error[E0425]: cannot find function `stdin` in module `tokio::io`
+error[E0425]: cannot find function `stdout` in module `tokio::io`
+error: could not compile `ruvector-cli` (bin "ruvector-mcp") due to 2 previous errors; 7 warnings emitted
+
+--- ruQu CHECK ERRORS ---
+error: package ID specification `ruQu` did not match any packages
+
+--- ruvllm-cli CHECK ERRORS ---
+error: failed to run custom build command for `openssl-sys v0.9.111`
+
+--- ruvector-domain-expansion-wasm CHECK ERRORS ---
+error: the wasm*-unknown-unknown targets are not supported by default, you may need to enable the "js" feature. For more information see: https://docs.rs/getrandom/#webassembly-support
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `imp`
+error: could not compile `getrandom` (lib) due to 2 previous errors
+
+--- ruvector-router-wasm CHECK ERRORS ---
+error: the wasm*-unknown-unknown targets are not supported by default, you may need to enable the "js" feature. For more information see: https://docs.rs/getrandom/#webassembly-support
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `imp`
+error: to use `uuid` on `wasm32-unknown-unknown`, specify a source of randomness using one of the `js`, `rng-getrandom`, or `rng-rand` features
+error: could not compile `getrandom` (lib) due to 2 previous errors
+error[E0433]: failed to resolve: could not find `RngImp` in `imp`
+error[E0433]: failed to resolve: could not find `RngImp` in `imp`
+error[E0433]: failed to resolve: could not find `RngImp` in `imp`
+error: could not compile `uuid` (lib) due to 4 previous errors
+
+--- ruvector-tiny-dancer-wasm CHECK ERRORS ---
+error: the wasm*-unknown-unknown targets are not supported by default, you may need to enable the "js" feature. For more information see: https://docs.rs/getrandom/#webassembly-support
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `imp`
+error: could not compile `getrandom` (lib) due to 2 previous errors
+
+--- ruvector-sparse-inference-wasm CHECK ERRORS ---
+error: the wasm*-unknown-unknown targets are not supported by default, you may need to enable the "js" feature. For more information see: https://docs.rs/getrandom/#webassembly-support
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `imp`
+error: could not compile `getrandom` (lib) due to 2 previous errors
+
+--- ruvector-temporal-tensor-wasm CHECK ERRORS ---
+error: package ID specification `ruvector-temporal-tensor-wasm` did not match any packages
+
+--- ruvector-mincut TEST ERRORS ---
+
+--- prime-radiant TEST ERRORS ---
+
+--- ruvector-graph TEST ERRORS ---
+
+--- ruvector-filter TEST ERRORS ---
+
+--- ruvector-delta-index TEST ERRORS ---
+

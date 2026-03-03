@@ -19,7 +19,8 @@ REPO="${RUVECTOR_REPO:-$HOME/repos/ruvector}"
 RESEARCH="${RESEARCH_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 # On a beefy machine, leave CARGO_BUILD_JOBS unset (auto = num CPUs).
 # On constrained machines, set to 1-2.
-export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-}"
+# Only export if user explicitly set a value; empty breaks cargo
+if [ -z "${CARGO_BUILD_JOBS:-}" ]; then unset CARGO_BUILD_JOBS; fi
 export RUSTFLAGS="${RUSTFLAGS:--C debuginfo=0}"
 # -----------------------
 

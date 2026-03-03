@@ -1,0 +1,33 @@
+================================================================================
+RUV-FANN COMPILATION AUDIT
+Toolchain: rustc 1.93.1 (01f6ddf75 2026-02-11) | CARGO_BUILD_JOBS=auto
+================================================================================
+
+CRATE                                    | CHECK    | TEST             | WARN | LOC
+-----------------------------------------|----------|------------------|------|------
+ruv-fann                                 | PASS     | 165p/0f/0i       | 0    | 27630
+ruv-swarm-core                           | FAIL(0)  | N/A              | 0    | 6688
+claude-parser                            | FAIL(0)  | N/A              | 0    | 787
+ruv-swarm-transport                      | FAIL(0)  | N/A              | 0    | 3154
+ruv-swarm-persistence                    | FAIL(0)  | N/A              | 0    | 6146
+ruv-swarm-agents                         | FAIL(0)  | N/A              | 0    | 3
+ruv-swarm-ml                             | FAIL(0)  | N/A              | 0    | 3973
+ruv-swarm-mcp                            | FAIL(0)  | N/A              | 0    | 4860
+ruv-swarm-daa                            | FAIL(0)  | N/A              | 0    | 11209
+swe-bench-adapter                        | FAIL(0)  | N/A              | 0    | 2940
+ruv-swarm-cli                            | FAIL(0)  | N/A              | 0    | 3415
+ml-training                              | FAIL(0)  | N/A              | 0    | ?
+benchmarking                             | FAIL(0)  | N/A              | 0    | ?
+ruv-swarm-wasm                           | FAIL(0)  | N/A              | 0    | 6734
+ruv-swarm-wasm-unified                   | FAIL(0)  | N/A              | 0    | 1422
+neuro-divergent                          | FAIL(0)  | N/A              | 0    | 4143
+neuro-divergent-core                     | FAIL(0)  | N/A              | 0    | 4098
+neuro-divergent-data                     | FAIL(0)  | N/A              | 0    | 4062
+neuro-divergent-models                   | FAIL(0)  | N/A              | 0    | 15507
+neuro-divergent-training                 | FAIL(0)  | N/A              | 0    | 4857
+opencv-core                              | PASS     | N/A              | 0    | 2122
+opencv-wasm                              | PASS     | N/A              | 0    | 290
+opencv-sdk                               | PASS     | N/A              | 0    | 48
+cuda-wasm                                | EXCLUDED | cuda-toolkit-required | -    | -
+
+Run completed: Tue Mar  3 10:12:52 CET 2026 | 91s elapsed

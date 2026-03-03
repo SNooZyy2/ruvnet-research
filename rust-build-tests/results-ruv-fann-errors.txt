@@ -1,0 +1,57 @@
+--- ruv-swarm-core CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- claude-parser CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-transport CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-persistence CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-agents CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-ml CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-mcp CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-daa CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- swe-bench-adapter CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-cli CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ml-training CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- benchmarking CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-wasm CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- ruv-swarm-wasm-unified CHECK ERRORS ---
+error: failed to select a version for the requirement `ruv-fann = "^0.1.5"`
+
+--- neuro-divergent CHECK ERRORS ---
+error: failed to parse manifest at `/home/snoozyy/personal-projects/repos/ruv-FANN/neuro-divergent/Cargo.toml`
+
+--- neuro-divergent-core CHECK ERRORS ---
+error: failed to parse manifest at `/home/snoozyy/personal-projects/repos/ruv-FANN/neuro-divergent/Cargo.toml`
+
+--- neuro-divergent-data CHECK ERRORS ---
+error: failed to parse manifest at `/home/snoozyy/personal-projects/repos/ruv-FANN/neuro-divergent/Cargo.toml`
+
+--- neuro-divergent-models CHECK ERRORS ---
+error: failed to parse manifest at `/home/snoozyy/personal-projects/repos/ruv-FANN/neuro-divergent/Cargo.toml`
+
+--- neuro-divergent-training CHECK ERRORS ---
+error: failed to parse manifest at `/home/snoozyy/personal-projects/repos/ruv-FANN/neuro-divergent/Cargo.toml`
+
