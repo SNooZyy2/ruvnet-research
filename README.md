@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/hero.svg" alt="ruvnet-research — A forensic audit of 5.5M lines across 4 repositories" width="900"/>
+</p>
+
 # ruvnet-research
 
 ## The Research Question
