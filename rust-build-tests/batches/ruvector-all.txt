@@ -1,0 +1,161 @@
+# Ruvector compilation audit — ordered by research tier
+# Format: crate_name [--wasm] [--skip-test] [--exclude reason]
+# The script is resumable: completed crates tracked in ruvector-done.txt
+
+# ============================================================
+# HARD EXCLUDES (record but do not attempt)
+# ============================================================
+ruvector-postgres --exclude pgrx-system-dep
+ruvector-bench --exclude plotters-fontconfig
+ruvector-fpga-transformer --exclude fpga-toolchain
+ruvector-fpga-transformer-wasm --exclude fpga-toolchain
+rvf-ebpf --exclude clang-bpf-target
+
+# ============================================================
+# TIER 1 — Core to research question (8 crates)
+# ============================================================
+ruvector-core
+sona
+ruvector-attention
+ruvector-router-core
+rvf
+rvf-crypto
+rvf-types
+ruvector-mincut
+
+# ============================================================
+# TIER 2 — Validated subsystems + unrated core (20 crates)
+# ============================================================
+prime-radiant
+ruvector-gnn
+ruvector-graph
+ruvector-graph-transformer
+ruvector-hyperbolic-hnsw
+ruvllm
+ruvector-raft
+ruvector-cluster
+ruvector-replication
+ruvector-cli
+ruvector-filter
+ruvector-collections
+ruvector-snapshot
+ruvector-server
+ruvector-metrics
+ruvector-solver
+ruvector-coherence
+ruvector-cognitive-container
+ruvector-profiler
+ruvector-attn-mincut
+
+# ============================================================
+# TIER 3A — Delta / CRDT subsystem (5 crates)
+# ============================================================
+ruvector-delta-core
+ruvector-delta-index
+ruvector-delta-graph
+ruvector-delta-consensus
+ruvector-delta-wasm
+
+# ============================================================
+# TIER 3B — Domain-specific (12 crates)
+# ============================================================
+ruvector-dag
+ruvector-nervous-system
+ruvector-math
+ruvector-crv
+ruvector-dither
+ruvector-domain-expansion
+ruvector-sparse-inference
+ruvector-temporal-tensor
+ruvector-verified
+ruvector-robotics
+thermorust
+rvlite
+
+# ============================================================
+# TIER 3C — Quantum / Cognitive / Economy (7 crates)
+# ============================================================
+ruQu
+ruqu-core
+ruqu-algorithms
+ruqu-exotic
+cognitum-gate-kernel
+cognitum-gate-tilezero
+mcp-gate
+
+# ============================================================
+# TIER 3D — Tiny dancer + ruvllm extras (5 crates)
+# ============================================================
+ruvector-tiny-dancer-core
+ruvllm-cli
+ruvector-economy-wasm --wasm --skip-test
+ruvector-learning-wasm --wasm --skip-test
+ruvector-exotic-wasm --wasm --skip-test
+
+# ============================================================
+# TIER 3E — RVF sub-workspace (own workspace at crates/rvf/)
+# Core format crates
+# ============================================================
+rvf-types
+rvf-wire
+rvf-crypto
+rvf-manifest
+rvf-index
+rvf-quant
+rvf-runtime
+rvf-kernel
+rvf-import
+rvf-launch
+rvf-server
+rvf-cli
+rvf-federation
+# RVF adapters (bridge to other systems)
+rvf-adapter-rvlite
+rvf-adapter-claude-flow
+rvf-adapter-agentdb
+rvf-adapter-agentic-flow
+rvf-adapter-ospipe
+rvf-adapter-sona
+# RVF WASM/Node
+rvf-wasm --wasm --skip-test
+rvf-solver-wasm --wasm --skip-test
+rvf-node --skip-test
+
+# ============================================================
+# NAPI -node crates (try check, may fail on NAPI deps)
+# ============================================================
+ruvector-node --skip-test
+ruvector-gnn-node --skip-test
+ruvector-attention-node --skip-test
+ruvector-graph-node --skip-test
+ruvector-graph-transformer-node --skip-test
+ruvector-mincut-node --skip-test
+ruvector-solver-node --skip-test
+ruvector-tiny-dancer-node --skip-test
+rvf-node --skip-test
+
+# ============================================================
+# WASM crates (--target wasm32-unknown-unknown, no tests)
+# ============================================================
+ruvector-wasm --wasm --skip-test
+ruvector-attention-wasm --wasm --skip-test
+ruvector-attention-unified-wasm --wasm --skip-test
+ruvector-gnn-wasm --wasm --skip-test
+ruvector-graph-wasm --wasm --skip-test
+ruvector-graph-transformer-wasm --wasm --skip-test
+ruvector-mincut-wasm --wasm --skip-test
+ruvector-mincut-gated-transformer-wasm --wasm --skip-test
+ruvector-dag-wasm --wasm --skip-test
+ruvector-domain-expansion-wasm --wasm --skip-test
+ruvector-solver-wasm --wasm --skip-test
+ruvector-verified-wasm --wasm --skip-test
+ruvector-router-wasm --wasm --skip-test
+ruvector-tiny-dancer-wasm --wasm --skip-test
+ruvector-nervous-system-wasm --wasm --skip-test
+ruvector-sparse-inference-wasm --wasm --skip-test
+ruvector-temporal-tensor-wasm --wasm --skip-test
+ruvector-math-wasm --wasm --skip-test
+ruvllm-wasm --wasm --skip-test
+micro-hnsw-wasm --wasm --skip-test
+ruvector-hyperbolic-hnsw-wasm --wasm --skip-test
+ruqu-wasm --wasm --skip-test

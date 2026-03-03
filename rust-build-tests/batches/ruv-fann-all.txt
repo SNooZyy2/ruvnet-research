@@ -1,0 +1,48 @@
+# ruv-FANN compilation audit — all sub-workspaces
+# Format: crate_name [--wasm] [--skip-test] [--exclude reason]
+
+# ============================================================
+# Root crate
+# ============================================================
+ruv-fann
+
+# ============================================================
+# ruv-swarm workspace (14 members)
+# ============================================================
+ruv-swarm-core
+claude-parser
+ruv-swarm-transport
+ruv-swarm-persistence
+ruv-swarm-agents
+ruv-swarm-ml
+ruv-swarm-mcp
+ruv-swarm-daa
+swe-bench-adapter
+ruv-swarm-cli
+ml-training --skip-test
+benchmarking --skip-test
+
+# WASM
+ruv-swarm-wasm --wasm --skip-test
+ruv-swarm-wasm-unified --wasm --skip-test
+
+# ============================================================
+# neuro-divergent workspace (5 members)
+# ============================================================
+neuro-divergent
+neuro-divergent-core
+neuro-divergent-data
+neuro-divergent-models
+neuro-divergent-training --skip-test
+
+# ============================================================
+# opencv-rust workspace (3 members + sys)
+# ============================================================
+opencv-core --skip-test
+opencv-wasm --wasm --skip-test
+opencv-sdk --skip-test
+
+# ============================================================
+# cuda-wasm (excluded)
+# ============================================================
+cuda-wasm --exclude cuda-toolkit-required
